@@ -178,7 +178,7 @@ This project stands on the shoulders of giants:
 
 ## License
 
-    Copyright 2024-2026 Narendra (theordinaryguy23)
+    Copyright 2024-2026 (theordinaryguy23)
     Based on TachiyomiJ2K (Copyright jays2kings)
     Based on Tachiyomi (Copyright 2015 Javier Tomás)
 
