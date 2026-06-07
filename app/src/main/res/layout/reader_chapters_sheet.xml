@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterSheet xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chapters_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:background="@drawable/bottom_sheet_rounded_background"
+    android:orientation="vertical"
+    app:behavior_peekHeight="60dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <FrameLayout
+        android:id="@+id/topbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/pill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:alpha="0.25"
+            android:contentDescription="@string/drag_handle"
+            android:src="@drawable/draggable_pill"
+            android:layout_gravity="top|center"
+            app:tint="?actionBarTintColor" />
+
+        <LinearLayout
+            android:id="@+id/buttonGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:spacing="0dp"
+            android:orientation="horizontal" >
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/chapters_button"
+            style="@style/Widget.Tachiyomi.Button.ReaderIcon"
+            app:icon="@drawable/ic_format_list_numbered_24dp"
+            android:contentDescription="@string/view_chapters"
+            android:tooltipText="@string/view_chapters" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/webview_button"
+            style="@style/Widget.Tachiyomi.Button.ReaderIcon"
+            app:icon="@drawable/ic_open_in_webview_24dp"
+            android:contentDescription="@string/open_in_webview"
+            android:tooltipText="@string/open_in_webview" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/reading_mode"
+            style="@style/Widget.Tachiyomi.Button.ReaderIcon"
+            app:icon="@drawable/ic_reader_default_24dp"
+            android:contentDescription="@string/reading_mode"
+            android:tooltipText="@string/reading_mode" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/rotation_sheet_button"
+            style="@style/Widget.Tachiyomi.Button.ReaderIcon"
+            app:icon="@drawable/ic_screen_rotation_24dp"
+            android:contentDescription="@string/rotation"
+            android:tooltipText="@string/rotation"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/crop_borders_sheet_button"
+            style="@style/Widget.Tachiyomi.Button.ReaderIcon"
+            app:icon="@drawable/anim_crop_to_free"
+            android:contentDescription="@string/crop_borders"
+            android:tooltipText="@string/crop_borders"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/double_page"
+            style="@style/Widget.Tachiyomi.Button.ReaderIcon"
+            app:icon="@drawable/ic_book_open_variant_24dp"
+            android:contentDescription="@string/page_layout"
+            android:tooltipText="@string/page_layout" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/shift_page_button"
+            style="@style/Widget.Tachiyomi.Button.ReaderIcon"
+            app:icon="@drawable/ic_page_next_outline_24dp"
+            android:contentDescription="@string/shift_one_page_over"
+            android:tooltipText="@string/shift_one_page_over" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/display_options"
+            style="@style/Widget.Tachiyomi.Button.ReaderIcon"
+            app:icon="@drawable/ic_tune_24dp"
+            android:contentDescription="@string/display_options"
+            android:tooltipText="@string/display_options" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chapter_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:background="@android:color/transparent"
+        android:clipToPadding="false"
+        tools:listitem="@layout/reader_chapter_item" />
+</eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterSheet>
