@@ -7,25 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-06-07
+
+### Changed
+- **Rebranded from TachiyomiJ2K to TachiyomiDNP** — new identity, new package (`eu.kanade.tachiyomi.dnp`), new GitHub repo
+- All in-app links now point to `theordinaryguy23/TachiyomiDNP` (was `Jays2Kings/tachiyomiJ2K`)
+- Versioning format changed to `{versionName}-{yyyyMMdd}-{shortSha}` for traceability
+
 ### Added
-- Initial release based on TachiyomiJ2K
-- Custom branding (TachiyomiDNP, package: `eu.kanade.tachiyomi.dnp`)
-- Proper versioning system: `{versionName}-{yyyyMMdd}-{shortSha}`
-- APK split by ABI (arm64-v8a, armeabi-v7a, x86_64, x86)
-- Release script for automated GitHub releases
+- APK split by ABI (arm64-v8a, armeabi-v7a, x86_64, x86) — smaller downloads per device
+- Automated release script for GitHub Releases
+- GitHub Actions CI for automated builds
+- Proper README with minimum requirements, build instructions, and architecture overview
+- CONTRIBUTING.md, SECURITY.md, and issue templates
 
-### Optimizations
-- Memory leak fixes (LibraryUpdateJob, ReaderViewModel RxJava, Coil cache trim)
-- Battery optimization (Coil memory cache 40% → 25%)
-- Image loading: crossfade off, disk cache 250MB, OkHttp cache 50MB
+### Fixed
+- **Memory leaks** — LibraryUpdateJob, ReaderViewModel RxJava subscriptions, Coil cache trim
+- **Battery drain** — reduced Coil memory cache from 40% → 25%
+- **SSL compatibility** — Conscrypt initialization now applied for all Android versions (was only <10)
+- **Gradle OOM** — increased JVM memory to 4096MB for both Gradle and Kotlin daemon
+
+### Optimized
+- Image loading: crossfade disabled, disk cache 250MB, OkHttp cache 50MB
 - Reader preload: 10 pages (up from 6), preload trigger at last 10 pages (up from 5)
-- Gradle JVM memory: 4096MB for both Gradle and Kotlin daemon
 
-### Build Configuration
-- compileSdk / targetSdk: 36 (Android 16)
-- minSdk: 23 (Android 6.0 Marshmallow)
-- Kotlin: 2.3.10
-- AGP: 8.13.2
-- NDK: 23.1.7779620
-
-[Unreleased]: https://github.com/theordinaryguy23/TachiyomiDNP/compare/main...HEAD
+[Unreleased]: https://github.com/theordinaryguy23/TachiyomiDNP/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/theordinaryguy23/TachiyomiDNP/releases/tag/v1.8.0
