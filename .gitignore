@@ -81,3 +81,4 @@ Thumbs.db
 
 # Kotlin
 .kotlin/
+sdk.dir
