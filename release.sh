@@ -1,15 +1,15 @@
 #!/bin/bash
-# GitHub Release Script for TachiyomiDNP Android
+# GitHub Release Script for TachiyomiDNP
 # Usage: ./release.sh <version> <apk_path>
 
 set -e
 
 VERSION="${1:-v1.8.0}"
-APK_PATH="${2:-/home/rere/TachiyomiDNP-Android/app/build/outputs/apk/standard/release/app-standard-arm64-v8a-release.apk}"
-REPO="theordinaryguy23/TachiyomiDNP-Android"
+APK_PATH="${2:-/home/rere/TachiyomiDNP/app/build/outputs/apk/standard/release/app-standard-arm64-v8a-release.apk}"
+REPO="theordinaryguy23/TachiyomiDNP"
 TAG="${VERSION}"
 
-echo "=== TachiyomiDNP Android Release Script ==="
+echo "=== TachiyomiDNP Release Script ==="
 echo "Version: ${VERSION}"
 echo "APK: ${APK_PATH}"
 echo ""
@@ -41,8 +41,8 @@ RELEASE_RESPONSE=$(curl -s -X POST \
     "https://api.github.com/repos/${REPO}/releases" \
     -d "{
         \"tag_name\": \"${TAG}\",
-        \"name\": \"TachiyomiDNP Android ${VERSION}\",
-        \"body\": \"## TachiyomiDNP Android ${VERSION}\\n\\n### Changes\\n- See CHANGELOG.md for details\\n\\n### APK\\n- arm64-v8a: ${APK_NAME} (${APK_SIZE})\\n\\n### Minimum Requirements\\n- Android 6.0 (API 23)+\\n- 2 GB RAM\\n- ARM64/ARMv7/x86_64\",
+        \"name\": \"TachiyomiDNP ${VERSION}\",
+        \"body\": \"## TachiyomiDNP ${VERSION}\\n\\n### Changes\\n- See CHANGELOG.md for details\\n\\n### APK\\n- arm64-v8a: ${APK_NAME} (${APK_SIZE})\\n\\n### Minimum Requirements\\n- Android 6.0 (API 23)+\\n- 2 GB RAM\\n- ARM64/ARMv7/x86_64\",
         \"draft\": false,
         \"prerelease\": false
     }")

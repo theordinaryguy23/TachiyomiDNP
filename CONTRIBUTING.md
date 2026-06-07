@@ -1,11 +1,11 @@
-# Contributing to TachiyomiDNP Android
+# Contributing to TachiyomiDNP
 
 Thank you for your interest in contributing! This document outlines how to contribute effectively.
 
 ## Getting Started
 
 1. **Fork** the repository
-2. **Clone** your fork: `git clone https://github.com/YOUR_USERNAME/TachiyomiDNP-Android.git`
+2. **Clone** your fork: `git clone https://github.com/YOUR_USERNAME/TachiyomiDNP.git`
 3. **Create a branch**: `git checkout -b feature/your-feature-name`
 4. **Open** the project in Android Studio
 

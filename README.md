@@ -1,14 +1,14 @@
-# TachiyomiDNP Android
+# TachiyomiDNP
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Platform](https://img.shields.io/badge/platform-Android-green.svg)](https://github.com/theordinaryguy23/TachiyomiDNP-Android)
+[![Platform](https://img.shields.io/badge/platform-Android-green.svg)](https://github.com/theordinaryguy23/TachiyomiDNP)
 [![Based on](https://img.shields.io/badge/based%20on-TachiyomiJ2K-green.svg)](https://github.com/Jays2Kings/tachiyomiJ2K)
 [![Min SDK](https://img.shields.io/badge/minSdk-23%20(Android%206.0)-orange.svg)](https://developer.android.com/about/versions/marshmallow)
 [![Target SDK](https://img.shields.io/badge/targetSdk-36%20(Android%2016)-orange.svg)](https://developer.android.com/about/versions)
 
 A free and open source manga reader for **Android 6.0 (Marshmallow) and above**.
 
-> **TachiyomiDNP Android** is based on the [TachiyomiJ2K](https://github.com/Jays2Kings/tachiyomiJ2K) project — a feature-rich fork of the original [Tachiyomi](https://github.com/tachiyomiorg/tachiyomi) manga reader. This build continues the TachiyomiJ2K legacy with additional optimizations and custom branding.
+> **TachiyomiDNP** is based on the [TachiyomiJ2K](https://github.com/Jays2Kings/tachiyomiJ2K) project — a feature-rich fork of the original [Tachiyomi](https://github.com/tachiyomiorg/tachiyomi) manga reader. This build continues the TachiyomiJ2K legacy with additional optimizations and custom branding.
 
 ---
 
@@ -79,7 +79,7 @@ A free and open source manga reader for **Android 6.0 (Marshmallow) and above**.
 
 ## Download
 
-Get the latest APK from the [Releases](https://github.com/theordinaryguy23/TachiyomiDNP-Android/releases) page.
+Get the latest APK from the [Releases](https://github.com/theordinaryguy23/TachiyomiDNP/releases) page.
 
 1. Download the `arm64-v8a` APK (recommended for most devices)
 2. Enable "Install from unknown sources" in your device settings
@@ -108,8 +108,8 @@ java -version  # Should show 17.x.x
 
 ### Build
 ```bash
-git clone https://github.com/theordinaryguy23/TachiyomiDNP-Android.git
-cd TachiyomiDNP-Android
+git clone https://github.com/theordinaryguy23/TachiyomiDNP.git
+cd TachiyomiDNP
 
 # Build release APK (recommended)
 ./gradlew assembleRelease --no-daemon
@@ -144,7 +144,7 @@ org.gradle.caching=true
 ## Architecture
 
 ```
-TachiyomiDNP-Android/
+TachiyomiDNP/
 ├── app/                    # Main application module
 │   ├── src/main/           # Source code (Kotlin)
 │   ├── src/main/res/       # Resources (layouts, strings, drawables)
