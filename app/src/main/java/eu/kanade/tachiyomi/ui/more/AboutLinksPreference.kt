@@ -57,7 +57,7 @@ class AboutLinksPreference
             }
             holder.findViewById(R.id.btn_github).apply {
                 compatToolTipText = (contentDescription.toString())
-                setOnClickListener { context.openInBrowser("https://github.com/Jays2Kings/tachiyomiJ2K") }
+                setOnClickListener { context.openInBrowser("https://github.com/theordinaryguy23/TachiyomiDNP") }
             }
             holder.findViewById(R.id.btn_tachiyomi).apply {
                 compatToolTipText = (contentDescription.toString())

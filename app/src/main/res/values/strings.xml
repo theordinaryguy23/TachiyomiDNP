@@ -4,8 +4,8 @@
     <string name="app_short_name" translatable="false">TachiDNP</string>
 
     <string name="all_files_permission_required">File permissions required</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K requires access to all files in Android 11 to download chapters, create automatic backups, and read local series. \n\nOn the next screen, enable \"Allow access to manage all files.\"</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K requires access to all files to download chapters. Tap here, then enable \"Allow access to manage all files.\"</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP requires access to all files in Android 11 to download chapters, create automatic backups, and read local series. \n\nOn the next screen, enable \"Allow access to manage all files.\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP requires access to all files to download chapters. Tap here, then enable \"Allow access to manage all files.\"</string>
 
     <!--Models-->
 
