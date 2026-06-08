@@ -49,11 +49,11 @@
     </plurals>
     <string name="category">Ramaddii</string>
     <string name="categories">Ramaddiiwwan</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K boqonnaawwan buusuuf, ofumaan dilbeessa uumuu fi mangaa naannoo dubbisuuf, faayiloota Android 11 keessa jiran hunda argachuu barbaachisa.
+    <string name="external_storage_permission_notice">TachiyomiDNP boqonnaawwan buusuuf, ofumaan dilbeessa uumuu fi mangaa naannoo dubbisuuf, faayiloota Android 11 keessa jiran hunda argachuu barbaachisa.
 \n
 \n Foddaa itti aanu irratti, \"Allow access to manage all files.\" Kan jedhuuf eeyyami .</string>
     <string name="comic">Baacoo</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K boqonnaawwan buusuuf faayiloota hunda argachuu barbaada. As tuqi, sana booda \"Allow access to manage all files\" kan jedhuuf eeyyami.</string>
+    <string name="external_storage_download_notice">TachiyomiDNP boqonnaawwan buusuuf faayiloota hunda argachuu barbaada. As tuqi, sana booda \"Allow access to manage all files\" kan jedhuuf eeyyami.</string>
     <string name="author">Barreessaa</string>
     <string name="new_chapters">Boqonnaawwan haaraa</string>
     <string name="publishing_finished">Maxxansi xumurame</string>

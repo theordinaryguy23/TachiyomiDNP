@@ -849,8 +849,8 @@
     <string name="by_chapter_number">章の数に基づく</string>
     <string name="by_source_order">ソースでの順位に基づく</string>
     <string name="not_bookmarked">未ブックマーク</string>
-    <string name="external_storage_download_notice">章をダウンロードするには、TachiyomiJ2Kは全ファイルへのアクセス権が必要です。こちらをタップして「全てのファイルの管理を許可」を有効にしてください。</string>
-    <string name="external_storage_permission_notice">章のダウンロード、自動バックアップの作成及びローカルマンガシリーズの閲覧を行うには、TachiyomiJ2KはAndroid 11での全ファイルへのアクセス権が必要です。
+    <string name="external_storage_download_notice">章をダウンロードするには、TachiyomiDNPは全ファイルへのアクセス権が必要です。こちらをタップして「全てのファイルの管理を許可」を有効にしてください。</string>
+    <string name="external_storage_permission_notice">章のダウンロード、自動バックアップの作成及びローカルマンガシリーズの閲覧を行うには、TachiyomiDNPはAndroid 11での全ファイルへのアクセス権が必要です。
 \n
 \n次の画面で「全てのファイルの管理を許可」を有効にしてください。</string>
     <string name="all_files_permission_required">ファイルアクセス権限が必要</string>

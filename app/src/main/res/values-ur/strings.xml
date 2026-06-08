@@ -23,7 +23,7 @@
     <string name="by_chapter_number">باب نمبر کے لحاظ سے</string>
     <string name="title">عنوان</string>
     <string name="scanlators">اسکین لیٹرز</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K کو ابواب ڈاؤن لوڈ کرنے، خودکار بیک اپ بنانے اور مقامی سیریز پڑھنے کے لیے Android 11 کی تمام فائلوں تک رسائی درکار ہے۔
+    <string name="external_storage_permission_notice">TachiyomiDNP کو ابواب ڈاؤن لوڈ کرنے، خودکار بیک اپ بنانے اور مقامی سیریز پڑھنے کے لیے Android 11 کی تمام فائلوں تک رسائی درکار ہے۔
 \nاگلی اسکرین پر، \"تمام فائلوں کا نظم کرنے کے لیے رسائی کی اجازت دیں\" کو فعال کریں.</string>
     <string name="lock_with_biometrics">ان لاک کی ضرورت ہے</string>
     <string name="edit_categories">زمرے ترمیم کریں</string>

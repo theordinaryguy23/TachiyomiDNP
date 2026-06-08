@@ -4,7 +4,7 @@
     <string name="external_storage_permission_notice">טאצ\'יומי J2K דורש גישה לכל הקבצים של אנדרואיד 11 כדי להוריד פרקים, צור גיבויים אוטומטיים, וקרא מנגה מקומית.
 \n
 \nבמסך הבא, אפשר \"תן גישה לכל הקבצים.\"</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K דורש גישה לכל הקבצים כדי להוריד פרקים. הקש כאן ולאחר מכן הפעל את \"אפשר גישה לניהול כל הקבצים.\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP דורש גישה לכל הקבצים כדי להוריד פרקים. הקש כאן ולאחר מכן הפעל את \"אפשר גישה לניהול כל הקבצים.\"</string>
     <string name="never">לעולם לא</string>
     <string name="newest">החדש ביותר</string>
     <string name="next">הבא</string>

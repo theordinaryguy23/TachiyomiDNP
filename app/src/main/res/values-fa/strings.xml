@@ -526,7 +526,7 @@
     <string name="split_tall_images">نصف کردن خودکار عکس های بلند</string>
     <string name="tap_zones">مناطق قابل لمس</string>
     <string name="category_cannot_be_blank">نام دسته نمی تواند خالی باشد</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K برای دانلود فصل ها نیاز به دسترسی به همه فایل ها دارد. روی اینجا ضربه بزنید، سپس «Allow access to management all files» را فعال کنید.</string>
+    <string name="external_storage_download_notice">TachiyomiDNP برای دانلود فصل ها نیاز به دسترسی به همه فایل ها دارد. روی اینجا ضربه بزنید، سپس «Allow access to management all files» را فعال کنید.</string>
     <string name="updating_">در حال بروز رسانی %1$s</string>
     <string name="update_completed">به روز رسانی تکمیل شد</string>
     <string name="search_tips_show_periodically">نکات جستجو به صورت دوره ای نمایش داده می شود. برای جستجوی، پیشنهاد را به مدت طولانی فشار دهید.</string>

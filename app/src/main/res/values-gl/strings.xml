@@ -26,7 +26,7 @@
     <string name="manhwa">Manhwa</string>
     <string name="manga">Manga</string>
     <string name="app_short_name" translatable="false">TachiJ2K</string>
-    <string name="app_name" translatable="false">TachiyomiJ2K</string>
+    <string name="app_name" translatable="false">TachiyomiDNP</string>
     <string name="webtoon">Webtoon</string>
     <string name="unread">Non lidos</string>
     <string name="bookmarked">Gardado nos marcadores</string>
@@ -246,12 +246,12 @@
         <item quantity="one">¿Borrar %1$d capítulo descargado\?</item>
         <item quantity="other">¿Borrar %1$d capítulos descargados\?</item>
     </plurals>
-    <string name="external_storage_permission_notice">TachiyomiJ2K require acceso a tódolos arquivos de Android 11 para descargar capítulos, facer copias de seguridade automáticas e ler manga en local.
+    <string name="external_storage_permission_notice">TachiyomiDNP require acceso a tódolos arquivos de Android 11 para descargar capítulos, facer copias de seguridade automáticas e ler manga en local.
 \n
 \nNa seguinte pantalla, marca \"Permitir acceso á xestión de tódolos arquivos.\"</string>
     <string name="all_files_permission_required">Requírense permisos de arquivo</string>
     <string name="not_bookmarked">Non gardado nos marcadores</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K require acceso a tódolos arquivos para descargar capítulos, Preme eiquí, e despóis marca \"Permitir acceso á xestión de tódolos arquivos.\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP require acceso a tódolos arquivos para descargar capítulos, Preme eiquí, e despóis marca \"Permitir acceso á xestión de tódolos arquivos.\"</string>
     <string name="author">Autor</string>
     <string name="move_x_to">Move %1$s a…</string>
     <string name="select_inverse">Selección inversa</string>

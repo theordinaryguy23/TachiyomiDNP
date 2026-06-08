@@ -848,8 +848,8 @@
     <string name="hide_unread_badges">Nascondi badge non letti</string>
     <string name="open_random_series">Apri una serie casuale</string>
     <string name="show_number_of_items">Mostra il numero di oggetti</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K richiede accesso a tutti i file per scaricare i capitoli. Fai tap qui, poi fornisci l\'autorizzazione per \"Accesso a tutti i file.\"</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K richiede accesso ai file per scaricare capitoli, creare backup automatici e leggere serie in locale.
+    <string name="external_storage_download_notice">TachiyomiDNP richiede accesso a tutti i file per scaricare i capitoli. Fai tap qui, poi fornisci l\'autorizzazione per \"Accesso a tutti i file.\"</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP richiede accesso ai file per scaricare capitoli, creare backup automatici e leggere serie in locale.
 \n
 \nAlla prossima schermata, fornisci l\'autorizzazione per \"Accesso a tutti i file.\"</string>
     <string name="all_files_permission_required">Permessi per la gestione dei file richiesti</string>

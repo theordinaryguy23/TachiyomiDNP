@@ -796,7 +796,7 @@
     <string name="mark_range_as_read">Označi raspon poglavlja kao pročitana</string>
     <string name="app_shortcuts">Prečaci programa</string>
     <string name="cancel_all_for_series">Prekini sve za ovu seriju</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K zahtijeva pristup svim datotekama u Androidu 11 za preuzimanje poglavlja, za stvaranje automatskih sigurnosnih kopija i za čitanje lokalnih serija.
+    <string name="external_storage_permission_notice">TachiyomiDNP zahtijeva pristup svim datotekama u Androidu 11 za preuzimanje poglavlja, za stvaranje automatskih sigurnosnih kopija i za čitanje lokalnih serija.
 \n
 \nU sljedećem ekranu aktiviraj „Dopusti pristup za upravljanje svim datotekama”.</string>
     <string name="all_files_permission_required">Potrebne su dozvole za pristup datotekama</string>
@@ -809,7 +809,7 @@
     <string name="by_source_order">Po imenu izvora</string>
     <string name="by_chapter_number">Po broju poglavlja</string>
     <string name="not_bookmarked">Nije zabilježeno</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K zahtijeva pristup svim datotekama za preuzimanje poglavlja. Dodirni ovdje, zatim uključi „Dopusti pristup za upravljanje svim datotekama”.</string>
+    <string name="external_storage_download_notice">TachiyomiDNP zahtijeva pristup svim datotekama za preuzimanje poglavlja. Dodirni ovdje, zatim uključi „Dopusti pristup za upravljanje svim datotekama”.</string>
     <string name="about_dont_kill_my_app">Neki proizvođači imaju dodatna programska ograničenja koja onemogućuju pozadinske usluge. Ova web-stranica sadrži daljnje informacije o tome kako to popraviti.</string>
     <string name="force_download_cache_refresh_summary">Ovo će prisiliti ponovno izračunavanje predmemorije preuzimanja. Korisno, ako su preuzimanja promijenjena izvan ovog programa i ako želiš da ih program preuzme</string>
     <string name="warning">Upozorenje</string>

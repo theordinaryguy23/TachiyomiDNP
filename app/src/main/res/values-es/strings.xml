@@ -857,8 +857,8 @@
     <string name="global_updates">Actualizaciones globales</string>
     <string name="open_random_series">Abrir una serie aleatoria</string>
     <string name="show_number_of_items">Mostrar el número de elementos</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K requiere acceso a todos los archivos para descargar capítulos. Toque aquí y, acto seguido, active \"Acceso a todos los archivos.\"</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K requiere acceso a todos los archivos en Android 11 para descargar los capítulos, crear las copias de seguridad automáticas y leer las series locales.
+    <string name="external_storage_download_notice">TachiyomiDNP requiere acceso a todos los archivos para descargar capítulos. Toque aquí y, acto seguido, active \"Acceso a todos los archivos.\"</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP requiere acceso a todos los archivos en Android 11 para descargar los capítulos, crear las copias de seguridad automáticas y leer las series locales.
 \n
 \nEn la siguiente pantalla, activa \"Permitir el acceso para gestionar todos los archivos\"</string>
     <string name="all_files_permission_required">Se necesita el permiso de archivos</string>

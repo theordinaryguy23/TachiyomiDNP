@@ -902,8 +902,8 @@
     <string name="by_chapter_number">حسب أرقام الفصول</string>
     <string name="by_source_order">حسب ترتيب المصدر</string>
     <string name="not_bookmarked">لم يعلَّم</string>
-    <string name="external_storage_download_notice">يتطلب TachiyomiJ2K الوصول إلى جميع الملفات لينزِّل الفصول. اضغط هنا ثم مكِّن «السماح بالوصول لإدارة جميع الملفات.»</string>
-    <string name="external_storage_permission_notice">يحتاج TachiyomiJ2K للوصول إلى كلِّ الملفَّات في أندرويد 11، فبذلك ينزِّل الفصول ويحتاط ويقرأ السلاسل المنزَّلة.
+    <string name="external_storage_download_notice">يتطلب TachiyomiDNP الوصول إلى جميع الملفات لينزِّل الفصول. اضغط هنا ثم مكِّن «السماح بالوصول لإدارة جميع الملفات.»</string>
+    <string name="external_storage_permission_notice">يحتاج TachiyomiDNP للوصول إلى كلِّ الملفَّات في أندرويد 11، فبذلك ينزِّل الفصول ويحتاط ويقرأ السلاسل المنزَّلة.
 \n
 \nمكِّن «اسمح بإدارة كافة الملفات.» عندما تراها في الشاشة التالية</string>
     <string name="all_files_permission_required">الإذن بالوصول إلى الملفات مطلوب</string>

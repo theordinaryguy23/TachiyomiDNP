@@ -786,8 +786,8 @@
     <string name="global_updates">全局更新</string>
     <string name="open_random_series">随机打开漫画</string>
     <string name="show_number_of_items">显示项目数</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K需要访问所有文件才能下载章节。点按此处，然后启用“允许访问管理所有文件”</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K 在 Android 11 下需要授权访问所有文件才能进行下载章节、创建自动备份和阅读本地漫画。
+    <string name="external_storage_download_notice">TachiyomiDNP需要访问所有文件才能下载章节。点按此处，然后启用“允许访问管理所有文件”</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP 在 Android 11 下需要授权访问所有文件才能进行下载章节、创建自动备份和阅读本地漫画。
 \n
 \n在接下来出现的画面中，请启用“允许访问管理所有文件。”</string>
     <string name="all_files_permission_required">需要文件权限</string>

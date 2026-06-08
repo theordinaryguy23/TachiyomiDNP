@@ -886,8 +886,8 @@
     <string name="by_chapter_number">Por número do capítulo</string>
     <string name="by_source_order">Pela ordem da fonte</string>
     <string name="not_bookmarked">Não foi marcado</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K requer o acesso total aos ficheiros para descarregar os capítulos. Clique aqui, então ative \"Permitir o acesso para gerir todos os ficheiros\"</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K requer acesso a todos os ficheiros no Android 11 para transferir capítulos, criar cópias de segurança automáticas e ler mangas locais.
+    <string name="external_storage_download_notice">TachiyomiDNP requer o acesso total aos ficheiros para descarregar os capítulos. Clique aqui, então ative \"Permitir o acesso para gerir todos os ficheiros\"</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP requer acesso a todos os ficheiros no Android 11 para transferir capítulos, criar cópias de segurança automáticas e ler mangas locais.
 \n
 \nNo próximo ecrã, ative \"Permitir acesso de gestão de todos os ficheiros.\"</string>
     <string name="all_files_permission_required">Permissões de ficheiro necessárias</string>

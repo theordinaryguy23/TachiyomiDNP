@@ -442,7 +442,7 @@
     <string name="rotation">Lloji i rrotullimit</string>
     <string name="comic">Libra Komik</string>
     <string name="marked_as_unread">Shëno si i pa lexuar</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K ka nevojë për aksesin e të gjithë dokumentave në Android 11 për të shkarkuar kapitujt, për të krijuar rezerva automatike, dhe lezoj serite lokale.
+    <string name="external_storage_permission_notice">TachiyomiDNP ka nevojë për aksesin e të gjithë dokumentave në Android 11 për të shkarkuar kapitujt, për të krijuar rezerva automatike, dhe lezoj serite lokale.
 \n
 \nNë vijim, aktivizo \"Lejo aksesin për të menaxhuar të gjithe dokumentat.\"</string>
     <string name="unlock">Hap</string>
@@ -453,7 +453,7 @@
     <string name="last_read_chapter_">Kapitulli i lexuar i fundit %1$s</string>
     <string name="description">Përshkrim</string>
     <string name="marked_as_read">Shëno si i lexuar</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K ka nevojë për aksesin e të gjithë dokumentave për të shkarkuar kapitujt. Shtyp ketu, dhe pastaj \"Lejo aksesin për të menaxhuar të gjithe dokumentat.\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP ka nevojë për aksesin e të gjithë dokumentave për të shkarkuar kapitujt. Shtyp ketu, dhe pastaj \"Lejo aksesin për të menaxhuar të gjithe dokumentat.\"</string>
     <string name="add_x_to">Shto %1$s në…</string>
     <string name="not_started">Të pa nisura</string>
     <string name="all_chapters_read">Të gjithë kapitujtë e lexuar</string>

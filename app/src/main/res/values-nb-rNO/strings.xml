@@ -803,8 +803,8 @@
     <string name="open_random_series">Åpne en tilfeldig serie</string>
     <string name="manhua">Manhua</string>
     <string name="manhwa">Manhwa</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K krever tilgang til alle filer for å laste ned kapitler. Trykk her og skru på «Tillat tilgang til håndtering av alle filer.»</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K krever tilgang til alle filer i Android 11 for å laste ned kapitler, opprette automatiske sikkerhetskopier, og lese lokal manga.
+    <string name="external_storage_download_notice">TachiyomiDNP krever tilgang til alle filer for å laste ned kapitler. Trykk her og skru på «Tillat tilgang til håndtering av alle filer.»</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP krever tilgang til alle filer i Android 11 for å laste ned kapitler, opprette automatiske sikkerhetskopier, og lese lokal manga.
 \n
 \nPå neste skjerm skrur du på «Innvilg tilgang til håndtering av alle filer.»</string>
     <string name="sapphire_dusk">Safirskumring</string>

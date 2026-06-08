@@ -187,7 +187,7 @@
     <string name="start">Бастау</string>
     <string name="stop">Тоқтату</string>
     <string name="all_files_permission_required">Файлдарға рұқсат керек</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K тарауларды жүктеп алу, автоматты сақтық көшірме жасау және жергілікті манга оқу үшін Android 11 жүйесіндегі барлық файлдарға кіруді қажет етеді.
+    <string name="external_storage_permission_notice">TachiyomiDNP тарауларды жүктеп алу, автоматты сақтық көшірме жасау және жергілікті манга оқу үшін Android 11 жүйесіндегі барлық файлдарға кіруді қажет етеді.
 \n
 \nКелесі экранда «Барлық файлдарды басқаруға рұқсат беру» опциясын қосыңыз.</string>
     <string name="reduces_banding_impacts_performance">Жолақты азайтады, бірақ өнімділікке әсер етуі мүмкін</string>
@@ -414,7 +414,7 @@
     <string name="cover_updated">Мұқаба жаңартылды</string>
     <string name="updating_library">Кітапхана жаңаруда</string>
     <string name="download_notifier_split_failed">Жүктелген бет бөлінбеді</string>
-    <string name="external_storage_download_notice">Тараулар жүктеу үшін TachiyomiJ2K-ге барлық файлдарды қарауға рұқсат беріңіз. Мынаны басып, \"Барлық файлдарды басқаруға рұқсат ету\" дегенді қосыңыз</string>
+    <string name="external_storage_download_notice">Тараулар жүктеу үшін TachiyomiDNP-ге барлық файлдарды қарауға рұқсат беріңіз. Мынаны басып, \"Барлық файлдарды басқаруға рұқсат ету\" дегенді қосыңыз</string>
     <string name="move_x_to">%1$s дегенді қайда жылжыту</string>
     <string name="all_chapters_read">Барлық тараулар оқылды</string>
     <string name="chapter_x_of_y">%2$d тараудың %1$d</string>

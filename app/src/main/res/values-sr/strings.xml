@@ -726,10 +726,10 @@
     <string name="marked_as_read">Oznaceno kao pročitano</string>
     <string name="new_chapters">Nova poglavlja</string>
     <string name="category">Kategorija</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K je potreban pristup svim datotekama u Andorid 11 za preuzimanje poglavlja, pravljenje automatskih rezervin kopija, i čitanje lokalnih mangi.
+    <string name="external_storage_permission_notice">TachiyomiDNP je potreban pristup svim datotekama u Andorid 11 za preuzimanje poglavlja, pravljenje automatskih rezervin kopija, i čitanje lokalnih mangi.
 \n
 \nNa sledećem ekranu, dozvolu \"Dozvoli pristum za upravljanje svih datoteka.\"</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K traži pristum svim datotekama povodom preuzimanja ppglavlja.Pritisni ovde,a onda dozvoli \"Dozvolite pristum za upravljanje svim datotekama.\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP traži pristum svim datotekama povodom preuzimanja ppglavlja.Pritisni ovde,a onda dozvoli \"Dozvolite pristum za upravljanje svim datotekama.\"</string>
     <plurals name="pages_left">
         <item quantity="one">%1$d strana ostala</item>
         <item quantity="few">%1$d strana ostalo</item>
