@@ -806,8 +806,8 @@
     <string name="could_not_install_extension">Uzantı yüklenemedi</string>
     <string name="global_updates">Genel güncellemeler</string>
     <string name="show_number_of_items">Öge sayısını göster</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K\'in, bölümleri indirmek için tüm dosyalara erişmesi gerekir. Buraya dokunun, ardından \"Tüm dosyaları yönetmek için erişime izin ver\"i etkinleştirin</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K\'in, bölümleri indirmek, otomatik yedeklemeler oluşturmak ve yerel dizileri okumak için Android 11\'deki tüm dosyalara erişimesi gerekir.
+    <string name="external_storage_download_notice">TachiyomiDNP\'in, bölümleri indirmek için tüm dosyalara erişmesi gerekir. Buraya dokunun, ardından \"Tüm dosyaları yönetmek için erişime izin ver\"i etkinleştirin</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP\'in, bölümleri indirmek, otomatik yedeklemeler oluşturmak ve yerel dizileri okumak için Android 11\'deki tüm dosyalara erişimesi gerekir.
 \n
 \nBir sonraki ekranda, \"Tüm dosyaları yönetmek için erişime izin ver\" seçeneğini etkinleştirin</string>
     <string name="all_files_permission_required">Dosya izinleri gerekli</string>

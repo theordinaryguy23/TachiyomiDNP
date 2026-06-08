@@ -446,7 +446,7 @@
     <string name="unknown_error">अज्ञात त्रुटि</string>
     <string name="unpin">अनपिन</string>
     <string name="view_chapters">अध्यायहरू हेर्नुहोस्</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K लाई अध्यायहरू डाउनलोड गर्न सबै फाइलहरू माथि पहुँच चाहिन्छ। यहाँ ट्याप गर्नुहोस्, त्यसपछि \"Allow access to manage all files.\" सक्षम गर्नुहोस्।</string>
+    <string name="external_storage_download_notice">TachiyomiDNP लाई अध्यायहरू डाउनलोड गर्न सबै फाइलहरू माथि पहुँच चाहिन्छ। यहाँ ट्याप गर्नुहोस्, त्यसपछि \"Allow access to manage all files.\" सक्षम गर्नुहोस्।</string>
     <string name="all_files_permission_required">फाइल अनुमति आवश्यक छ</string>
     <string name="manga">माङ्गा</string>
     <string name="manhwa">मानह्वा</string>
@@ -478,7 +478,7 @@
         <item quantity="other">%d अध्यायहरू छोड्दै, या त स्रोत सँग छैन वा यसलाई फिल्टर गरिएको छ</item>
     </plurals>
     <string name="backup_in_progress">ब्याकअप पहिले नै प्रगतिमा छ</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K लाई अध्यायहरू डाउनलोड गर्न, स्वचालित ब्याकअपहरू सिर्जना गर्न र लोकल श्रृङ्खला पढ्नको लागि Android 11 मा सबै फाइलहरू माथि पहुँच चाहिन्छ।
+    <string name="external_storage_permission_notice">TachiyomiDNP लाई अध्यायहरू डाउनलोड गर्न, स्वचालित ब्याकअपहरू सिर्जना गर्न र लोकल श्रृङ्खला पढ्नको लागि Android 11 मा सबै फाइलहरू माथि पहुँच चाहिन्छ।
 \n
 \nअर्को स्क्रिनमा, \"Allow access to manage all files.\" सक्षम गर्नुहोस्।</string>
     <string name="tracker">ट्र्याकर</string>

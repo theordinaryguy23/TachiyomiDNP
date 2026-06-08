@@ -467,7 +467,7 @@
     <string name="comic">कॉमिक</string>
     <string name="new_chapters">नए अध्याय</string>
     <string name="all_files_permission_required">फाइल की अनुमति चाहिए</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K को अध्याय डाउनलोड करने, स्वचालित बैकअप बनाने और स्थानीय श्रृंखला पढ़ने के लिए एंड्रॉइड 11 में सभी फ़ाइलों तक पहुंच की आवश्यकता होती है।
+    <string name="external_storage_permission_notice">TachiyomiDNP को अध्याय डाउनलोड करने, स्वचालित बैकअप बनाने और स्थानीय श्रृंखला पढ़ने के लिए एंड्रॉइड 11 में सभी फ़ाइलों तक पहुंच की आवश्यकता होती है।
 \n
 \nअगली स्क्रीन पर, \"सभी फ़ाइलों को एक्सेस करने के लिए पहुंच की अनुमति दें\" सक्षम करें।</string>
     <string name="manhwa">मानह्वा</string>

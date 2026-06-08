@@ -492,9 +492,9 @@
     <string name="in_progress">진행 중</string>
     <string name="new_chapters">새 장</string>
     <string name="all_files_permission_required">파일 사용 권한이 필요합니다</string>
-    <string name="external_storage_permission_notice">안드로이드 11의 \"모든 파일에 대한 접근 권한\"이 활성화 되어야 TachiyomiJ2K가 챕터를 다운로드하고, 자동 백업을 진행하며, 저장된 오프라인 만화를 읽을 수 있습니다.
+    <string name="external_storage_permission_notice">안드로이드 11의 \"모든 파일에 대한 접근 권한\"이 활성화 되어야 TachiyomiDNP가 챕터를 다운로드하고, 자동 백업을 진행하며, 저장된 오프라인 만화를 읽을 수 있습니다.
 \n
-\n다음 화면에서 TachiyomiJ2K에 대한 \"모든 파일에 대한 접근권한\"을 허용해 주십시오.</string>
+\n다음 화면에서 TachiyomiDNP에 대한 \"모든 파일에 대한 접근권한\"을 허용해 주십시오.</string>
     <string name="external_storage_download_notice">챕터를 다운로드하기 위해서는 모든 파일에 액세스 권한이 필요합니다. 여기를 탭한 다음에 “모든 파일에 액세스 허용\"을 활성화해주십시오.</string>
     <string name="manhwa">한국 만화</string>
     <string name="manhua">중국 만화</string>

@@ -88,7 +88,7 @@ android {
 
     buildTypes {
         getByName("debug") {
-            applicationIdSuffix = ".debugJ2K"
+            applicationIdSuffix = ".debugDNP"
             versionNameSuffix = "-d${getCommitCount()}"
             signingConfig = signingConfigs.getByName("release")
         }

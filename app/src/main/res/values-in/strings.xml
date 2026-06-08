@@ -815,8 +815,8 @@
     <string name="show_number_of_items">Tampilkan jumlah item</string>
     <string name="update_completed">Pembaruan selesai</string>
     <string name="not_bookmarked">Tak ditandai</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K membutuhkan akses semua berkas untuk mengunduh bab. Ketuk di sini, lalu izinkan \"Izinkan akses untuk mengatur semua berkas.\"</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K memerlukan akses ke semua file di Android 11 untuk mengunduh bab, membuat cadangan otomatis, dan membaca seri lokal.
+    <string name="external_storage_download_notice">TachiyomiDNP membutuhkan akses semua berkas untuk mengunduh bab. Ketuk di sini, lalu izinkan \"Izinkan akses untuk mengatur semua berkas.\"</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP memerlukan akses ke semua file di Android 11 untuk mengunduh bab, membuat cadangan otomatis, dan membaca seri lokal.
 \n
 \nPada layar berikutnya, aktifkan \"Izinkan akses untuk mengelola semua file.\"</string>
     <string name="restrictions_">Pembatasan: %1$s</string>

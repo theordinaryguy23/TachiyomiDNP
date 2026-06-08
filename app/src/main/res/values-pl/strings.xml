@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">TachiyomiJ2K</string>
+    <string name="app_name" translatable="false">TachiyomiDNP</string>
     <string name="app_short_name" translatable="false">TachiJ2K</string>
     <!--Models-->
     <!-- Manga Type -->
@@ -824,8 +824,8 @@
     <string name="source_unsupported">Źródło nie jest wspierane</string>
     <string name="restore_miui_warning">Funkcje kopii zapasowej mogą nie działać, jeśli optymalizacja nakładki MIUI jest wyłączona.</string>
     <string name="hide_notification_content">Ukryj zawartość powiadomienia</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K wymaga dostępu do wszystkich plików w celu pobrania rozdziałów. Dotknij tutaj, a następnie włącz \"Zezwól na dostęp do wszystkich plików.\"</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K wymaga dostępu do wszystkich plików w Android 11 w celu pobierania rozdziałów, tworzenia automatycznych backupów oraz czytania lokalnie zapisanych mang.
+    <string name="external_storage_download_notice">TachiyomiDNP wymaga dostępu do wszystkich plików w celu pobrania rozdziałów. Dotknij tutaj, a następnie włącz \"Zezwól na dostęp do wszystkich plików.\"</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP wymaga dostępu do wszystkich plików w Android 11 w celu pobierania rozdziałów, tworzenia automatycznych backupów oraz czytania lokalnie zapisanych mang.
 \n
 \nNa następnym ekranie włącz opcję \"Zezwól na dostęp do wszystkich plików.\"</string>
     <string name="all_files_permission_required">Wymagany jest dostęp do plików</string>

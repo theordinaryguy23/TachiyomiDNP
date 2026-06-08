@@ -722,10 +722,10 @@
     <string name="warning">Попередження</string>
     <string name="download_queue_size_warning">Попередження: великий об\'єм завантажень може призвести до сповільнення роботи джерел та/або блокуванню Tachiyomi.</string>
     <string name="every_3_days">Що 3 дні</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K потребує доступу до всіх файлів в Android 11, щоб завантажувати розділи, створювати автоматичні резервні копії та читати особисті серії.
+    <string name="external_storage_permission_notice">TachiyomiDNP потребує доступу до всіх файлів в Android 11, щоб завантажувати розділи, створювати автоматичні резервні копії та читати особисті серії.
 \n
 \nНа наступному екрані ввімкніть \"Дозволити доступ для керування всіма файлами.\"</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K потребує доступу до всіх файлів для завантаження розділів. Натисніть тут, а потім увімкніть \"Дозволити доступ для керування всіма файлами.\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP потребує доступу до всіх файлів для завантаження розділів. Натисніть тут, а потім увімкніть \"Дозволити доступ для керування всіма файлами.\"</string>
     <string name="new_category">Нова категорія</string>
     <plurals name="category_plural">
         <item quantity="one">%d категорія</item>

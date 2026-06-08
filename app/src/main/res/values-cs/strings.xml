@@ -689,7 +689,7 @@
     <string name="download_queue_size_warning">Varování: hromadné stahování může vést k tomu, že zdroje zpomalí a/nebo zablokují Tachiyomi. Klepnutím se dozvíte více.</string>
     <string name="every_3_days">Každé 3 dny</string>
     <string name="reduces_banding_impacts_performance">Snižuje pruhování barev, ale může mít vliv na výkon</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K požaduje přístup ke všem souborům v Android 11, aby mohlo stahovat kapitoly, vytvářet zálohy a načíst lokálně uložené publikace.
+    <string name="external_storage_permission_notice">TachiyomiDNP požaduje přístup ke všem souborům v Android 11, aby mohlo stahovat kapitoly, vytvářet zálohy a načíst lokálně uložené publikace.
 \n
 \nNa obrazovce povolte \"Povolit aplikaci přístup ke všem souborům.\"</string>
     <string name="extension_updates_pending">Rozšíření čekající na aktualizaci</string>
@@ -711,7 +711,7 @@
     <string name="crop_borders_webtoon">Oříznout okraje (Webtoon)</string>
     <string name="split_double_pages">Rozdělit dvojité strany</string>
     <string name="pad_cutout_areas">Vyplnit vystřihnuté oblasti</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K potřebuje přístup k celému úložišti, aby mohlo stahovat kapitoly. Klikněte sem, poté povolte \"Povolit aplikaci přístup k souborům.\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP potřebuje přístup k celému úložišti, aby mohlo stahovat kapitoly. Klikněte sem, poté povolte \"Povolit aplikaci přístup k souborům.\"</string>
     <string name="show_read_chapters_all">Zobrazovat přečtené kapitoly v Ve skupině a Všechny</string>
     <string name="share_combined_pages">Sdílet kombinované strany</string>
     <string name="smart_by_page">Chytře (podle strany)</string>

@@ -326,10 +326,10 @@
     <string name="always">Vždy</string>
     <string name="manhwa">Manhwa</string>
     <string name="comic">Komix</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K vyžaduje prístup ku všetkým súborom v Android 11 na sťahovanie mangy, vytváranie automatických záloh a čítania stiahnutej mangy.
+    <string name="external_storage_permission_notice">TachiyomiDNP vyžaduje prístup ku všetkým súborom v Android 11 na sťahovanie mangy, vytváranie automatických záloh a čítania stiahnutej mangy.
 \n
 \nNa nasledujucej obrazovke, povoľte \"Povoliť prístup ku spravovaniu všetkych súborov.\"</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K vyžaduje prístup ku všetkým súborom pre stiahnutie časti. Kliknite sem, a potom potvrďte \"Povoliť prístup na spravovanie všetkých súborov\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP vyžaduje prístup ku všetkým súborom pre stiahnutie časti. Kliknite sem, a potom potvrďte \"Povoliť prístup na spravovanie všetkých súborov\"</string>
     <string name="ascending">Vzostupne</string>
     <string name="descending">Zostupne</string>
     <string name="select_inverse">Vyberte inverzne</string>

@@ -834,8 +834,8 @@
     <string name="pad_cutout_areas">Surfaces coupées du bloc</string>
     <string name="category_hopper_long_press">Action d\'un appui long sur le filtre par Catégorie</string>
     <string name="cancel_all_for_series">Tout annuler pour cette série</string>
-    <string name="external_storage_download_notice">Pour télécharger des chapitres, TachiyomiJ2K nécessite l\'accès à tous les fichiers. Appuyez ici, puis activez « Autoriser l\'accès pour gérer tous les fichiers.»</string>
-    <string name="external_storage_permission_notice">Sous Android 11, TachiyomiJ2K nécessite l\'accès à tous les fichiers pour pouvoir télécharger des chapitres, créer des sauvegardes automatiques et lire des séries locales.
+    <string name="external_storage_download_notice">Pour télécharger des chapitres, TachiyomiDNP nécessite l\'accès à tous les fichiers. Appuyez ici, puis activez « Autoriser l\'accès pour gérer tous les fichiers.»</string>
+    <string name="external_storage_permission_notice">Sous Android 11, TachiyomiDNP nécessite l\'accès à tous les fichiers pour pouvoir télécharger des chapitres, créer des sauvegardes automatiques et lire des séries locales.
 \n
 \nSur l\'écran suivant, activez « Autoriser l\'accès pour gérer tous les fichiers.»</string>
     <string name="include_">Inclure : %s</string>

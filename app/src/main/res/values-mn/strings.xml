@@ -2,11 +2,11 @@
 <resources>
     <string name="all_files_permission_required">Файлийн зөвшөөрөл шаардлагатай</string>
     <string name="comic">Комик</string>
-    <string name="external_storage_permission_notice">\"TachiyomiJ2K\" нь Андройд 11-ийн бүх файлыг хэрэглэх зөвшөөрөл авч байж утсан дээрээс тань манга уншиж, манга татах боломжтой.
+    <string name="external_storage_permission_notice">\"TachiyomiDNP\" нь Андройд 11-ийн бүх файлыг хэрэглэх зөвшөөрөл авч байж утсан дээрээс тань манга уншиж, манга татах боломжтой.
 \n
 \nДараа гарч ирэх хэсэгт, бүх файлийг удирдахыг зөвшөөрнө үү.</string>
     <string name="not_started">Эхлээгүй</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K бүх файлуудыг ашиглах зөвшөөрөлтэй байж манга татах боломжтой. Энд дараад, бүх файлыг удирдах зөвшөөрөл олгоно уу.</string>
+    <string name="external_storage_download_notice">TachiyomiDNP бүх файлуудыг ашиглах зөвшөөрөлтэй байж манга татах боломжтой. Энд дараад, бүх файлыг удирдах зөвшөөрөл олгоно уу.</string>
     <string name="manhwa">Манхуа</string>
     <string name="manhua">Манхуа</string>
     <string name="unlock_library">Ашиглахын тулд онгойлгоно уу</string>

@@ -632,13 +632,13 @@
         <item quantity="many">Els següents %d capítols no llegits</item>
         <item quantity="other">Els següents %d capítols no llegits</item>
     </plurals>
-    <string name="external_storage_download_notice">El TachiyomiJ2K requereix l’accés a tots els fitxers per a poder baixar capítols. Premeu aquí i activeu «Permet l’accés a tots els fitxers».</string>
+    <string name="external_storage_download_notice">El TachiyomiDNP requereix l’accés a tots els fitxers per a poder baixar capítols. Premeu aquí i activeu «Permet l’accés a tots els fitxers».</string>
     <string name="could_not_install_update">No s’ha pogut instal·lar l’actualització</string>
     <string name="release_page">Pàgina del llançament</string>
     <string name="your_library">La vostra biblioteca</string>
     <string name="new_beta_version_available">Nova versió beta disponible!</string>
     <string name="update_completed">Actualització completada</string>
-    <string name="external_storage_permission_notice">El TachiyomiJ2K requereix l’accés a tots els fitxers en Android 11 per a poder baixar capítols, crear còpies de seguretat automàtiques i llegir sèries locals.
+    <string name="external_storage_permission_notice">El TachiyomiDNP requereix l’accés a tots els fitxers en Android 11 per a poder baixar capítols, crear còpies de seguretat automàtiques i llegir sèries locals.
 \n
 \nA la següent pantalla, activeu «Permet l’accés a tots els fitxers».</string>
     <string name="skipped_reason_not_always_update">S’ha omès perquè no cal actualitzar la sèrie</string>

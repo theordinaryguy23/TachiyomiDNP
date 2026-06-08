@@ -808,8 +808,8 @@
     <string name="global_updates">Agiornamentos globales</string>
     <string name="open_random_series">Aberi una sèrie a casu</string>
     <string name="show_number_of_items">Ammustra su nùmeru de elementos</string>
-    <string name="external_storage_download_notice">Pro iscarrigare capìtulos TachiyomiJ2K tenet bisòngiu de s\'atzessu a totu sos documentos. Incarca inoghe, e a pustis abìlita \"Permite s\'atzessu pro amministrare totu sos documentos.\"</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K tenet bisòngiu de s\'atzessu a sos documentos de Android 11 pro iscarrigare capìtulos, creare còpias de seguresa automàticas e lèghere sèries in locale.
+    <string name="external_storage_download_notice">Pro iscarrigare capìtulos TachiyomiDNP tenet bisòngiu de s\'atzessu a totu sos documentos. Incarca inoghe, e a pustis abìlita \"Permite s\'atzessu pro amministrare totu sos documentos.\"</string>
+    <string name="external_storage_permission_notice">TachiyomiDNP tenet bisòngiu de s\'atzessu a sos documentos de Android 11 pro iscarrigare capìtulos, creare còpias de seguresa automàticas e lèghere sèries in locale.
 \n
 \nIn s\'ischermada imbeniente abìlita \"Permite s\'atzessu pro amministrare totu sos documentos.\"</string>
     <string name="all_files_permission_required">Permissos de iscritura pedidos</string>

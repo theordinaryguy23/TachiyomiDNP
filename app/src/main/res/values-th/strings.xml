@@ -425,7 +425,7 @@
     <string name="getting_started_guide">คู่มือเริ่มต้นใช้งาน</string>
     <string name="ext_installer_shizuku_stopped">Shizuku ไม่ทำงาน</string>
     <string name="in_progress">กำลังอ่าน</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K ต้องการการเข้าถึงไฟล์ทั้งหมดใน Android 11 เพื่อดาวน์โหลดตอน สร้างการสำรองข้อมูลอัตโนมัติ และอ่านซีรีย์ในเครื่อง
+    <string name="external_storage_permission_notice">TachiyomiDNP ต้องการการเข้าถึงไฟล์ทั้งหมดใน Android 11 เพื่อดาวน์โหลดตอน สร้างการสำรองข้อมูลอัตโนมัติ และอ่านซีรีย์ในเครื่อง
 \n
 \nในหน้าจอถัดไป ให้เปิดใช้งาน \"อนุญาตการเข้าถึงเพื่อจัดการไฟล์ทั้งหมด\"</string>
     <string name="unlock">ปลดล็อก</string>
@@ -734,7 +734,7 @@
     <string name="delete_downloaded_if_removed_online">ลบตอนที่ดาวน์โหลดไว้หากแหล่งที่มาได้ลบตอนออกในออนไลน์</string>
     <string name="automatic_removal">การลบอัตโนมัติ</string>
     <string name="all_files_permission_required">จำเป็นต้องมีสิทธิ์ในการเข้าถึงไฟล์</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K ต้องการการเข้าถึงไฟล์ทั้งหมดเพื่อดาวน์โหลดตอน แตะที่นี่ แล้วเปิดใช้งาน \"อนุญาตการเข้าถึงเพื่อจัดการไฟล์ทั้งหมด\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP ต้องการการเข้าถึงไฟล์ทั้งหมดเพื่อดาวน์โหลดตอน แตะที่นี่ แล้วเปิดใช้งาน \"อนุญาตการเข้าถึงเพื่อจัดการไฟล์ทั้งหมด\"</string>
     <string name="not_started">ยังไม่เริ่ม</string>
     <string name="unknown_status">ไม่ระบุสถานะ</string>
     <string name="unlock_library">ปลดล็อกเพื่อเข้าถึงคลัง</string>

@@ -464,7 +464,7 @@
     <string name="all_chapters_read">以下章節已讀</string>
     <string name="last_read_chapter_">最後閱讀的章節%1$s</string>
     <string name="new_chapters">新章節</string>
-    <string name="external_storage_permission_notice">為了讓您順利下載漫畫章節、自動進行資料備份，以及閱讀儲存在本機的漫畫，TachiyomiJ2K 需要您授予其在 Android 11 環境下的「全檔案存取」權限。
+    <string name="external_storage_permission_notice">為了讓您順利下載漫畫章節、自動進行資料備份，以及閱讀儲存在本機的漫畫，TachiyomiDNP 需要您授予其在 Android 11 環境下的「全檔案存取」權限。
 \n
 \n接下來，在出現的畫面中，請啟動「允許存取並管理所有檔案」選項。</string>
     <string name="external_storage_download_notice">Tachiyomi 需要有儲存空間存取權限才能下載漫畫。請允許\"管理儲存空間\"</string>

@@ -600,10 +600,10 @@
         <item quantity="other">ডাউনলোড করা %1$dটি অধ্যায় সরাবেন\?</item>
     </plurals>
     <string name="all_files_permission_required">ফাইল অনুমতি প্রয়োজন</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K-এর জন্য অধ্যায়গুলি ডাউনলোড করতে, স্বয়ংক্রিয় ব্যাকআপ তৈরি করতে এবং স্থানীয় সিরিজ পড়তে Android 11-এর সমস্ত ফাইল অ্যাক্সেস করতে হবে।
+    <string name="external_storage_permission_notice">TachiyomiDNP-এর জন্য অধ্যায়গুলি ডাউনলোড করতে, স্বয়ংক্রিয় ব্যাকআপ তৈরি করতে এবং স্থানীয় সিরিজ পড়তে Android 11-এর সমস্ত ফাইল অ্যাক্সেস করতে হবে।
 \n
 \nপরবর্তী স্ক্রিনে, \"সমস্ত ফাইল পরিচালনা করতে অ্যাক্সেসের অনুমতি দিন\" সক্ষম করুন।\"</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K-এর অধ্যায়গুলি ডাউনলোড করার জন্য সমস্ত ফাইলে অ্যাক্সেস প্রয়োজন। এখানে আলতো চাপুন, তারপর \"সমস্ত ফাইল পরিচালনা করতে অ্যাক্সেসের অনুমতি দিন\" সক্ষম করুন৷\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP-এর অধ্যায়গুলি ডাউনলোড করার জন্য সমস্ত ফাইলে অ্যাক্সেস প্রয়োজন। এখানে আলতো চাপুন, তারপর \"সমস্ত ফাইল পরিচালনা করতে অ্যাক্সেসের অনুমতি দিন\" সক্ষম করুন৷\"</string>
     <string name="ext_installer_shizuku_unavailable_dialog">এক্সটেনশন ইনস্টলার হিসাবে Shizuku ব্যবহার করতে Shizuku ইনস্টল করুন এবং শুরু করুন।</string>
     <string name="ext_installer_shizuku_stopped">শিজুকু চলছে না</string>
     <string name="move_dynamic_to_bottom">সঙ্কুচিত ডায়নামিক বিভাগগুলিকে নীচে নিয়ে যাও</string>

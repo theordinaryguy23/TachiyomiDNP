@@ -576,7 +576,7 @@
     <string name="dont_auto_update">Не актуализирайте автоматично</string>
     <string name="all_files_permission_required">Необходими са разрешения за файлове</string>
     <string name="category_deleted">Изтрита категория</string>
-    <string name="external_storage_permission_notice">TachiyomiJ2K изисква достъп до всички файлове в Android 11, за да изтегля глави, да създава автоматични резервни копия и да чете локални серии.
+    <string name="external_storage_permission_notice">TachiyomiDNP изисква достъп до всички файлове в Android 11, за да изтегля глави, да създава автоматични резервни копия и да чете локални серии.
 \n
 \nНа следващия екран позволете \"Разрешаване на достъп за управление на всички файлове.\"</string>
     <string name="add_categories">Добавете категории</string>
@@ -715,7 +715,7 @@
     <string name="auto_updates">Автоматични актуализации</string>
     <string name="auto_update_app">Приложение за автоматично актуализиране</string>
     <string name="over_wifi_only">Само през Wi-Fi</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K изисква достъп до всички файлове, за да изтегли главите. Докоснете тук, след което разрешете \"Разрешаване на достъп за управление на всички файлове.\"</string>
+    <string name="external_storage_download_notice">TachiyomiDNP изисква достъп до всички файлове, за да изтегли главите. Докоснете тук, след което разрешете \"Разрешаване на достъп за управление на всички файлове.\"</string>
     <string name="could_not_install_update">Не можа да се инсталира актуализация</string>
     <string name="update_completed">Завършена актуализация</string>
     <string name="your_library">Вашата библиотека</string>

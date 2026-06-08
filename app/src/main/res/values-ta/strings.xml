@@ -25,10 +25,10 @@
     <string name="categories">வகைகள்</string>
     <string name="adding_category_to_queue">புதுப்பிப்பு வரிசையில் %1$sஐச் சேர்த்திடு</string>
     <string name="category_is_empty">வகை காலியாக உள்ளது</string>
-    <string name="external_storage_permission_notice">அத்தியாயங்களைப் பதிவிறக்கவும், தானியங்கு காப்புப்பிரதிகளை உருவாக்கவும் மற்றும் லோக்கல் தொடர்களைப் படிக்கவும் TachiyomiJ2K க்கு Android 11 இல் உள்ள அனைத்து கோப்புகளுக்கும் அணுகல் தேவைப்படுகிறது. 
+    <string name="external_storage_permission_notice">அத்தியாயங்களைப் பதிவிறக்கவும், தானியங்கு காப்புப்பிரதிகளை உருவாக்கவும் மற்றும் லோக்கல் தொடர்களைப் படிக்கவும் TachiyomiDNP க்கு Android 11 இல் உள்ள அனைத்து கோப்புகளுக்கும் அணுகல் தேவைப்படுகிறது. 
 \n
 \nஅடுத்த திரையில், \"அனைத்து கோப்புகளையும் நிர்வகிக்க அணுகலை அனுமதி\" என்பதை இயக்கவும்.</string>
-    <string name="external_storage_download_notice">TachiyomiJ2K க்கு அத்தியாயங்களைப் பதிவிறக்க அனைத்து கோப்புகளுக்கும் அணுகல் தேவை. இங்கே தட்டவும், பின்னர் \"எல்லா கோப்புகளையும் நிர்வகிக்க அணுகலை அனுமதி\" என்பதை இயக்கவும்.</string>
+    <string name="external_storage_download_notice">TachiyomiDNP க்கு அத்தியாயங்களைப் பதிவிறக்க அனைத்து கோப்புகளுக்கும் அணுகல் தேவை. இங்கே தட்டவும், பின்னர் \"எல்லா கோப்புகளையும் நிர்வகிக்க அணுகலை அனுமதி\" என்பதை இயக்கவும்.</string>
     <string name="manga">மாங்கா</string>
     <string name="manhwa">மாந்ஹவா</string>
     <string name="library_entries">நூலக உள்ளீடுகள்</string>
