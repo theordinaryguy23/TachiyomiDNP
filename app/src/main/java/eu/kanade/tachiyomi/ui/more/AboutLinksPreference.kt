@@ -35,29 +35,30 @@ class AboutLinksPreference
                         if (width >= (56 * fullCount).dpToPx) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
                 }
             }
+            val githubUrl = "https://github.com/theordinaryguy23/TachiyomiDNP"
             holder.findViewById(R.id.btn_website).apply {
                 compatToolTipText = (contentDescription.toString())
-                setOnClickListener { context.openInBrowser("https://tachiyomi.org") }
+                setOnClickListener { context.openInBrowser(githubUrl) }
             }
             holder.findViewById(R.id.btn_discord).apply {
                 compatToolTipText = (contentDescription.toString())
-                setOnClickListener { context.openInBrowser("https://discord.gg/tachiyomi") }
+                setOnClickListener { context.openInBrowser(githubUrl) }
             }
             holder.findViewById(R.id.btn_x).apply {
                 compatToolTipText = (contentDescription.toString())
-                setOnClickListener { context.openInBrowser("https://twitter.com/tachiyomiorg") }
+                setOnClickListener { context.openInBrowser(githubUrl) }
             }
             holder.findViewById(R.id.btn_facebook).apply {
                 compatToolTipText = (contentDescription.toString())
-                setOnClickListener { context.openInBrowser("https://facebook.com/tachiyomiorg") }
+                setOnClickListener { context.openInBrowser(githubUrl) }
             }
             holder.findViewById(R.id.btn_reddit).apply {
                 compatToolTipText = (contentDescription.toString())
-                setOnClickListener { context.openInBrowser("https://www.reddit.com/r/Tachiyomi") }
+                setOnClickListener { context.openInBrowser(githubUrl) }
             }
             holder.findViewById(R.id.btn_github).apply {
                 compatToolTipText = (contentDescription.toString())
-                setOnClickListener { context.openInBrowser("https://github.com/theordinaryguy23/TachiyomiDNP") }
+                setOnClickListener { context.openInBrowser(githubUrl) }
             }
             holder.findViewById(R.id.btn_tachiyomi).apply {
                 compatToolTipText = (contentDescription.toString())
