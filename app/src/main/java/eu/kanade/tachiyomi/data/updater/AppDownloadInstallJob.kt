@@ -167,7 +167,7 @@ class AppDownloadInstallJob(
             val apkFile = File(context.externalCacheDir, "update.apk")
 
             if (response.isSuccessful) {
-                response.body.source().saveTo(apkFile)
+                response.body?.source()?.saveTo(apkFile.outputStream()) ?: throw Exception("Empty response body")
             } else {
                 response.close()
                 throw Exception("Unsuccessful response")

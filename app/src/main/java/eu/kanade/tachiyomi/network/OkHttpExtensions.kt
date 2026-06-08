@@ -76,7 +76,7 @@ private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
                     response: Response,
                 ) {
                     continuation.resume(response) {
-                        response.body.close()
+                        response.body?.close()
                     }
                 }
 
@@ -132,7 +132,7 @@ fun OkHttpClient.newCachelessCallWithProgress(
                 val originalResponse = chain.proceed(chain.request())
                 originalResponse
                     .newBuilder()
-                    .body(ProgressResponseBody(originalResponse.body, listener))
+                    .body(ProgressResponseBody(originalResponse.body ?: throw IOException("Empty response body"), listener))
                     .build()
             }.build()
 
@@ -147,9 +147,9 @@ fun <T> decodeFromJsonResponse(
     deserializer: DeserializationStrategy<T>,
     response: Response,
 ): T =
-    response.body.source().use {
+    response.body?.source()?.use {
         decodeFromBufferedSource(deserializer, it)
-    }
+    } ?: throw IOException("Empty response body")
 
 /**
  * Exception that handles HTTP codes considered not successful by OkHttp.

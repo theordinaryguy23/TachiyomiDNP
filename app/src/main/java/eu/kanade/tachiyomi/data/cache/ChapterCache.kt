@@ -223,12 +223,11 @@ class ChapterCache(
             editor = diskCache.edit(key) ?: throw IOException("Unable to edit key")
 
             // Get OutputStream and write image with Okio.
-            response.body.source().saveTo(editor.newOutputStream(0))
+            response.body?.source()?.saveTo(editor.newOutputStream(0)) ?: throw IOException("Empty response body")
 
             diskCache.flush()
             editor.commit()
         } finally {
-            response.body.close()
             editor?.abortUnlessCommitted()
         }
     }

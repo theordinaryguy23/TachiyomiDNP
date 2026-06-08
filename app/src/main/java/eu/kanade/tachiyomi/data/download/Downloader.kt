@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.CancellationException
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -522,7 +523,7 @@ class Downloader(
             val response = source.getImage(page)
             val file = tmpDir.createFile("$filename.tmp")
             try {
-                response.body.source().saveTo(file.openOutputStream())
+                response.body?.source()?.saveTo(file.openOutputStream()) ?: throw IOException("Empty response body")
                 val extension = getImageExtension(response, file)
                 file.renameTo("$filename.$extension")
             } catch (e: Exception) {
@@ -580,7 +581,7 @@ class Downloader(
     ): String {
         // Read content type if available.
         val mime =
-            response.body.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
+            response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
                 // Else guess from the uri.
                 ?: context.contentResolver.getType(file.uri)
                 // Else read magic numbers.
