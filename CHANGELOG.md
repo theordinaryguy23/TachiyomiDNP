@@ -1,23 +1,31 @@
 # Changelog
 
-All notable changes to TachiyomiDNP will be documented in this file.
+## v1.8.2
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Bug Fixes
+- Fixed Firebase integration — crash logs & analytics now go to our own Firebase project (was incorrectly sending to TachiyomiJ2K upstream)
+- Fixed branding: removed all leftover "TachiyomiJ2K" references across 52 locale strings
+- Fixed debug application ID suffix (.debugJ2K → .debugDNP)
+- Fixed root project name (tachiyomiJ2K → TachiyomiDNP)
+- Fixed About page social links pointing to upstream Tachiyomi
+- Fixed Weblate translation link in About page
 
-## [Unreleased]
+### Performance
+- More stable network connections with OkHttp 4.12.0 (downgraded from unstable 5.0.0-alpha.14)
 
-## [1.8.0] - 2026-06-07
+### New Features
+- Default extension repo (keiyoushi) pre-configured — no more "Failed to fetch available extensions" on first launch
+- APK filenames now include version number (e.g., TachiyomiDNP-1.8.2-Standard-Release.apk)
 
-### Fixed
-- **Memory leaks** — LibraryUpdateJob, ReaderViewModel RxJava subscriptions, Coil cache trim
-- **SSL compatibility** — Conscrypt initialization now applied for all Android versions (was only <10)
-- **Gradle OOM** — increased JVM memory to 4096MB for both Gradle and Kotlin daemon
+## v1.8.1
 
-### Optimized
-- **Battery** — Coil memory cache reduced from 40% → 25%
-- **Image loading** — crossfade disabled, disk cache 250MB, OkHttp cache 50MB
-- **Reader preload** — 10 pages (up from 6), preload trigger at last 10 pages (up from 5)
+### Bug Fixes
+- Fixed "Failed to fetch available extensions" error on first launch
 
-[Unreleased]: https://github.com/theordinaryguy23/TachiyomiDNP/compare/v1.8.0...HEAD
-[1.8.0]: https://github.com/theordinaryguy23/TachiyomiDNP/releases/tag/v1.8.0
+### Performance
+- Downgraded OkHttp from 5.0.0-alpha.14 to stable 4.12.0 to fix SocketException crashes
+
+## v1.8.0
+
+- Initial release based on TachiyomiJ2K
+- Package: eu.kanade.tachiyomi.dnp

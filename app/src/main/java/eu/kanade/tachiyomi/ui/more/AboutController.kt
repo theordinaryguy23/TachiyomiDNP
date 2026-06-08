@@ -134,7 +134,7 @@ class AboutController : SettingsController() {
                     titleRes = R.string.help_translate
 
                     onClick {
-                        openInBrowser("https://hosted.weblate.org/projects/tachiyomi/tachiyomi-j2k/")
+                        openInBrowser("https://github.com/theordinaryguy23/TachiyomiDNP/wiki")
                     }
                 }
                 preference {
