@@ -321,7 +321,7 @@ class PreferencesHelper(
 
     fun automaticExtUpdates() = flowPrefs.getBoolean(Keys.automaticExtUpdates, true)
 
-    fun extensionRepos() = flowPrefs.getStringSet("extension_repos", emptySet())
+    fun extensionRepos() = flowPrefs.getStringSet("extension_repos", setOf("https://raw.githubusercontent.com/keiyoushi/extensions/repo"))
 
     fun installedExtensionsOrder() = flowPrefs.getInt(Keys.installedExtensionsOrder, InstalledExtensionsOrder.Name.value)
 

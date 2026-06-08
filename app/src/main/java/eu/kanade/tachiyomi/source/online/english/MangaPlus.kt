@@ -43,7 +43,7 @@ class MangaPlus : DelegatedHttpSource() {
         return withContext(Dispatchers.IO) {
             val response = network.client.newCall(request).await()
             if (response.code != 200) throw Exception("HTTP error ${response.code}")
-            val body = response.body.string()
+            val body = response.body?.string() ?: ""
             val match = titleIdRegex.find(body)
             val titleId =
                 match?.groupValues?.firstOrNull()?.substringAfterLast("/")
