@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Primary Meta Tags -->
+  <title>TachiyomiDNP — Free & Open Source Manga Reader for Android</title>
+  <meta name="title" content="TachiyomiDNP — Free & Open Source Manga Reader for Android">
+  <meta name="description" content="TachiyomiDNP is a free, open-source manga reader for Android. Read thousands of manga, manhwa, and comics from multiple sources — no ads, no tracking, completely free. Download now.">
+  <meta name="keywords" content="TachiyomiDNP, manga reader, android manga app, free manga reader, tachiyomi alternative, open source manga, manhwa reader, comic reader android, manga app no ads">
+  <meta name="author" content="TachiyomiDNP">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tachiyomi-dnp.web.app/">
+  <meta property="og:title" content="TachiyomiDNP — Free & Open Source Manga Reader for Android">
+  <meta property="og:description" content="Read thousands of manga, manhwa, and comics from multiple sources — no ads, no tracking, completely free. The best open-source manga reader for Android.">
+  <meta property="og:image" content="https://tachiyomi-dnp.web.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://tachiyomi-dnp.web.app/">
+  <meta property="twitter:title" content="TachiyomiDNP — Free & Open Source Manga Reader for Android">
+  <meta property="twitter:description" content="Read thousands of manga, manhwa, and comics from multiple sources — no ads, no tracking, completely free.">
+  <meta property="twitter:image" content="https://tachiyomi-dnp.web.app/og-image.png">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://tachiyomi-dnp.web.app/">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "TachiyomiDNP",
+    "applicationCategory": "Multimedia",
+    "operatingSystem": "Android",
+    "description": "Free and open-source manga reader for Android. Read thousands of manga, manhwa, and comics from multiple sources with no ads and no tracking.",
+    "url": "https://tachiyomi-dnp.web.app/",
+    "downloadUrl": "https://github.com/theordinaryguy23/TachiyomiDNP/releases",
+    "author": {
+      "@type": "Person",
+      "name": "theordinaryguy23",
+      "url": "https://github.com/theordinaryguy23"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "1"
+    }
+  }
+  </script>
+
+  <!-- FAQ Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is TachiyomiDNP free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, TachiyomiDNP is completely free and open-source. There are no ads, no in-app purchases, and no subscriptions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is TachiyomiDNP safe to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. TachiyomiDNP is open-source, meaning the code is publicly auditable. It contains no trackers, no ads, and sends no data to third parties."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What Android version does TachiyomiDNP support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "TachiyomiDNP requires Android 8.0 (Oreo) or higher."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is TachiyomiDNP different from Tachiyomi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "TachiyomiDNP is a fork of TachiyomiJ2K with its own Firebase project for crash reporting, clean branding, pre-configured extension repository, and stable network libraries out of the box."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where can I download TachiyomiDNP?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can download the latest APK from the GitHub releases page at github.com/theordinaryguy23/TachiyomiDNP/releases"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does TachiyomiDNP have ads?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. TachiyomiDNP is completely ad-free. We believe reading should be distraction-free."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a26;
+      --text-primary: #f0f0f5;
+      --text-secondary: #a0a0b8;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --accent-glow: rgba(108, 92, 231, 0.3);
+      --green: #00cec9;
+      --green-glow: rgba(0, 206, 201, 0.2);
+      --border: rgba(255,255,255,0.06);
+      --gradient: linear-gradient(135deg, #6c5ce7, #00cec9);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(108,92,231,0.08) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(0,206,201,0.06) 0%, transparent 50%);
+      z-index: -1;
+      animation: bgFloat 20s ease-in-out infinite;
+    }
+
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-2%, -1%); }
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-weight: 800;
+      font-size: 1.3rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text-primary); }
+
+    .nav-cta {
+      background: var(--gradient) !important;
+      color: white !important;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 600 !important;
+      font-size: 0.85rem;
+      transition: transform 0.2s, box-shadow 0.2s !important;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+
+    .hero-content { max-width: 760px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108, 92, 231, 0.12);
+      border: 1px solid rgba(108, 92, 231, 0.25);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-light);
+      margin-bottom: 28px;
+    }
+
+    .hero-badge .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 .gradient {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gradient);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-primary);
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stat { text-align: center; }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* Phone mockup */
+    .hero-mockup {
+      margin-top: 56px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .phone-frame {
+      width: 280px;
+      height: 560px;
+      background: var(--bg-card);
+      border-radius: 36px;
+      border: 2px solid var(--border);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 24px;
+      background: var(--bg-primary);
+      border-radius: 0 0 16px 16px;
+      z-index: 2;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex;
+      flex-direction: column;
+      padding: 40px 16px 16px;
+    }
+
+    .mockup-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .mockup-header .logo-text {
+      font-weight: 800;
+      font-size: 1.1rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .mockup-header p {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .mockup-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .mockup-thumb {
+      width: 42px;
+      height: 56px;
+      border-radius: 6px;
+      background: var(--gradient);
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+
+    .mockup-info .title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .mockup-info .meta {
+      font-size: 0.6rem;
+      color: var(--text-secondary);
+    }
+
+    .mockup-info .progress-bar {
+      width: 80px;
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .mockup-info .progress-bar .fill {
+      height: 100%;
+      background: var(--gradient);
+      border-radius: 3px;
+    }
+
+    /* Section styles */
+    section {
+      padding: 100px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-light);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    /* Features */
+    #features { padding-top: 60px; }
+
+    .features-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .features-header .section-desc { margin: 0 auto; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(108, 92, 231, 0.3);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon.purple { background: rgba(108,92,231,0.15); }
+    .feature-icon.teal { background: rgba(0,206,201,0.15); }
+    .feature-icon.pink { background: rgba(255,118,117,0.15); }
+    .feature-icon.yellow { background: rgba(253,203,110,0.15); }
+    .feature-icon.blue { background: rgba(116,185,255,0.15); }
+    .feature-icon.green { background: rgba(85,239,196,0.15); }
+
+    .feature-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* How it works */
+    #how-it-works { padding-top: 60px; }
+
+    .steps-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .steps-header .section-desc { margin: 0 auto; }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .step {
+      text-align: center;
+      padding: 40px 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      margin: 0 auto 20px;
+    }
+
+    .step h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Screenshots */
+    #screenshots { padding-top: 60px; }
+
+    .screenshots-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .screenshots-header .section-desc { margin: 0 auto; }
+
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .screenshot {
+      aspect-ratio: 9/19;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .screenshot-inner {
+      width: 85%;
+      height: 90%;
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px;
+    }
+
+    .screenshot-inner .placeholder-icon {
+      font-size: 2.5rem;
+      opacity: 0.5;
+    }
+
+    .screenshot-inner .placeholder-text {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* FAQ */
+    #faq { padding-top: 60px; }
+
+    .faq-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .faq-header .section-desc { margin: 0 auto; }
+
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .faq-question {
+      width: 100%;
+      padding: 20px 24px;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: inherit;
+      gap: 16px;
+    }
+
+    .faq-question:hover { color: var(--accent-light); }
+
+    .faq-question .arrow {
+      transition: transform 0.3s;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .faq-item.open .faq-question .arrow { transform: rotate(180deg); }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+      padding: 0 24px 20px;
+    }
+
+    .faq-answer p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Download CTA */
+    #download {
+      padding-top: 60px;
+      padding-bottom: 100px;
+    }
+
+    .download-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 64px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .download-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, rgba(108,92,231,0.1) 0%, transparent 60%);
+      z-index: 0;
+    }
+
+    .download-card > * { position: relative; z-index: 1; }
+
+    .download-card h2 {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .download-card p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .download-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .download-note {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .download-note a {
+      color: var(--accent-light);
+      text-decoration: none;
+    }
+
+    .download-note a:hover { text-decoration: underline; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-weight: 800;
+      font-size: 1.2rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text-primary); }
+
+    .footer-copy {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.3);
+    }
+
+    /* Mobile nav */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 14px 20px; }
+
+      .nav-links { display: none; }
+
+      .mobile-menu-btn { display: block; }
+
+      .hero { padding: 100px 20px 60px; }
+
+      .hero-stats { gap: 24px; }
+
+      section { padding: 60px 20px; }
+
+      .features-grid { grid-template-columns: 1fr; }
+
+      .download-card { padding: 40px 24px; }
+
+      .phone-frame { width: 220px; height: 440px; }
+    }
+
+    /* Scroll animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#" class="nav-logo">TachiyomiDNP</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#faq">FAQ</a>
+      <a href="#download" class="nav-cta">Download</a>
+    </div>
+    <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        v1.8.2 — Now Available
+      </div>
+      <h1>
+        The Best Free<br>
+        <span class="gradient">Manga Reader</span><br>
+        for Android
+      </h1>
+      <p>
+        Read thousands of manga, manhwa, and comics from multiple sources — all in one app. No ads, no tracking, completely free and open-source.
+      </p>
+      <div class="hero-buttons">
+        <a href="https://github.com/theordinaryguy23/TachiyomiDNP/releases/latest" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download APK
+        </a>
+        <a href="https://github.com/theordinaryguy23/TachiyomiDNP" class="btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-value">Free</div>
+          <div class="stat-label">No Ads, No Subscriptions</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">1000+</div>
+          <div class="stat-label">Manga Sources</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">Open</div>
+          <div class="stat-label">Source Code on GitHub</div>
+        </div>
+      </div>
+      <div class="hero-mockup">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="mockup-header">
+              <div class="logo-text">TachiyomiDNP</div>
+              <p>Your manga, your way</p>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-thumb"></div>
+              <div class="mockup-info">
+                <div class="title">One Piece</div>
+                <div class="meta">Ch. 1118 · MangaDex</div>
+                <div class="progress-bar"><div class="fill" style="width:65%"></div></div>
+              </div>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-thumb" style="background: linear-gradient(135deg, #e17055, #fdcb6e);"></div>
+              <div class="mockup-info">
+                <div class="title">Solo Leveling</div>
+                <div class="meta">Ch. 179 · Asura</div>
+                <div class="progress-bar"><div class="fill" style="width:90%"></div></div>
+              </div>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-thumb" style="background: linear-gradient(135deg, #0984e3, #74b9ff);"></div>
+              <div class="mockup-info">
+                <div class="title">Jujutsu Kaisen</div>
+                <div class="meta">Ch. 261 · MangaPlus</div>
+                <div class="progress-bar"><div class="fill" style="width:40%"></div></div>
+              </div>
+            </div>
+            <div class="mockup-card">
+              <div class="mockup-thumb" style="background: linear-gradient(135deg, #6c5ce7, #fd79a8);"></div>
+              <div class="mockup-info">
+                <div class="title">Chainsaw Man</div>
+                <div class="meta">Ch. 168 · MangaDex</div>
+                <div class="progress-bar"><div class="fill" style="width:75%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="features-header fade-in">
+      <div class="section-label">✦ Features</div>
+      <h2 class="section-title">Everything You Need to Read Manga</h2>
+      <p class="section-desc">A powerful, feature-packed manga reader built for Android. No compromises.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <div class="feature-icon purple">📚</div>
+        <h3>Thousands of Sources</h3>
+        <p>Access manga from hundreds of sources via extensions. MangaDex, MangaPlus, Asura, and many more — all in one app.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon teal">🚫</div>
+        <h3>Completely Ad-Free</h3>
+        <p>No ads, no pop-ups, no banners. Just pure reading enjoyment from start to finish.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon pink">🎨</div>
+        <h3>Customizable Reader</h3>
+        <p>Multiple reading modes, themes, and customization options. Read the way you want — left to right, vertical, or webtoon style.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon yellow">📡</div>
+        <h3>Offline Reading</h3>
+        <p>Download chapters and read offline anywhere. Perfect for commuting, traveling, or when you're off the grid.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon blue">🔒</div>
+        <h3>Privacy First</h3>
+        <p>No tracking, no analytics, no data collection. Your reading habits stay yours. Open-source code for full transparency.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon green">⚡</div>
+        <h3>Lightweight & Fast</h3>
+        <p>Optimized for performance with stable network libraries. Smooth scrolling, fast loading, minimal battery drain.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works">
+    <div class="steps-header fade-in">
+      <div class="section-label">✦ How It Works</div>
+      <h2 class="section-title">Start Reading in 3 Steps</h2>
+      <p class="section-desc">Getting started with TachiyomiDNP is quick and easy.</p>
+    </div>
+    <div class="steps">
+      <div class="step fade-in">
+        <div class="step-number">1</div>
+        <h3>Download & Install</h3>
+        <p>Download the APK from GitHub releases and install it on your Android device. Enable "Install from unknown sources" if needed.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-number">2</div>
+        <h3>Add Extensions</h3>
+        <p>Browse and install extensions for your favorite manga sources. The default repo (keiyoushi) is pre-configured — extensions work on first launch.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-number">3</div>
+        <h3>Start Reading</h3>
+        <p>Search for manga, add them to your library, and start reading. Download chapters for offline reading anytime.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshots -->
+  <section id="screenshots">
+    <div class="screenshots-header fade-in">
+      <div class="section-label">✦ Screenshots</div>
+      <h2 class="section-title">Clean & Beautiful Interface</h2>
+      <p class="section-desc">A modern, intuitive interface designed for the best reading experience.</p>
+    </div>
+    <div class="screenshots-grid">
+      <div class="screenshot fade-in">
+        <div class="screenshot-inner">
+          <div class="placeholder-icon">📖</div>
+          <div class="placeholder-text">Library</div>
+        </div>
+      </div>
+      <div class="screenshot fade-in">
+        <div class="screenshot-inner">
+          <div class="placeholder-icon">🔍</div>
+          <div class="placeholder-text">Browse Sources</div>
+        </div>
+      </div>
+      <div class="screenshot fade-in">
+        <div class="screenshot-inner">
+          <div class="placeholder-icon">📄</div>
+          <div class="placeholder-text">Reader</div>
+        </div>
+      </div>
+      <div class="screenshot fade-in">
+        <div class="screenshot-inner">
+          <div class="placeholder-icon">⚙️</div>
+          <div class="placeholder-text">Settings</div>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center; color: var(--text-secondary); font-size:0.85rem; margin-top:20px;">
+      📸 Replace placeholders with actual app screenshots for best results
+    </p>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="faq-header fade-in">
+      <div class="section-label">✦ FAQ</div>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-desc">Got questions? We've got answers.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Is TachiyomiDNP free?
+          <span class="arrow">▾</span>
+        </button>
+        <div class="faq-answer">
+          <p>Yes, TachiyomiDNP is completely free and open-source. There are no ads, no in-app purchases, and no subscriptions. Ever.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Is TachiyomiDNP safe to use?
+          <span class="arrow">▾</span>
+        </button>
+        <div class="faq-answer">
+          <p>Yes. TachiyomiDNP is open-source, meaning the code is publicly auditable on GitHub. It contains no trackers, no ads, and sends no data to third parties.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          What Android version does TachiyomiDNP support?
+          <span class="arrow">▾</span>
+        </button>
+        <div class="faq-answer">
+          <p>TachiyomiDNP requires Android 8.0 (Oreo) or higher. It works on most Android phones and tablets released in the last 5+ years.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          How is TachiyomiDNP different from Tachiyomi?
+          <span class="arrow">▾</span>
+        </button>
+        <div class="faq-answer">
+          <p>TachiyomiDNP is a fork of TachiyomiJ2K with its own Firebase project for crash reporting, clean branding (no upstream references), pre-configured extension repository, and stable network libraries out of the box.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Where can I download TachiyomiDNP?
+          <span class="arrow">▾</span>
+        </button>
+        <div class="faq-answer">
+          <p>You can download the latest APK from the GitHub releases page at <a href="https://github.com/theordinaryguy23/TachiyomiDNP/releases" style="color:var(--accent-light);">github.com/theordinaryguy23/TachiyomiDNP/releases</a></p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Does TachiyomiDNP have ads?
+          <span class="arrow">▾</span>
+        </button>
+        <div class="faq-answer">
+          <p>No. TachiyomiDNP is completely ad-free. We believe reading should be distraction-free and your data should remain private.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Can I read manga offline?
+          <span class="arrow">▾</span>
+        </button>
+        <div class="faq-answer">
+          <p>Yes! You can download chapters to your device and read them offline anytime, anywhere — no internet connection needed.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          How do I report a bug or request a feature?
+          <span class="arrow">▾</span>
+        </button>
+        <div class="faq-answer">
+          <p>Open an issue on our GitHub repository at <a href="https://github.com/theordinaryguy23/TachiyomiDNP/issues" style="color:var(--accent-light);">github.com/theordinaryguy23/TachiyomiDNP/issues</a> — we'd love to hear from you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download CTA -->
+  <section id="download">
+    <div class="download-card fade-in">
+      <h2>Ready to Start Reading?</h2>
+      <p>Download TachiyomiDNP now and join thousands of manga readers who've made the switch to a better, ad-free reading experience.</p>
+      <div class="download-buttons">
+        <a href="https://github.com/theordinaryguy23/TachiyomiDNP/releases/latest" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Latest APK
+        </a>
+        <a href="https://github.com/theordinaryguy23/TachiyomiDNP" class="btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+      <p class="download-note">
+        Requires Android 8.0+ · <a href="https://github.com/theordinaryguy23/TachiyomiDNP/blob/main/LICENSE">Open Source (GPL-3.0)</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-logo">TachiyomiDNP</div>
+    <div class="footer-links">
+      <a href="https://github.com/theordinaryguy23/TachiyomiDNP">GitHub</a>
+      <a href="https://github.com/theordinaryguy23/TachiyomiDNP/releases">Releases</a>
+      <a href="https://github.com/theordinaryguy23/TachiyomiDNP/issues">Issues</a>
+      <a href="https://github.com/theordinaryguy23/TachiyomiDNP/blob/main/LICENSE">License</a>
+    </div>
+    <p class="footer-copy">© 2026 TachiyomiDNP. Free and open-source software.</p>
+  </footer>
+
+  <script>
+    // FAQ toggle
+    function toggleFaq(button) {
+      const item = button.parentElement;
+      item.classList.toggle('open');
+    }
+
+    // Mobile menu toggle
+    function toggleMenu() {
+      const links = document.querySelector('.nav-links');
+      links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+      if (links.style.display === 'flex') {
+        links.style.position = 'absolute';
+        links.style.top = '100%';
+        links.style.left = '0';
+        links.style.right = '0';
+        links.style.flexDirection = 'column';
+        links.style.background = 'rgba(10,10,15,0.95)';
+        links.style.padding = '20px';
+        links.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+      }
+    }
+
+    // Scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
