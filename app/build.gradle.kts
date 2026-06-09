@@ -90,7 +90,9 @@ android {
         getByName("debug") {
             applicationIdSuffix = ".debugDNP"
             versionNameSuffix = "-d${getCommitCount()}"
-            signingConfig = signingConfigs.getByName("release")
+            if (file("release.keystore").exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         getByName("release") {
             // applicationIdSuffix = ".j2k"
