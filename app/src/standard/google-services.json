@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "602437167181",
+    "project_id": "tachiyomi-dnp",
+    "storage_bucket": "tachiyomi-dnp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:602437167181:android:31854fe5851f25a88a5404",
+        "android_client_info": {
+          "package_name": "eu.kanade.tachiyomi.dnp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpX-lWomtLfRZj0HsK2xy9VNWJCql48Qw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
