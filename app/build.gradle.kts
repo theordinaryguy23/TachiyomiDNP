@@ -12,8 +12,8 @@ plugins {
     id(Plugins.kotlinParcelize)
     id(Plugins.kotlinSerialization)
     id("com.google.android.gms.oss-licenses-plugin")
-    // id(Plugins.googleServices) apply false
-    // id("com.google.firebase.crashlytics")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
     id("org.jetbrains.kotlin.plugin.compose") version AndroidVersions.kotlin // this version matches your Kotlin version
 }
 
@@ -88,7 +88,6 @@ android {
 
     buildTypes {
         getByName("debug") {
-            applicationIdSuffix = ".debugDNP"
             versionNameSuffix = "-d${getCommitCount()}"
             if (file("release.keystore").exists()) {
                 signingConfig = signingConfigs.getByName("release")
