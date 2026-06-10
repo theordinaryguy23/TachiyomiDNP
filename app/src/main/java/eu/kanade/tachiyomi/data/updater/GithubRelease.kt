@@ -28,15 +28,31 @@ data class GithubRelease(
         get() {
             val apkVariant =
                 when (Build.SUPPORTED_ABIS[0]) {
-                    "arm64-v8a" -> "-arm64-v8a"
-                    "armeabi-v7a" -> "-armeabi-v7a"
-                    "x86" -> "-x86"
-                    "x86_64" -> "-x86_64"
+                    "arm64-v8a" -> "arm64-v8a"
+                    "armeabi-v7a" -> "armeabi-v7a"
+                    "x86" -> "x86"
+                    "x86_64" -> "x86_64"
                     else -> ""
                 }
 
-            return assets.find { it.downloadLink.contains("tachiyomidnp$apkVariant-") }?.downloadLink
-                ?: assets[0].downloadLink
+            // Try exact ABI match first (case-insensitive)
+            val abiMatch = assets.find {
+                it.downloadLink.lowercase().contains("tachiyomidnp") &&
+                    it.downloadLink.lowercase().contains(apkVariant)
+            }
+            if (abiMatch != null) return abiMatch.downloadLink
+
+            // Fallback: universal APK
+            val universalMatch = assets.find {
+                it.downloadLink.lowercase().contains("tachiyomidnp") &&
+                    it.downloadLink.lowercase().contains("universal")
+            }
+            if (universalMatch != null) return universalMatch.downloadLink
+
+            // Last fallback: first APK asset
+            return assets.firstOrNull {
+                it.downloadLink.lowercase().contains(".apk")
+            }?.downloadLink ?: assets.first().downloadLink
         }
 
     /**
