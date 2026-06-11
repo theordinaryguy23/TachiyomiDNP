@@ -4,6 +4,7 @@ import java.util.Date
 import java.util.Locale
 import org.gradle.api.tasks.Copy
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.android.build.OutputFile
 
 plugins {
     id(Plugins.androidApplication)
@@ -128,6 +129,21 @@ android {
         create("dev") {
             androidResources.localeFilters.clear()
             androidResources.localeFilters.add("en")
+        }
+    }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val output = this
+            if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                val sep = "-"
+                val versionName = variant.versionName
+                val buildType = variant.buildType.name
+                val abi = output.getFilter(com.android.build.OutputFile.ABI) ?: "universal"
+                output.outputFileName =
+                    "TachiyomiDNP$sep$versionName$sep$buildType$sep$abi.apk"
+            }
         }
     }
 
