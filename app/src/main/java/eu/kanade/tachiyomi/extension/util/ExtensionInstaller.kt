@@ -502,13 +502,14 @@ internal class ExtensionInstaller(
             if (id !in activeDownloads.values) return
 
             val uri = downloadManager.getUriForDownloadedFile(id)
+            Timber.d("DownloadCompleteReceiver: id=$id, uri=$uri")
 
             val pkgName = activeDownloads.entries.find { id == it.value }?.key
             // Set next installation step
             if (uri != null && pkgName != null) {
                 emitToFlow(pkgName, ExtensionIntallInfo(InstallStep.Loading, null))
             } else if (pkgName != null) {
-                Timber.e("Couldn't locate downloaded APK")
+                Timber.e("Couldn't locate downloaded APK for pkgName=$pkgName")
                 emitToFlow(pkgName, ExtensionIntallInfo(InstallStep.Error, null))
                 return
             }
