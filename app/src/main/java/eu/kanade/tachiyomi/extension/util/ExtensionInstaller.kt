@@ -516,13 +516,21 @@ internal class ExtensionInstaller(
             val query = DownloadManager.Query().setFilterById(id)
             downloadManager.query(query).use { cursor ->
                 if (cursor.moveToFirst()) {
-                    val localUri =
+                    val localUriStr =
                         cursor
                             .getString(
                                 cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI),
-                            ).removePrefix(FILE_SCHEME)
+                            )
 
-                    installApk(id, File(localUri).getUriCompat(context))
+                    val installUri = if (localUriStr.startsWith(FILE_SCHEME)) {
+                        // file:// URI → convert via FileProvider
+                        File(localUriStr.removePrefix(FILE_SCHEME)).getUriCompat(context)
+                    } else {
+                        // content:// URI (Android 10+) → use directly
+                        uri ?: return@use
+                    }
+
+                    installApk(id, installUri)
                 }
             }
         }
