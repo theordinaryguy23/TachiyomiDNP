@@ -202,6 +202,7 @@ class ReaderViewModel(
     fun onSaveInstanceState() {
         val currentChapter = getCurrentChapter() ?: return
         saveChapterProgress(currentChapter)
+        saveChapterHistory(currentChapter)
     }
 
     /**

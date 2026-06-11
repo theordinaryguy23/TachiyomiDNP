@@ -18,6 +18,14 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version AndroidVersions.kotlin // this version matches your Kotlin version
 }
 
+// Auto-copy dummy google-services.json if real one doesn't exist
+// This allows building without committing real API keys
+val googleServicesFile = file("src/standard/google-services.json")
+val googleServicesDummy = file("src/standard/google-services.json.dummy")
+if (!googleServicesFile.exists() && googleServicesDummy.exists()) {
+    googleServicesDummy.copyTo(googleServicesFile, overwrite = false)
+}
+
 fun runCommand(command: String): String {
     val byteOut = ByteArrayOutputStream()
     project.exec {

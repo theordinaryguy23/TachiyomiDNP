@@ -39,8 +39,9 @@ jobs:
           mkdir -p app/src/standard
           echo "$GOOGLE_SERVICES_JSON" > app/src/standard/google-services.json
           echo "google-services.json created from GitHub Secret"
-        else
-          echo "WARNING: GOOGLE_SERVICES_JSON secret not set, Firebase features disabled"
+        elif [ -f "app/src/standard/google-services.json.dummy" ]; then
+          cp app/src/standard/google-services.json.dummy app/src/standard/google-services.json
+          echo "WARNING: Using dummy google-services.json, Firebase features disabled"
         fi
 
     - name: Grant execute permission for gradlew

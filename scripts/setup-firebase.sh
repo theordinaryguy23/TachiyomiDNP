@@ -11,7 +11,13 @@ GOOGLE_SERVICES_FILE="app/src/standard/google-services.json"
 
 if [ -z "$GOOGLE_SERVICES_JSON" ]; then
     if [ -f "$GOOGLE_SERVICES_FILE" ]; then
-        echo "google-services.json already exists, skipping..."
+        # Check if it's a dummy file
+        if grep -q "DummyKey" "$GOOGLE_SERVICES_FILE" 2>/dev/null; then
+            echo "WARNING: google-services.json is a dummy file. Firebase features will not work."
+            echo "Set GOOGLE_SERVICES_JSON environment variable with your real Firebase config."
+        else
+            echo "google-services.json already exists, skipping..."
+        fi
         exit 0
     else
         echo "ERROR: GOOGLE_SERVICES_JSON environment variable is not set"
