@@ -280,6 +280,7 @@ internal class ExtensionInstaller(
         // On HyperOS, PackageInstaller is blocked by the OS.
         // Auto-fallback to private install to avoid install failures.
         if (DeviceUtil.isHyperOS) {
+            Timber.d("installApk: HyperOS detected, pkgName=$pkgName, uri=$uri")
             pkgName ?: return
             if (prefs.extensionInstaller().get() == SHIZUKU) {
                 setInstalling(pkgName, uri.hashCode())
@@ -340,15 +341,24 @@ internal class ExtensionInstaller(
         }
 
         try {
-            context.contentResolver.openInputStream(uri)?.use { input ->
+            val inputStream = context.contentResolver.openInputStream(uri)
+            if (inputStream == null) {
+                Timber.e("installPrivately: openInputStream returned null for uri=$uri")
+                setInstallationResult(pkgName, false)
+                return
+            }
+            inputStream.use { input ->
                 tempFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
+            Timber.d("installPrivately: copied ${tempFile.length()} bytes for $pkgName")
 
             if (ExtensionLoader.installPrivateExtensionFile(context, tempFile)) {
+                Timber.d("installPrivately: SUCCESS for $pkgName")
                 setInstallationResult(pkgName, true)
             } else {
+                Timber.e("installPrivately: installPrivateExtensionFile returned false for $pkgName")
                 setInstallationResult(pkgName, false)
             }
         } catch (e: Exception) {
