@@ -278,11 +278,17 @@ internal class ExtensionInstaller(
         val prefs: PreferencesHelper = Injekt.get()
 
         // On HyperOS, PackageInstaller is blocked by the OS.
-        // Auto-fallback to Shizuku if available, otherwise use private install.
-        if (DeviceUtil.isHyperOS && prefs.extensionInstaller().get() == SHIZUKU) {
+        // Auto-fallback to private install to avoid install failures.
+        if (DeviceUtil.isHyperOS) {
             pkgName ?: return
-            setInstalling(pkgName, uri.hashCode())
-            shizukuInstaller?.addToQueue(downloadId, pkgName, uri)
+            if (prefs.extensionInstaller().get() == SHIZUKU) {
+                setInstalling(pkgName, uri.hashCode())
+                shizukuInstaller?.addToQueue(downloadId, pkgName, uri)
+                return
+            }
+            // HyperOS blocks PackageInstaller for non-system apps.
+            // Use private install as fallback.
+            installPrivately(downloadId, pkgName, uri)
             return
         }
 
