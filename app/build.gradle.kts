@@ -13,9 +13,14 @@ plugins {
     id(Plugins.kotlinParcelize)
     id(Plugins.kotlinSerialization)
     id("com.google.android.gms.oss-licenses-plugin")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
     id("org.jetbrains.kotlin.plugin.compose") version AndroidVersions.kotlin // this version matches your Kotlin version
+}
+
+// Only apply Firebase plugins when google-services.json exists
+// This allows building without committing the file to version control
+if (file("src/standard/google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 // if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
