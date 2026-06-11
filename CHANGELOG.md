@@ -2,14 +2,6 @@
 
 ## v1.8.2
 
-### Bug Fixes
-- Fixed Firebase integration — crash logs & analytics now go to our own Firebase project (was incorrectly sending to TachiyomiJ2K upstream)
-- Fixed branding: removed all leftover "TachiyomiJ2K" references across 52 locale strings
-- Fixed debug application ID suffix (.debugJ2K → .debugDNP)
-- Fixed root project name (tachiyomiJ2K → TachiyomiDNP)
-- Fixed About page social links pointing to upstream Tachiyomi
-- Fixed Weblate translation link in About page
-
 ### Performance
 - More stable network connections with OkHttp 4.12.0 (downgraded from unstable 5.0.0-alpha.14)
 
