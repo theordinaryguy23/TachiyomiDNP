@@ -523,12 +523,24 @@ internal class ExtensionInstaller(
                                 cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI),
                             )
 
-                    val installUri = if (localUriStr.startsWith(FILE_SCHEME)) {
+                    Timber.d("DownloadCompleteReceiver: localUriStr=$localUriStr")
+
+                    val installUri = when {
                         // file:// URI → convert via FileProvider
-                        File(localUriStr.removePrefix(FILE_SCHEME)).getUriCompat(context)
-                    } else {
+                        localUriStr?.startsWith(FILE_SCHEME) == true -> {
+                            File(localUriStr.removePrefix(FILE_SCHEME)).getUriCompat(context)
+                        }
                         // content:// URI (Android 10+) → use directly
-                        uri ?: return@use
+                        uri != null -> uri
+                        // Fallback: try to open via download manager content URI
+                        else -> {
+                            Timber.e("DownloadCompleteReceiver: both localUriStr and uri are null/empty")
+                            val contentUri = downloadManager.getUriForDownloadedFile(id)
+                            contentUri ?: run {
+                                Timber.e("DownloadCompleteReceiver: fallback also failed, aborting install")
+                                return@use
+                            }
+                        }
                     }
 
                     installApk(id, installUri)
