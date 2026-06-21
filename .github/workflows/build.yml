@@ -45,6 +45,23 @@ jobs:
           echo "WARNING: Using dummy google-services.json, Firebase features disabled"
         fi
 
+    - name: Setup release keystore
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        if [ -n "$KEYSTORE_BASE64" ]; then
+          echo "$KEYSTORE_BASE64" | base64 -d > app/release.keystore
+          echo "Keystore restored from GitHub Secret"
+          echo "KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> $GITHUB_ENV
+          echo "KEY_ALIAS=$KEY_ALIAS" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=$KEY_PASSWORD" >> $GITHUB_ENV
+        else
+          echo "WARNING: KEYSTORE_BASE64 not set, release APK will be unsigned"
+        fi
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
