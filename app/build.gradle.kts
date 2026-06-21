@@ -142,11 +142,13 @@ android {
             val output = this
             if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
                 val sep = "-"
-                val versionName = variant.versionName
+                // Use clean versionName (without suffix) for consistent APK naming
+                val cleanVersion = AndroidVersions.versionName
                 val buildType = variant.buildType.name
                 val abi = output.getFilter(com.android.build.OutputFile.ABI) ?: "universal"
+                // Standard naming: TachiyomiDNP-{version}-{buildType}-{abi}.apk
                 output.outputFileName =
-                    "TachiyomiDNP$sep$versionName$sep$buildType$sep$abi.apk"
+                    "TachiyomiDNP$sep$cleanVersion$sep$buildType$sep$abi.apk"
             }
         }
     }

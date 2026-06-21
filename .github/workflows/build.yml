@@ -54,6 +54,20 @@ jobs:
     - name: Build release APK
       run: ./gradlew assembleStandardRelease --no-daemon --stacktrace
 
+    - name: Rename release APKs to standard naming
+      run: |
+        cd app/build/outputs/apk/standard/release
+        for apk in *.apk; do
+          # Rename from TachiyomiDNP-{version}-{buildType}-{abi}.apk
+          # to TachiyomiDNP-{version}-release-{abi}.apk
+          if [[ "$apk" != *"-release-"* ]]; then
+            newname=$(echo "$apk" | sed 's/-standardRelease-/-release-/')
+            mv "$apk" "$newname"
+            echo "Renamed: $apk -> $newname"
+          fi
+        done
+        ls -la *.apk
+
     - name: Upload debug APK
       uses: actions/upload-artifact@v4
       with:

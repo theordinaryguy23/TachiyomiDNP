@@ -93,9 +93,11 @@ class AppUpdateChecker {
         versionTag: String,
         currentVersion: String = BuildConfig.VERSION_NAME,
     ): Boolean {
-        // Removes prefixes like "r" or "v"
+        // Strip suffixes like "-d42" (debug) or "-b3" (beta) for fair comparison
+        val cleanCurrent = currentVersion.substringBefore("-")
+        // Removes prefixes like "r" or "v" from GitHub tag
         val newVersion = versionTag.replace("[^\\d.-]".toRegex(), "")
-        val oldVersion = currentVersion.replace("[^\\d.-]".toRegex(), "")
+        val oldVersion = cleanCurrent.replace("[^\\d.-]".toRegex(), "")
         val newPreReleaseVer = newVersion.split("-")
         val oldPreReleaseVer = oldVersion.split("-")
         val newSemVer = newPreReleaseVer.first().split(".").map { it.toInt() }
@@ -132,7 +134,7 @@ class AppUpdateChecker {
 }
 
 val RELEASE_TAG: String by lazy {
-    "v${BuildConfig.VERSION_NAME}"
+    "v${BuildConfig.VERSION_NAME.substringBefore("-")}"
 }
 
 const val GITHUB_REPO: String = "theordinaryguy23/TachiyomiDNP"
