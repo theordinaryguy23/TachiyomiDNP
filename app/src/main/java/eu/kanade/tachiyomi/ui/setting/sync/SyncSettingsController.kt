@@ -76,8 +76,8 @@ class SyncSettingsController(
                     launchIO {
                         googleAuthManager.signOut()
                         updateAccountUI()
-                        SyncWorker.cancelPeriodic(context)
-                        context.toast(R.string.pref_sync_signed_out)
+                        SyncWorker.cancelPeriodic(requireContext())
+                        requireContext().toast(R.string.pref_sync_signed_out)
                     }
                 }
             }
@@ -100,7 +100,7 @@ class SyncSettingsController(
                             startSync()
                         } else {
                             updateSyncUI(false)
-                            context.toast(R.string.pref_sync_sign_in_first)
+                            requireContext().toast(R.string.pref_sync_sign_in_first)
                         }
                     } else {
                         stopSync()
@@ -121,9 +121,9 @@ class SyncSettingsController(
                     val userId = googleAuthManager.getUserId()
                     if (userId != null) {
                         if (autoEnabled) {
-                            SyncWorker.schedulePeriodic(context, userId)
+                            SyncWorker.schedulePeriodic(requireContext(), userId)
                         } else {
-                            SyncWorker.cancelPeriodic(context)
+                            SyncWorker.cancelPeriodic(requireContext())
                         }
                     }
                     true
@@ -141,10 +141,10 @@ class SyncSettingsController(
                 onClick {
                     val userId = googleAuthManager.getUserId()
                     if (userId != null) {
-                        SyncWorker.runImmediate(context, userId, SyncWorker.SYNC_TYPE_FULL)
-                        context.toast(R.string.pref_sync_started)
+                        SyncWorker.runImmediate(requireContext(), userId, SyncWorker.SYNC_TYPE_FULL)
+                        requireContext().toast(R.string.pref_sync_started)
                     } else {
-                        context.toast(R.string.pref_sync_sign_in_first)
+                        requireContext().toast(R.string.pref_sync_sign_in_first)
                     }
                 }
             }
@@ -179,18 +179,18 @@ class SyncSettingsController(
                     if (result.isSuccess) {
                         updateAccountUI()
                         updateSyncUI(prefs.syncEnabled().get())
-                        context.toast(R.string.pref_sync_signed_in)
+                        requireContext().toast(R.string.pref_sync_signed_in)
                     } else {
-                        context.toast(context.getString(R.string.pref_sync_sign_in_error, result.exceptionOrNull()?.message))
+                        requireContext().toast(requireContext().getString(R.string.pref_sync_sign_in_error, result.exceptionOrNull()?.message))
                     }
                 }
             } else {
                 Timber.e("Sign-in failed: ${task.exception}")
-                context.toast(R.string.pref_sync_sign_in_failed)
+                requireContext().toast(R.string.pref_sync_sign_in_failed)
             }
         } catch (e: Exception) {
             Timber.e(e, "Sign-in result error")
-            context.toast(R.string.pref_sync_sign_in_failed)
+            requireContext().toast(R.string.pref_sync_sign_in_failed)
         }
     }
 
@@ -205,8 +205,8 @@ class SyncSettingsController(
         if (isSignedIn && displayName != null) {
             signInPref?.isVisible = false
             signOutPref?.isVisible = true
-            accountInfo?.title = context.getString(R.string.pref_sync_account_logged_in, displayName)
-            accountInfo?.summary = context.getString(R.string.pref_sync_account_sync_enabled)
+            accountInfo?.title = requireContext().getString(R.string.pref_sync_account_logged_in, displayName)
+            accountInfo?.summary = requireContext().getString(R.string.pref_sync_account_sync_enabled)
         } else {
             signInPref?.isVisible = true
             signOutPref?.isVisible = false
@@ -224,13 +224,13 @@ class SyncSettingsController(
     private fun startSync() {
         val userId = googleAuthManager.getUserId() ?: return
         if (prefs.autoSync().get()) {
-            SyncWorker.schedulePeriodic(context, userId)
+            SyncWorker.schedulePeriodic(requireContext(), userId)
         }
         // Do an initial full sync
-        SyncWorker.runImmediate(context, userId, SyncWorker.SYNC_TYPE_FULL)
+        SyncWorker.runImmediate(requireContext(), userId, SyncWorker.SYNC_TYPE_FULL)
     }
 
     private fun stopSync() {
-        SyncWorker.cancelPeriodic(context)
+        SyncWorker.cancelPeriodic(requireContext())
     }
 }
