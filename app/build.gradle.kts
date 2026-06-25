@@ -203,7 +203,7 @@ dependencies {
     implementation("com.google.android.material:material:1.14.0-alpha02")
     implementation("androidx.webkit:webkit:1.13.0")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
-    implementation("androidx.preference:preference:1.2.1")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.annotation:annotation:1.9.1")
     implementation("androidx.browser:browser:1.8.0")
     implementation("androidx.biometric:biometric:1.1.0")
@@ -337,6 +337,7 @@ dependencies {
     val coroutines = "1.10.2"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutines")
 
     // Text distance
     implementation("info.debatty:java-string-similarity:2.0.0")
