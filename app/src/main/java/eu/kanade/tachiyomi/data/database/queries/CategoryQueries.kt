@@ -39,4 +39,23 @@ interface CategoryQueries : DbProvider {
     fun deleteCategory(category: Category) = db.delete().`object`(category).prepare()
 
     fun deleteCategories(categories: List<Category>) = db.delete().objects(categories).prepare()
+
+    fun getCategoryById(categoryId: Long) =
+        db
+            .get()
+            .`object`(Category::class.java)
+            .withQuery(
+                RawQuery
+                    .builder()
+                    .query("SELECT * FROM ${CategoryTable.TABLE} WHERE ${CategoryTable.COL_ID} = ? LIMIT 1")
+                    .args(categoryId)
+                    .observesTables(CategoryTable.TABLE)
+                    .build(),
+            ).prepare()
+
+    fun updateCategory(category: Category) =
+        db
+            .put()
+            .`object`(category)
+            .prepare()
 }

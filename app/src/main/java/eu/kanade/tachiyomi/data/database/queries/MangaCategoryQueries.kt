@@ -34,4 +34,29 @@ interface MangaCategoryQueries : DbProvider {
             insertMangasCategories(mangasCategories).executeAsBlocking()
         }
     }
+
+    fun getMangaCategories() =
+        db
+            .get()
+            .listOfObjects(MangaCategory::class.java)
+            .withQuery(
+                RawQuery
+                    .builder()
+                    .query("SELECT * FROM ${MangaCategoryTable.TABLE}")
+                    .observesTables(MangaCategoryTable.TABLE)
+                    .build(),
+            ).prepare()
+
+    fun getMangaCategory(mangaId: Long, categoryId: Long) =
+        db
+            .get()
+            .`object`(MangaCategory::class.java)
+            .withQuery(
+                RawQuery
+                    .builder()
+                    .query("SELECT * FROM ${MangaCategoryTable.TABLE} WHERE ${MangaCategoryTable.COL_MANGA_ID} = ? AND ${MangaCategoryTable.COL_CATEGORY_ID} = ? LIMIT 1")
+                    .args(mangaId, categoryId)
+                    .observesTables(MangaCategoryTable.TABLE)
+                    .build(),
+            ).prepare()
 }

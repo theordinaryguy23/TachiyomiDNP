@@ -13,8 +13,8 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 /**
- * Worker for background history sync.
- * Handles both upload (local -> cloud) and download/merge (cloud -> local).
+ * Worker for background history + library sync.
+ * Handles upload (local -> cloud) and download/merge (cloud -> local).
  *
  * Battery-aware strategy:
  * - Charging: 15 min interval
@@ -35,6 +35,8 @@ class SyncWorker(
         const val SYNC_TYPE_UPLOAD = "upload"
         const val SYNC_TYPE_DOWNLOAD = "download"
         const val SYNC_TYPE_FULL = "full"
+        const val SYNC_TYPE_HISTORY = "history"
+        const val SYNC_TYPE_LIBRARY = "library"
 
         fun schedulePeriodic(context: Context, userId: String) {
             val intervalMinutes = getOptimalIntervalMinutes(context)
@@ -106,7 +108,8 @@ class SyncWorker(
 
     private val db = DatabaseHelper(applicationContext)
     private val prefs = PreferencesHelper(applicationContext)
-    private val syncManager = HistorySyncManager(db, prefs)
+    private val historySyncManager = HistorySyncManager(db, prefs)
+    private val librarySyncManager = LibrarySyncManager(db, prefs)
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -116,17 +119,46 @@ class SyncWorker(
             Timber.d("Starting sync: type=$syncType, user=$userId, attempt=$runAttemptCount")
 
             when (syncType) {
+                SYNC_TYPE_HISTORY -> {
+                    historySyncManager.uploadAllHistory(userId)
+                    val merged = historySyncManager.mergeHistory(userId)
+                    Timber.d("History sync complete: $merged entries merged")
+                }
+                SYNC_TYPE_LIBRARY -> {
+                    librarySyncManager.uploadAllMangas(userId)
+                    librarySyncManager.uploadCategories(userId)
+                    librarySyncManager.uploadMangaCategories(userId)
+                    val mangas = librarySyncManager.mergeMangas(userId)
+                    val cats = librarySyncManager.mergeCategories(userId)
+                    val mc = librarySyncManager.mergeMangaCategories(userId)
+                    Timber.d("Library sync complete: $mangas mangas, $cats categories, $mc manga-categories")
+                }
                 SYNC_TYPE_UPLOAD -> {
-                    syncManager.uploadAllHistory(userId)
+                    historySyncManager.uploadAllHistory(userId)
+                    librarySyncManager.uploadAllMangas(userId)
+                    librarySyncManager.uploadCategories(userId)
+                    librarySyncManager.uploadMangaCategories(userId)
                 }
                 SYNC_TYPE_DOWNLOAD -> {
-                    syncManager.mergeHistory(userId)
+                    historySyncManager.mergeHistory(userId)
+                    librarySyncManager.mergeMangas(userId)
+                    librarySyncManager.mergeCategories(userId)
+                    librarySyncManager.mergeMangaCategories(userId)
                 }
                 SYNC_TYPE_FULL -> {
-                    // Upload first, then merge (so local changes go up, then pull remote changes)
-                    syncManager.uploadAllHistory(userId)
-                    val merged = syncManager.mergeHistory(userId)
-                    Timber.d("Full sync complete: $merged entries merged")
+                    // History first (most important)
+                    historySyncManager.uploadAllHistory(userId)
+                    val historyMerged = historySyncManager.mergeHistory(userId)
+
+                    // Then library
+                    librarySyncManager.uploadAllMangas(userId)
+                    librarySyncManager.uploadCategories(userId)
+                    librarySyncManager.uploadMangaCategories(userId)
+                    val mangas = librarySyncManager.mergeMangas(userId)
+                    val cats = librarySyncManager.mergeCategories(userId)
+                    val mc = librarySyncManager.mergeMangaCategories(userId)
+
+                    Timber.d("Full sync complete: history=$historyMerged, mangas=$mangas, cats=$cats, mc=$mc")
                 }
             }
 

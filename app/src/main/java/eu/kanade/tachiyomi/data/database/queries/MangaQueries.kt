@@ -283,4 +283,23 @@ interface MangaQueries : DbProvider {
             .`object`(manga)
             .withPutResolver(MangaFilteredScanlatorsPutResolver())
             .prepare()
+
+    fun getMangaById(mangaId: Long) =
+        db
+            .get()
+            .`object`(Manga::class.java)
+            .withQuery(
+                RawQuery
+                    .builder()
+                    .query("SELECT * FROM ${MangaTable.TABLE} WHERE ${MangaTable.COL_ID} = ? LIMIT 1")
+                    .args(mangaId)
+                    .observesTables(MangaTable.TABLE)
+                    .build(),
+            ).prepare()
+
+    fun updateManga(manga: Manga) =
+        db
+            .put()
+            .`object`(manga)
+            .prepare()
 }

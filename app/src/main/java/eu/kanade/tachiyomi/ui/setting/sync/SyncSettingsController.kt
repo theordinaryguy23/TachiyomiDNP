@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.sync.GoogleAuthManager
 import eu.kanade.tachiyomi.data.sync.SyncWorker
-import eu.kanade.tachiyomi.ui.setting.PreferenceDSL
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -25,7 +24,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 /**
- * Controller for the History Sync settings screen.
+ * Controller for the History & Library Sync settings screen.
  */
 class SyncSettingsController(
     private val prefs: PreferencesHelper = Injekt.get(),
@@ -227,7 +226,7 @@ class SyncSettingsController(
         if (prefs.autoSync().get()) {
             SyncWorker.schedulePeriodic(context, userId)
         }
-        // Do an initial sync
+        // Do an initial full sync
         SyncWorker.runImmediate(context, userId, SyncWorker.SYNC_TYPE_FULL)
     }
 
