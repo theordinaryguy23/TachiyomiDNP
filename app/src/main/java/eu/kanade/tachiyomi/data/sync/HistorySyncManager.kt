@@ -39,7 +39,7 @@ class HistorySyncManager(
      */
     suspend fun uploadHistoryEntry(userId: String, history: History, manga: Manga) {
         try {
-            val chapter = db.getChapterById(history.chapter_id).executeAsBlocking() ?: return
+            val chapter = db.getChapter(history.chapter_id).executeAsBlocking() ?: return
             val data = hashMapOf(
                 "mangaId" to manga.id,
                 "mangaTitle" to manga.title,
@@ -148,7 +148,7 @@ class HistorySyncManager(
                     val updatedHistory = History.create(
                         localHistory.let {
                             // We need to get the chapter to create history
-                            db.getChapterById(remote.chapterId).executeAsBlocking() ?: continue
+                            db.getChapter(remote.chapterId).executeAsBlocking() ?: continue
                         }
                         ).apply {
                             id = localHistory.id

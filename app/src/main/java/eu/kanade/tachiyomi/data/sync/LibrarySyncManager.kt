@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
+
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
@@ -138,16 +138,13 @@ class LibrarySyncManager(
 
                 if (localManga == null) {
                     // Manga not in local library — add it (unfavorited, preserve source/url)
-                    val newManga = MangaImpl().apply {
+                    val newManga = Manga.create(remote.url, remote.title, remote.source).apply {
                         id = remote.mangaId
-                        source = remote.source
-                        url = remote.url
-                        title = remote.title
                         favorite = false  // Don't auto-favorite synced manga
                         date_added = remote.dateAdded
                         last_update = remote.lastUpdate
                         viewer_flags = remote.viewerFlags
-                        chapterFlags = remote.chapterFlags
+                        chapter_flags = remote.chapterFlags
                     }
                     db.insertManga(newManga).executeAsBlocking()
                     mergedCount++

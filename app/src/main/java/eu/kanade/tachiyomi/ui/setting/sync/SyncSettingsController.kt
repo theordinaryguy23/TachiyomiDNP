@@ -223,14 +223,15 @@ class SyncSettingsController(
 
     private fun startSync() {
         val userId = googleAuthManager.getUserId() ?: return
+        val ctx = preferenceScreen.context
         if (prefs.autoSync().get()) {
-            SyncWorker.schedulePeriodic(requireContext(), userId)
+            SyncWorker.schedulePeriodic(ctx, userId)
         }
         // Do an initial full sync
-        SyncWorker.runImmediate(requireContext(), userId, SyncWorker.SYNC_TYPE_FULL)
+        SyncWorker.runImmediate(ctx, userId, SyncWorker.SYNC_TYPE_FULL)
     }
 
     private fun stopSync() {
-        SyncWorker.cancelPeriodic(requireContext())
+        SyncWorker.cancelPeriodic(preferenceScreen.context)
     }
 }
