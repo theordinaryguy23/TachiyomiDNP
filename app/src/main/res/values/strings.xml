@@ -1205,4 +1205,29 @@
     <string name="view_chapters">View chapters</string>
     <string name="warning">Warning</string>
     <string name="wifi">Wi-Fi</string>
+
+    <!-- History Sync -->
+    <string name="pref_sync_title">History sync</string>
+    <string name="pref_sync_account">Account</string>
+    <string name="pref_sync_account_none">Not signed in</string>
+    <string name="pref_sync_account_summary">Sign in with Google to sync reading history across devices</string>
+    <string name="pref_sync_account_logged_in">Signed in as %s</string>
+    <string name="pref_sync_account_sync_enabled">Sync enabled — history will be uploaded and merged across devices</string>
+    <string name="pref_sync_sign_in">Sign in with Google</string>
+    <string name="pref_sync_sign_in_summary">Use Google account to sync reading history on multiple devices</string>
+    <string name="pref_sync_sign_out">Sign out</string>
+    <string name="pref_sync_sign_out_summary">Stop syncing and remove account from this device</string>
+    <string name="pref_sync_settings">Sync settings</string>
+    <string name="pref_sync_enabled">Enable sync</string>
+    <string name="pref_sync_enabled_summary">Automatically sync reading history across devices</string>
+    <string name="pref_sync_auto">Auto sync</string>
+    <string name="pref_sync_auto_summary">Sync periodically in the background when network is available</string>
+    <string name="pref_sync_now">Sync now</string>
+    <string name="pref_sync_now_summary">Manually sync reading history</string>
+    <string name="pref_sync_signed_in">Signed in successfully</string>
+    <string name="pref_sync_signed_out">Signed out</string>
+    <string name="pref_sync_sign_in_first">Please sign in first to use sync</string>
+    <string name="pref_sync_started">Sync started</string>
+    <string name="pref_sync_sign_in_failed">Sign in failed</string>
+    <string name="pref_sync_sign_in_error">Sign in error: %s</string>
 </resources>

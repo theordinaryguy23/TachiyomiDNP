@@ -254,6 +254,15 @@
                 android:resource="@xml/updates_grid_glance_widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".data.sync.SyncBootReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"

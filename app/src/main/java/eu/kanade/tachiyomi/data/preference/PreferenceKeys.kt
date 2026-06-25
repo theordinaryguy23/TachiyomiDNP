@@ -236,4 +236,9 @@ object PreferenceKeys {
     const val hideChapterTitles = "hide_chapter_titles"
 
     const val chaptersDescAsDefault = "chapters_desc_as_default"
+
+    // History sync
+    const val syncEnabled = "sync_enabled"
+    const val autoSync = "auto_sync"
+    const val syncAccount = "sync_account"
 }

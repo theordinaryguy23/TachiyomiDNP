@@ -220,4 +220,17 @@ interface HistoryQueries : DbProvider {
                     .whereArgs(0)
                     .build(),
             ).prepare()
+
+    fun getHistoryByChapterId(chapterId: Long) =
+        db
+            .get()
+            .`object`(History::class.java)
+            .withQuery(
+                RawQuery
+                    .builder()
+                    .query("SELECT * FROM ${HistoryTable.TABLE} WHERE ${HistoryTable.COL_CHAPTER_ID} = ? LIMIT 1")
+                    .args(chapterId)
+                    .observesTables(HistoryTable.TABLE)
+                    .build(),
+            ).prepare()
 }

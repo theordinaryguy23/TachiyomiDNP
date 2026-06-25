@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.more.AboutController
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
+import eu.kanade.tachiyomi.ui.setting.sync.SyncSettingsController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.fadeTransactionHandler
@@ -73,6 +74,12 @@ class SettingsMainController :
                 iconTint = tintColor
                 titleRes = R.string.tracking
                 onClick { navigateTo(SettingsTrackingController()) }
+            }
+            preference {
+                iconRes = R.drawable.ic_sync_24dp
+                iconTint = tintColor
+                titleRes = R.string.pref_sync_title
+                onClick { navigateTo(SyncSettingsController()) }
             }
             preference {
                 iconRes = R.drawable.ic_backup_restore_24dp

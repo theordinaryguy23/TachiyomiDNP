@@ -512,4 +512,8 @@ class PreferencesHelper(
     fun coverColors() = flowPrefs.getStringSet(Keys.coverColors, emptySet())
 
     fun useStaggeredGrid() = flowPrefs.getBoolean("use_staggered_grid", false)
+
+    // History sync
+    fun syncEnabled() = flowPrefs.getBoolean(Keys.syncEnabled, false)
+    fun autoSync() = flowPrefs.getBoolean(Keys.autoSync, false)
 }
