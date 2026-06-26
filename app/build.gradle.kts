@@ -218,12 +218,11 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
-
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-crashlytics")
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    // Firebase - using explicit versions instead of BOM to avoid version conflicts
+    implementation("com.google.firebase:firebase-analytics:22.2.0")
+    implementation("com.google.firebase:firebase-crashlytics:20.0.4")
+    implementation("com.google.firebase:firebase-auth:23.2.0")
+    implementation("com.google.firebase:firebase-firestore:25.1.4")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
 
     val lifecycleVersion = "2.8.7"
@@ -334,7 +333,7 @@ dependencies {
 
     implementation(kotlin("stdlib"))
 
-    val coroutines = "1.11.0"
+    val coroutines = "1.10.2"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutines")
