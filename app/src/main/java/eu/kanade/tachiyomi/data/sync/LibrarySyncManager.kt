@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.data.sync
 import android.content.Context
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.SetOptions
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
