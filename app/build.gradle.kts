@@ -219,11 +219,18 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     // Firebase - using BOM for compatible versions
+    configurations.all {
+        resolutionStrategy {
+            force("com.google.android.gms:play-services-tasks:18.1.0")
+        }
+    }
     implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-firestore") {
+        exclude(group = "com.google.firebase", module = "firebase-firestore-ktx")
+    }
     implementation("com.google.android.gms:play-services-auth:21.3.0")
 
     val lifecycleVersion = "2.8.7"
