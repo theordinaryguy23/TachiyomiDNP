@@ -229,6 +229,7 @@ dependencies {
         exclude(group = "com.google.firebase", module = "firebase-firestore")
     }
     implementation("com.google.firebase:firebase-firestore:25.1.4")
+    implementation("com.google.android.gms:play-services-tasks:18.1.0")
     implementation("com.google.android.gms:play-services-auth:21.3.0") {
         exclude(group = "com.google.firebase", module = "firebase-firestore")
         exclude(group = "com.google.firebase", module = "firebase-firestore-ktx")
@@ -348,10 +349,10 @@ dependencies {
 
     implementation(kotlin("stdlib"))
 
-    val coroutines = "1.11.0"
+    val coroutines = "1.9.0"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutines")
+    // kotlinx-coroutines-play-services replaced with custom await() extension to avoid version conflicts
 
     // Text distance
     implementation("info.debatty:java-string-similarity:2.0.0")

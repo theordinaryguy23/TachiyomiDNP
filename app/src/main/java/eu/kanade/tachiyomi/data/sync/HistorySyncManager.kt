@@ -11,9 +11,11 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 import java.util.Date
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Manages syncing reading history between devices via Firestore.
@@ -194,6 +196,31 @@ class HistorySyncManager(
             .collection(COLLECTION_HISTORY)
             .document("ch_$chapterId")
 }
+
+/**
+ * Suspends until the Task completes.
+ */
+suspend fun <T> com.google.android.gms.tasks.Task<T>.await(): T =
+    suspendCancellableCoroutine { continuation ->
+        addOnCompleteListener { task ->
+            try {
+                if (task.isSuccessful) {
+                    continuation.resume(task.result)
+                } else {
+                    continuation.resumeWithException(
+                        task.exception ?: IllegalStateException("Task failed without exception")
+                    )
+                }
+            } catch (e: Exception) {
+                continuation.resumeWithException(e)
+            }
+        }
+        continuation.invokeOnCancellation {
+            try {
+                cancel()
+            } catch (_: Exception) {}
+        }
+    }
 
 /**
  * Data class for syncing history entries to/from Firestore.

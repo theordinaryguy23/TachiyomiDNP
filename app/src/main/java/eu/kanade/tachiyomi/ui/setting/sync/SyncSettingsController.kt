@@ -20,6 +20,9 @@ import eu.kanade.tachiyomi.ui.setting.summaryRes
 import eu.kanade.tachiyomi.ui.setting.preferenceCategory
 import eu.kanade.tachiyomi.ui.setting.switchPreference
 import eu.kanade.tachiyomi.ui.setting.preference
+import eu.kanade.tachiyomi.ui.setting.onChange
+import eu.kanade.tachiyomi.ui.setting.iconRes
+import eu.kanade.tachiyomi.ui.setting.iconTint
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.toast
@@ -81,8 +84,8 @@ class SyncSettingsController(
                     launchIO {
                         googleAuthManager.signOut()
                         updateAccountUI()
-                        SyncWorker.cancelPeriodic(requireContext())
-                        requireContext().toast(R.string.pref_sync_signed_out)
+                        SyncWorker.cancelPeriodic(context)
+                        context.toast(R.string.pref_sync_signed_out)
                     }
                 }
             }
@@ -105,7 +108,7 @@ class SyncSettingsController(
                             startSync()
                         } else {
                             updateSyncUI(false)
-                            requireContext().toast(R.string.pref_sync_sign_in_first)
+                            context.toast(R.string.pref_sync_sign_in_first)
                         }
                     } else {
                         stopSync()
@@ -126,9 +129,9 @@ class SyncSettingsController(
                     val userId = googleAuthManager.getUserId()
                     if (userId != null) {
                         if (autoEnabled) {
-                            SyncWorker.schedulePeriodic(requireContext(), userId)
+                            SyncWorker.schedulePeriodic(context, userId)
                         } else {
-                            SyncWorker.cancelPeriodic(requireContext())
+                            SyncWorker.cancelPeriodic(context)
                         }
                     }
                     true
@@ -146,10 +149,10 @@ class SyncSettingsController(
                 onClick {
                     val userId = googleAuthManager.getUserId()
                     if (userId != null) {
-                        SyncWorker.runImmediate(requireContext(), userId, SyncWorker.SYNC_TYPE_FULL)
-                        requireContext().toast(R.string.pref_sync_started)
+                        SyncWorker.runImmediate(context, userId, SyncWorker.SYNC_TYPE_FULL)
+                        context.toast(R.string.pref_sync_started)
                     } else {
-                        requireContext().toast(R.string.pref_sync_sign_in_first)
+                        context.toast(R.string.pref_sync_sign_in_first)
                     }
                 }
             }
@@ -159,10 +162,13 @@ class SyncSettingsController(
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         // Register for activity result before creating preferences
-        signInLauncher = (activity as? androidx.activity.ComponentActivity)
-            ?.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        (activity as? androidx.activity.ComponentActivity)?.let { componentActivity ->
+            signInLauncher = componentActivity.registerForActivityResult(
+                ActivityResultContracts.StartActivityForResult()
+            ) { result ->
                 handleSignInResult(result.data)
             }
+        }
 
         googleAuthManager = GoogleAuthManager(preferenceScreen.context)
         super.onCreatePreferences(savedInstanceState, rootKey)
@@ -171,7 +177,7 @@ class SyncSettingsController(
 
     private fun launchSignIn() {
         val signInIntent = googleAuthManager.getSignInIntent()
-        signInLauncher.launch(signInIntent)
+        signInLauncher?.launch(signInIntent)
     }
 
     private fun handleSignInResult(data: Intent?) {
@@ -184,18 +190,18 @@ class SyncSettingsController(
                     if (result.isSuccess) {
                         updateAccountUI()
                         updateSyncUI(prefs.syncEnabled().get())
-                        requireContext().toast(R.string.pref_sync_signed_in)
+                        context.toast(R.string.pref_sync_signed_in)
                     } else {
-                        requireContext().toast(requireContext().getString(R.string.pref_sync_sign_in_error, result.exceptionOrNull()?.message))
+                        context.toast(context.getString(R.string.pref_sync_sign_in_error, result.exceptionOrNull()?.message))
                     }
-                }
-            } else {
-                Timber.e("Sign-in failed: ${task.exception}")
-                requireContext().toast(R.string.pref_sync_sign_in_failed)
+                } else {
+                    Timber.e("Sign-in failed: ${task.exception}")
+                    context.toast(R.string.pref_sync_sign_in_failed)
+                context.toast(R.string.pref_sync_sign_in_failed)
             }
         } catch (e: Exception) {
             Timber.e(e, "Sign-in result error")
-            requireContext().toast(R.string.pref_sync_sign_in_failed)
+            context.toast(R.string.pref_sync_sign_in_failed)
         }
     }
 
@@ -210,8 +216,8 @@ class SyncSettingsController(
         if (isSignedIn && displayName != null) {
             signInPref?.isVisible = false
             signOutPref?.isVisible = true
-            accountInfo?.title = requireContext().getString(R.string.pref_sync_account_logged_in, displayName)
-            accountInfo?.summary = requireContext().getString(R.string.pref_sync_account_sync_enabled)
+            accountInfo?.title = context.getString(R.string.pref_sync_account_logged_in, displayName)
+            accountInfo?.summary = context.getString(R.string.pref_sync_account_sync_enabled)
         } else {
             signInPref?.isVisible = true
             signOutPref?.isVisible = false
@@ -221,8 +227,8 @@ class SyncSettingsController(
     }
 
     private fun updateSyncUI(enabled: Boolean) {
-        findPreference<SwitchPreferenceCompat>(PreferenceKeys.syncEnabled)?.isChecked = enabled
-        findPreference<SwitchPreferenceCompat>(PreferenceKeys.autoSync)?.isEnabled = enabled
+        findPreference(PreferenceKeys.syncEnabled)?.let { it as SwitchPreferenceCompat }?.isChecked = enabled
+        findPreference(PreferenceKeys.autoSync)?.let { it as SwitchPreferenceCompat }?.isEnabled = enabled
         findPreference("sync_now")?.isEnabled = enabled
     }
 
