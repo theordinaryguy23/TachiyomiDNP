@@ -1,9 +1,10 @@
 package eu.kanade.tachiyomi.data.sync
 
 import android.content.Context
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.firestore
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -31,7 +32,7 @@ class HistorySyncManager(
         private const val COLLECTION_MANGAS = "mangas"
     }
 
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val firestore = Firebase.firestore
 
     /**
      * Uploads a single history entry to Firestore when a chapter is read.
