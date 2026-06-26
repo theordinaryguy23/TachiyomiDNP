@@ -184,7 +184,7 @@ class LibrarySyncManager(
                         "order" to category.order,
                         "updatedAt" to Timestamp.now(),
                     )
-                    writeBatch.set(getCategoryDoc(userId, category.id!!), data, SetOptions.merge())
+                    writeBatch.set(getCategoryDoc(userId, category.id!!.toLong()), data, SetOptions.merge())
                 }
                 writeBatch.commit().await()
             }
@@ -232,7 +232,7 @@ class LibrarySyncManager(
                 if (localCategory == null) {
                     // Category doesn't exist locally — create it
                     val newCategory = CategoryImpl().apply {
-                        id = remote.categoryId
+                        id = remote.categoryId.toInt()
                         name = remote.name
                         order = remote.order
                     }
@@ -267,7 +267,7 @@ class LibrarySyncManager(
                         "categoryId" to mc.category_id,
                         "updatedAt" to Timestamp.now(),
                     )
-                    writeBatch.set(getMangaCategoryDoc(userId, mc.manga_id, mc.category_id), data, SetOptions.merge())
+                    writeBatch.set(getMangaCategoryDoc(userId, mc.manga_id, mc.category_id.toLong()), data, SetOptions.merge())
                 }
                 writeBatch.commit().await()
             }
@@ -309,7 +309,9 @@ class LibrarySyncManager(
             try {
                 val exists = db.getMangaCategory(item.mangaId, item.categoryId).executeAsBlocking()
                 if (exists == null) {
-                    db.insertMangaCategory(MangaCategory.create(item.mangaId, item.categoryId)).executeAsBlocking()
+                    val manga = Manga.create(pathUrl = "", title = "", source = 0L).apply { id = item.mangaId }
+                    val category = CategoryImpl().apply { id = item.categoryId.toInt() }
+                    db.insertMangaCategory(MangaCategory.create(manga, category)).executeAsBlocking()
                     mergedCount++
                 }
             } catch (e: Exception) {
