@@ -69,8 +69,8 @@ class HistorySyncManager(
                 .collection(COLLECTION_HISTORY)
                 .get()
                 .await()
-            snapshot.documents.mapNotNull { doc ->
-                doc.toObject(HistorySyncData::class.java)
+            snapshot.getDocuments().mapNotNull { doc ->
+                doc.toObject<HistorySyncData>()
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to download history entries")
@@ -176,7 +176,7 @@ class HistorySyncManager(
                 .get()
                 .await()
             val batch = firestore.batch()
-            docs.documents.forEach { batch.delete(it.reference) }
+            docs.getDocuments().forEach { batch.delete(it.reference) }
             batch.commit().await()
             Timber.d("Cleared all cloud history for user: $userId")
         } catch (e: Exception) {
