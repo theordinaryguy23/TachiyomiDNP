@@ -64,13 +64,11 @@ class HistorySyncManager(
      */
     suspend fun downloadHistoryEntries(userId: String): List<HistorySyncData> {
         return try {
-            val snapshot = firestore.collection(COLLECTION_USERS)
-                .document(userId)
-                .collection(COLLECTION_HISTORY)
+            val snapshot = firestore.collection("$COLLECTION_USERS/$userId/$COLLECTION_HISTORY")
                 .get()
                 .await()
             snapshot.getDocuments().mapNotNull { doc ->
-                doc.toObject<HistorySyncData>()
+                doc.toObject(HistorySyncData::class.java)
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to download history entries")
@@ -170,9 +168,7 @@ class HistorySyncManager(
      */
     suspend fun clearCloudHistory(userId: String) {
         try {
-            val docs = firestore.collection(COLLECTION_USERS)
-                .document(userId)
-                .collection(COLLECTION_HISTORY)
+            val docs = firestore.collection("$COLLECTION_USERS/$userId/$COLLECTION_HISTORY")
                 .get()
                 .await()
             val batch = firestore.batch()
@@ -188,10 +184,7 @@ class HistorySyncManager(
      * Returns the Firestore document reference for a history entry by chapter ID.
      */
     private fun getHistoryDoc(userId: String, chapterId: Long) =
-        firestore.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_HISTORY)
-            .document("ch_$chapterId")
+        firestore.document("$COLLECTION_USERS/$userId/$COLLECTION_HISTORY/ch_$chapterId")
 }
 
 /**

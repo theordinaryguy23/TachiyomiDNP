@@ -224,17 +224,12 @@ dependencies {
             force("com.google.android.gms:play-services-tasks:18.1.0")
         }
     }
-    implementation("com.google.firebase:firebase-analytics:22.2.0")
     implementation("com.google.firebase:firebase-crashlytics:20.0.4")
     implementation("com.google.firebase:firebase-auth:23.2.0")
     implementation("com.google.firebase:firebase-firestore:25.1.4")
     implementation("com.google.android.gms:play-services-tasks:18.1.0")
-    implementation("com.google.android.gms:play-services-auth:20.7.0") {
-        exclude(group = "com.google.android.gms", module = "play-services-tasks")
-    }
-    implementation("com.google.android.gms:play-services-oss-licenses:17.1.0") {
-        exclude(group = "com.google.android.gms", module = "play-services-tasks")
-    }
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.android.gms:play-services-oss-licenses:17.1.0")
 
     val lifecycleVersion = "2.8.7"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")

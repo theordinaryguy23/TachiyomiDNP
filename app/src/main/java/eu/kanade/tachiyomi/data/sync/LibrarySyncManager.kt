@@ -54,7 +54,7 @@ class LibrarySyncManager(
                 "chapterFlags" to manga.chapter_flags,
                 "updatedAt" to Timestamp.now(),
             )
-            getMangaDoc(userId, manga.id!!)
+            firestore.document("$COLLECTION_USERS/$userId/$COLLECTION_LIBRARY/$COLLECTION_MANGAS/m_${manga.id!!}")
                 .set(data, SetOptions.merge())
                 .await()
             Timber.d("Uploaded manga: ${manga.title}")
@@ -69,14 +69,12 @@ class LibrarySyncManager(
      */
     suspend fun downloadMangas(userId: String): List<LibraryMangaSyncData> {
         return try {
-            val snapshot = firestore.collection(COLLECTION_USERS)
-                .document(userId)
-                .collection(COLLECTION_LIBRARY)
-                .collection(COLLECTION_MANGAS)
+            val collectionPath = "$COLLECTION_USERS/$userId/$COLLECTION_LIBRARY/$COLLECTION_MANGAS"
+            val snapshot = firestore.collection(collectionPath)
                 .get()
                 .await()
             snapshot.getDocuments().mapNotNull { doc ->
-                doc.toObject<LibraryMangaSyncData>()?.copy(
+                doc.toObject(LibraryMangaSyncData::class.java)?.copy(
                     mangaId = doc.id.toLongOrNull() ?: return@mapNotNull null
                 )
             }
@@ -199,14 +197,11 @@ class LibrarySyncManager(
      */
     suspend fun downloadCategories(userId: String): List<CategorySyncData> {
         return try {
-            val snapshot = firestore.collection(COLLECTION_USERS)
-                .document(userId)
-                .collection(COLLECTION_LIBRARY)
-                .collection(COLLECTION_CATEGORIES)
+            val snapshot = firestore.collection("$COLLECTION_USERS/$userId/$COLLECTION_LIBRARY/$COLLECTION_CATEGORIES")
                 .get()
                 .await()
             snapshot.getDocuments().mapNotNull { doc ->
-                doc.toObject<CategorySyncData>()?.copy(
+                doc.toObject(CategorySyncData::class.java)?.copy(
                     categoryId = doc.id.toLongOrNull() ?: return@mapNotNull null
                 )
             }
@@ -282,14 +277,11 @@ class LibrarySyncManager(
      */
     suspend fun downloadMangaCategories(userId: String): List<MangaCategorySyncData> {
         return try {
-            val snapshot = firestore.collection(COLLECTION_USERS)
-                .document(userId)
-                .collection(COLLECTION_LIBRARY)
-                .collection(COLLECTION_MANGA_CATEGORIES)
+            val snapshot = firestore.collection("$COLLECTION_USERS/$userId/$COLLECTION_LIBRARY/$COLLECTION_MANGA_CATEGORIES")
                 .get()
                 .await()
             snapshot.getDocuments().mapNotNull { doc ->
-                doc.toObject<MangaCategorySyncData>()
+                doc.toObject(MangaCategorySyncData::class.java)
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to download manga-categories")
@@ -329,10 +321,7 @@ class LibrarySyncManager(
         try {
             val collections = listOf(COLLECTION_MANGAS, COLLECTION_CATEGORIES, COLLECTION_MANGA_CATEGORIES)
             for (collection in collections) {
-                val docs = firestore.collection(COLLECTION_USERS)
-                    .document(userId)
-                    .collection(COLLECTION_LIBRARY)
-                    .collection(collection)
+                val docs = firestore.collection("$COLLECTION_USERS/$userId/$COLLECTION_LIBRARY/$collection")
                     .get()
                     .await()
                 val batch = firestore.batch()
@@ -346,25 +335,13 @@ class LibrarySyncManager(
     }
 
     private fun getMangaDoc(userId: String, mangaId: Long) =
-        firestore.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_LIBRARY)
-            .collection(COLLECTION_MANGAS)
-            .document("m_$mangaId")
+        firestore.document("$COLLECTION_USERS/$userId/$COLLECTION_LIBRARY/$COLLECTION_MANGAS/m_$mangaId")
 
     private fun getCategoryDoc(userId: String, categoryId: Long) =
-        firestore.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_LIBRARY)
-            .collection(COLLECTION_CATEGORIES)
-            .document("c_$categoryId")
+        firestore.document("$COLLECTION_USERS/$userId/$COLLECTION_LIBRARY/$COLLECTION_CATEGORIES/c_$categoryId")
 
     private fun getMangaCategoryDoc(userId: String, mangaId: Long, categoryId: Long) =
-        firestore.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_LIBRARY)
-            .collection(COLLECTION_MANGA_CATEGORIES)
-            .document("mc_${mangaId}_$categoryId")
+        firestore.document("$COLLECTION_USERS/$userId/$COLLECTION_LIBRARY/$COLLECTION_MANGA_CATEGORIES/mc_${mangaId}_$categoryId")
 }
 
 /**

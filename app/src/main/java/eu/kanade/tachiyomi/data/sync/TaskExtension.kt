@@ -24,8 +24,6 @@ suspend fun <T> Task<T>.await(): T =
             }
         }
         continuation.invokeOnCancellation {
-            try {
-                cancel()
-            } catch (_: Exception) {}
+            // Task cancellation not supported in play-services-tasks 18.x
         }
     }
