@@ -219,11 +219,20 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     // Firebase - using explicit versions instead of BOM to avoid version conflicts
-    implementation("com.google.firebase:firebase-analytics:22.2.0")
-    implementation("com.google.firebase:firebase-crashlytics:20.0.4")
-    implementation("com.google.firebase:firebase-auth:23.2.0")
+    implementation("com.google.firebase:firebase-analytics:22.2.0") {
+        exclude(group = "com.google.firebase", module = "firebase-firestore")
+    }
+    implementation("com.google.firebase:firebase-crashlytics:20.0.4") {
+        exclude(group = "com.google.firebase", module = "firebase-firestore")
+    }
+    implementation("com.google.firebase:firebase-auth:23.2.0") {
+        exclude(group = "com.google.firebase", module = "firebase-firestore")
+    }
     implementation("com.google.firebase:firebase-firestore:25.1.4")
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.android.gms:play-services-auth:21.3.0") {
+        exclude(group = "com.google.firebase", module = "firebase-firestore")
+        exclude(group = "com.google.firebase", module = "firebase-firestore-ktx")
+    }
 
     val lifecycleVersion = "2.8.7"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
@@ -277,7 +286,10 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.10.1")
     implementation("com.google.guava:guava:32.0.1-jre")
 
-    implementation("com.google.android.gms:play-services-gcm:17.0.0")
+    implementation("com.google.android.gms:play-services-gcm:17.0.0") {
+        exclude(group = "com.google.firebase", module = "firebase-firestore")
+        exclude(group = "com.google.firebase", module = "firebase-firestore-ktx")
+    }
 
     // Database
     implementation("androidx.sqlite:sqlite-ktx:2.5.0")
@@ -324,7 +336,10 @@ dependencies {
     // Conductor
     val conductorVersion = "4.0.0-preview-3"
     implementation("com.bluelinelabs:conductor:$conductorVersion")
-    implementation("com.github.tachiyomiorg:conductor-support-preference:3.0.0")
+    implementation("com.github.tachiyomiorg:conductor-support-preference:3.0.0") {
+        exclude(group = "com.google.firebase", module = "firebase-firestore")
+        exclude(group = "com.google.firebase", module = "firebase-firestore-ktx")
+    }
 
     // Shizuku
     val shizukuVersion = "12.1.0"
