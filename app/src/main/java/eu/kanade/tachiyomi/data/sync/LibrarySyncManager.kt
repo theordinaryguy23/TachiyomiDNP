@@ -4,7 +4,6 @@ import android.content.Context
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.toObject
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
@@ -77,8 +76,8 @@ class LibrarySyncManager(
                 .collection(COLLECTION_MANGAS)
                 .get()
                 .await()
-            snapshot.getDocuments().mapNotNull { doc ->
-                doc.toObject<LibraryMangaSyncData>()?.copy(
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(LibraryMangaSyncData::class.java)?.copy(
                     mangaId = doc.id.toLongOrNull() ?: return@mapNotNull null
                 )
             }
@@ -207,8 +206,8 @@ class LibrarySyncManager(
                 .collection(COLLECTION_CATEGORIES)
                 .get()
                 .await()
-            snapshot.getDocuments().mapNotNull { doc ->
-                doc.toObject<CategorySyncData>()?.copy(
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(CategorySyncData::class.java)?.copy(
                     categoryId = doc.id.toLongOrNull() ?: return@mapNotNull null
                 )
             }
@@ -290,8 +289,8 @@ class LibrarySyncManager(
                 .collection(COLLECTION_MANGA_CATEGORIES)
                 .get()
                 .await()
-            snapshot.getDocuments().mapNotNull { doc ->
-                doc.toObject<MangaCategorySyncData>()
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(MangaCategorySyncData::class.java)
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to download manga-categories")
@@ -336,7 +335,7 @@ class LibrarySyncManager(
                     .get()
                     .await()
                 val batch = firestore.batch()
-                docs.getDocuments().forEach { batch.delete(it.reference) }
+                docs.documents.forEach { batch.delete(it.reference) }
                 batch.commit().await()
             }
             Timber.d("Cleared all cloud library for user: $userId")

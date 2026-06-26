@@ -1,11 +1,9 @@
 package eu.kanade.tachiyomi.data.sync
 
 import android.content.Context
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.toObject
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -33,7 +31,7 @@ class HistorySyncManager(
         private const val COLLECTION_MANGAS = "mangas"
     }
 
-    private val firestore = Firebase.firestore
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     /**
      * Uploads a single history entry to Firestore when a chapter is read.
@@ -72,8 +70,8 @@ class HistorySyncManager(
                 .collection(COLLECTION_HISTORY)
                 .get()
                 .await()
-            snapshot.getDocuments().mapNotNull { doc ->
-                doc.toObject<HistorySyncData>()
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(HistorySyncData::class.java)
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to download history entries")
@@ -179,7 +177,7 @@ class HistorySyncManager(
                 .get()
                 .await()
             val batch = firestore.batch()
-            docs.getDocuments().forEach { batch.delete(it.reference) }
+            docs.documents.forEach { batch.delete(it.reference) }
             batch.commit().await()
             Timber.d("Cleared all cloud history for user: $userId")
         } catch (e: Exception) {

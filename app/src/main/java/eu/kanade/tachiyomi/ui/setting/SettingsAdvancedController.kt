@@ -14,8 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
-import com.google.firebase.Firebase
-import com.google.firebase.crashlytics.crashlytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
@@ -94,7 +93,7 @@ class SettingsAdvancedController : SettingsController() {
                 defaultValue = true
                 onChange {
                     try {
-                        Firebase.crashlytics.setCrashlyticsCollectionEnabled(it as Boolean)
+                        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(it as Boolean)
                     } catch (_: Exception) {
                     }
                     true
