@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.ui.setting.preferenceCategory
 import eu.kanade.tachiyomi.ui.setting.switchPreference
 import eu.kanade.tachiyomi.ui.setting.preference
 import eu.kanade.tachiyomi.ui.setting.onChange
+import eu.kanade.tachiyomi.ui.setting.onClick
 import eu.kanade.tachiyomi.ui.setting.iconRes
 import eu.kanade.tachiyomi.ui.setting.iconTint
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -41,124 +42,127 @@ class SyncSettingsController(
     private lateinit var googleAuthManager: GoogleAuthManager
     private lateinit var signInLauncher: ActivityResultLauncher<Intent>
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) =
-        with(screen) {
-            titleRes = R.string.pref_sync_title
+    override fun setupPreferenceScreen(screen: PreferenceScreen): PreferenceScreen {
+        screen.titleRes = R.string.pref_sync_title
 
-            val tintColor = context.getResourceColor(R.attr.colorSecondary)
+        val tintColor = screen.context.getResourceColor(R.attr.colorSecondary)
+        val updateAccountUI = this::updateAccountUI
+        val startSync = this::startSync
+        val updateSyncUI = this::updateSyncUI
+        val stopSync = this::stopSync
 
-            // Account section
-            preferenceCategory {
-                titleRes = R.string.pref_sync_account
-            }
-
-            // Account info
-            preference {
-                key = "sync_account_info"
-                titleRes = R.string.pref_sync_account_none
-                summaryRes = R.string.pref_sync_account_summary
-                isSelectable = false
-            }
-
-            // Sign in button
-            preference {
-                key = "sync_sign_in"
-                titleRes = R.string.pref_sync_sign_in
-                summaryRes = R.string.pref_sync_sign_in_summary
-                iconRes = R.drawable.ic_arrow_forward_24dp
-                iconTint = tintColor
-                onClick {
-                    launchSignIn()
-                }
-            }
-
-            // Sign out button
-            preference {
-                key = "sync_sign_out"
-                titleRes = R.string.pref_sync_sign_out
-                summaryRes = R.string.pref_sync_sign_out_summary
-                iconRes = R.drawable.ic_arrow_back_24dp
-                iconTint = tintColor
-                isVisible = false
-                onClick {
-                    launchIO {
-                        googleAuthManager.signOut()
-                        updateAccountUI()
-                        SyncWorker.cancelPeriodic(context)
-                        context.toast(R.string.pref_sync_signed_out)
-                    }
-                }
-            }
-
-            // Sync settings section
-            preferenceCategory {
-                titleRes = R.string.pref_sync_settings
-            }
-
-            // Enable sync switch
-            switchPreference {
-                key = PreferenceKeys.syncEnabled
-                titleRes = R.string.pref_sync_enabled
-                summaryRes = R.string.pref_sync_enabled_summary
-                setDefaultValue(false)
-                onChange { newValue ->
-                    val enabled = newValue as Boolean
-                    if (enabled) {
-                        if (googleAuthManager.isSignedIn()) {
-                            startSync()
-                        } else {
-                            updateSyncUI(false)
-                            context.toast(R.string.pref_sync_sign_in_first)
-                        }
-                    } else {
-                        stopSync()
-                    }
-                    true
-                }
-            }
-
-            // Auto sync switch
-            switchPreference {
-                key = PreferenceKeys.autoSync
-                titleRes = R.string.pref_sync_auto
-                summaryRes = R.string.pref_sync_auto_summary
-                setDefaultValue(false)
-                dependency = PreferenceKeys.syncEnabled
-                onChange { newValue ->
-                    val autoEnabled = newValue as Boolean
-                    val userId = googleAuthManager.getUserId()
-                    if (userId != null) {
-                        if (autoEnabled) {
-                            SyncWorker.schedulePeriodic(context, userId)
-                        } else {
-                            SyncWorker.cancelPeriodic(context)
-                        }
-                    }
-                    true
-                }
-            }
-
-            // Sync now button
-            preference {
-                key = "sync_now"
-                titleRes = R.string.pref_sync_now
-                summaryRes = R.string.pref_sync_now_summary
-                iconRes = R.drawable.ic_sync_24dp
-                iconTint = tintColor
-                dependency = PreferenceKeys.syncEnabled
-                onClick {
-                    val userId = googleAuthManager.getUserId()
-                    if (userId != null) {
-                        SyncWorker.runImmediate(context, userId, SyncWorker.SYNC_TYPE_FULL)
-                        context.toast(R.string.pref_sync_started)
-                    } else {
-                        context.toast(R.string.pref_sync_sign_in_first)
-                    }
-                }
-            }
-
-            this
+        // Account section
+        screen.preferenceCategory {
+            titleRes = R.string.pref_sync_account
         }
+
+        // Account info
+        screen.preference {
+            key = "sync_account_info"
+            titleRes = R.string.pref_sync_account_none
+            summaryRes = R.string.pref_sync_account_summary
+            isSelectable = false
+        }
+
+        // Sign in button
+        screen.preference {
+            key = "sync_sign_in"
+            titleRes = R.string.pref_sync_sign_in
+            summaryRes = R.string.pref_sync_sign_in_summary
+            iconRes = R.drawable.ic_arrow_forward_24dp
+            iconTint = tintColor
+            onClick {
+                launchSignIn()
+            }
+        }
+
+        // Sign out button
+        screen.preference {
+            key = "sync_sign_out"
+            titleRes = R.string.pref_sync_sign_out
+            summaryRes = R.string.pref_sync_sign_out_summary
+            iconRes = R.drawable.ic_arrow_back_24dp
+            iconTint = tintColor
+            isVisible = false
+            onClick {
+                launchIO {
+                    googleAuthManager.signOut()
+                    updateAccountUI()
+                    SyncWorker.cancelPeriodic(preferenceScreen.context)
+                    preferenceScreen.context.toast(R.string.pref_sync_signed_out)
+                }
+            }
+        }
+
+        // Sync settings section
+        screen.preferenceCategory {
+            titleRes = R.string.pref_sync_settings
+        }
+
+        // Enable sync switch
+        screen.switchPreference {
+            key = PreferenceKeys.syncEnabled
+            titleRes = R.string.pref_sync_enabled
+            summaryRes = R.string.pref_sync_enabled_summary
+            setDefaultValue(false)
+            onChange { newValue ->
+                val enabled = newValue as Boolean
+                if (enabled) {
+                    if (googleAuthManager.isSignedIn()) {
+                        startSync()
+                    } else {
+                        updateSyncUI(false)
+                        preferenceScreen.context.toast(R.string.pref_sync_sign_in_first)
+                    }
+                } else {
+                    stopSync()
+                }
+                true
+            }
+        }
+
+        // Auto sync switch
+        screen.switchPreference {
+            key = PreferenceKeys.autoSync
+            titleRes = R.string.pref_sync_auto
+            summaryRes = R.string.pref_sync_auto_summary
+            setDefaultValue(false)
+            dependency = PreferenceKeys.syncEnabled
+            onChange { newValue ->
+                val autoEnabled = newValue as Boolean
+                val userId = googleAuthManager.getUserId()
+                if (userId != null) {
+                    if (autoEnabled) {
+                        SyncWorker.schedulePeriodic(preferenceScreen.context, userId)
+                    } else {
+                        SyncWorker.cancelPeriodic(preferenceScreen.context)
+                    }
+                }
+                true
+            }
+        }
+
+        // Sync now button
+        screen.preference {
+            key = "sync_now"
+            titleRes = R.string.pref_sync_now
+            summaryRes = R.string.pref_sync_now_summary
+            iconRes = R.drawable.ic_sync_24dp
+            iconTint = tintColor
+            dependency = PreferenceKeys.syncEnabled
+            onClick {
+                val userId = googleAuthManager.getUserId()
+                if (userId != null) {
+                    SyncWorker.runImmediate(preferenceScreen.context, userId, SyncWorker.SYNC_TYPE_FULL)
+                    preferenceScreen.context.toast(R.string.pref_sync_started)
+                } else {
+                    preferenceScreen.context.toast(R.string.pref_sync_sign_in_first)
+                }
+            }
+        }
+
+        return screen
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         // Register for activity result before creating preferences
@@ -190,18 +194,18 @@ class SyncSettingsController(
                     if (result.isSuccess) {
                         updateAccountUI()
                         updateSyncUI(prefs.syncEnabled().get())
-                        context.toast(R.string.pref_sync_signed_in)
+                        preferenceScreen.context.toast(R.string.pref_sync_signed_in)
                     } else {
-                        context.toast(context.getString(R.string.pref_sync_sign_in_error, result.exceptionOrNull()?.message))
+                        preferenceScreen.context.toast(R.string.pref_sync_sign_in_failed)
                     }
-                } else {
-                    Timber.e("Sign-in failed: ${task.exception}")
-                    context.toast(R.string.pref_sync_sign_in_failed)
-                context.toast(R.string.pref_sync_sign_in_failed)
+                }
+            } else {
+                Timber.e("Sign-in failed: ${task.exception}")
+                preferenceScreen.context.toast(R.string.pref_sync_sign_in_failed)
             }
         } catch (e: Exception) {
             Timber.e(e, "Sign-in result error")
-            context.toast(R.string.pref_sync_sign_in_failed)
+            preferenceScreen.context.toast(R.string.pref_sync_sign_in_failed)
         }
     }
 
@@ -216,8 +220,8 @@ class SyncSettingsController(
         if (isSignedIn && displayName != null) {
             signInPref?.isVisible = false
             signOutPref?.isVisible = true
-            accountInfo?.title = context.getString(R.string.pref_sync_account_logged_in, displayName)
-            accountInfo?.summary = context.getString(R.string.pref_sync_account_sync_enabled)
+            accountInfo?.title = preferenceScreen.context.getString(R.string.pref_sync_account_logged_in, displayName)
+            accountInfo?.summary = preferenceScreen.context.getString(R.string.pref_sync_account_sync_enabled)
         } else {
             signInPref?.isVisible = true
             signOutPref?.isVisible = false
