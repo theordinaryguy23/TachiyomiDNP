@@ -334,7 +334,7 @@ dependencies {
 
     implementation(kotlin("stdlib"))
 
-    val coroutines = "1.13.0"
+    val coroutines = "1.11.0"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutines")
