@@ -229,7 +229,6 @@ dependencies {
         exclude(group = "com.google.firebase", module = "firebase-firestore")
     }
     implementation("com.google.firebase:firebase-firestore:25.1.4")
-    implementation("com.google.android.gms:play-services-tasks:18.1.0")
     implementation("com.google.android.gms:play-services-auth:21.3.0") {
         exclude(group = "com.google.firebase", module = "firebase-firestore")
         exclude(group = "com.google.firebase", module = "firebase-firestore-ktx")
