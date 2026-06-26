@@ -14,10 +14,7 @@ import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * Manages syncing library state (manga, categories, favorites) between devices via Firestore.
@@ -367,31 +364,6 @@ class LibrarySyncManager(
             .collection(COLLECTION_MANGA_CATEGORIES)
             .document("mc_${mangaId}_$categoryId")
 }
-
-/**
- * Suspends until the Task completes.
- */
-suspend fun <T> com.google.android.gms.tasks.Task<T>.await(): T =
-    suspendCancellableCoroutine { continuation ->
-        addOnCompleteListener { task ->
-            try {
-                if (task.isSuccessful) {
-                    continuation.resume(task.result)
-                } else {
-                    continuation.resumeWithException(
-                        task.exception ?: IllegalStateException("Task failed without exception")
-                    )
-                }
-            } catch (e: Exception) {
-                continuation.resumeWithException(e)
-            }
-        }
-        continuation.invokeOnCancellation {
-            try {
-                cancel()
-            } catch (_: Exception) {}
-        }
-    }
 
 /**
  * Data class for syncing manga library entries.
