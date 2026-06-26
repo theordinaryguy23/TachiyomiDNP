@@ -38,7 +38,7 @@ class LibrarySyncManager(
         private const val COLLECTION_MANGA_CATEGORIES = "mangaCategories"
     }
 
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
 
     /**
      * Uploads a single manga's library entry to Firestore.
