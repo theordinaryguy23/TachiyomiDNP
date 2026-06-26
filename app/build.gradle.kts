@@ -218,12 +218,11 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Firebase - using BOM for compatible versions
-    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-crashlytics")
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    // Firebase - explicit versions to avoid BOM version conflicts
+    implementation("com.google.firebase:firebase-analytics:22.2.0")
+    implementation("com.google.firebase:firebase-crashlytics:20.0.4")
+    implementation("com.google.firebase:firebase-auth:23.2.0")
+    implementation("com.google.firebase:firebase-firestore:25.1.4")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     val lifecycleVersion = "2.8.7"
