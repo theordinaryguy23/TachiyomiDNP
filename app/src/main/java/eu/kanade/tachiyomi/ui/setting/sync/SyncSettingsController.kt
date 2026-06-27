@@ -174,8 +174,8 @@ class SyncSettingsController(
             }
         }
 
-        googleAuthManager = GoogleAuthManager(preferenceScreen.context)
         super.onCreatePreferences(savedInstanceState, rootKey)
+        googleAuthManager = GoogleAuthManager(preferenceScreen.context)
         updateAccountUI()
     }
 

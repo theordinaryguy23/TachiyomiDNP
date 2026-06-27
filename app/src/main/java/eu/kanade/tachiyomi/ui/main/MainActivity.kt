@@ -102,6 +102,7 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsController
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.recents.RecentsViewType
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.data.sync.SyncOnboardingHelper
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.source.BrowseController
@@ -988,6 +989,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         DownloadJob.callListeners(downloadManager = downloadManager)
         showDLQueueTutorial()
         reEnableBackPressedCallBack()
+        showSyncOnboardingPrompt()
+    }
+
+    private fun showSyncOnboardingPrompt() {
+        if (!SyncOnboardingHelper.shouldShow(preferences)) return
+        SyncOnboardingHelper.markShown(preferences)
+        materialAlertDialog()
+            .setMessage(R.string.pref_sync_onboarding_message)
+            .setPositiveButton(R.string.pref_sync_onboarding_enable) { _, _ ->
+                router.pushController(SettingsMainController().withFadeTransaction())
+            }
+            .setNegativeButton(R.string.pref_sync_onboarding_skip, null)
+            .show()
     }
 
     private fun showDLQueueTutorial() {

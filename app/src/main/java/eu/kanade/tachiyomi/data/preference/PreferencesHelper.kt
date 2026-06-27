@@ -461,6 +461,9 @@ class PreferencesHelper(
 
     fun shownDownloadSwipeTutorial() = flowPrefs.getBoolean("shown_download_tutorial", false)
 
+    // Sync onboarding
+    fun shownSyncOnboarding() = flowPrefs.getBoolean("shown_sync_onboarding", false)
+
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
     fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
