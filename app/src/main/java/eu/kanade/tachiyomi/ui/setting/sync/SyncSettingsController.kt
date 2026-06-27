@@ -174,11 +174,20 @@ class SyncSettingsController(
     }
 
     private fun launchSignIn() {
-        val signInIntent = googleAuthManager.getSignInIntent()
-        // ponytail: use startActivityForResult directly — registerForActivityResult
-        // crashes when called after activity is RESUMED (Conductor pushes controllers lazily)
-        pendingSignInHandler = { data -> handleSignInResult(data) }
-        activity?.startActivityForResult(signInIntent, RC_SIGN_IN)
+        try {
+            val signInIntent = googleAuthManager.getSignInIntent()
+            // ponytail: use startActivityForResult directly — registerForActivityResult
+            // crashes when called after activity is RESUMED (Conductor pushes controllers lazily)
+            pendingSignInHandler = { data -> handleSignInResult(data) }
+            activity?.startActivityForResult(signInIntent, RC_SIGN_IN)
+                ?: run {
+                    Timber.e("launchSignIn: activity is null")
+                    preferenceScreen.context.toast(R.string.pref_sync_sign_in_failed)
+                }
+        } catch (e: Exception) {
+            Timber.e(e, "launchSignIn failed — Google Play Services may be unavailable")
+            preferenceScreen.context.toast(R.string.pref_sync_sign_in_failed)
+        }
     }
 
     private fun handleSignInResult(data: Intent?) {
