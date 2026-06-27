@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.ui.setting.sync
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceScreen
@@ -39,8 +37,13 @@ class SyncSettingsController(
     private val prefs: PreferencesHelper = Injekt.get(),
 ) : SettingsController() {
 
+    companion object {
+        const val RC_SIGN_IN = 9001
+        // ponytail: static callback to forward onActivityResult from MainActivity
+        var pendingSignInHandler: ((Intent?) -> Unit)? = null
+    }
+
     private lateinit var googleAuthManager: GoogleAuthManager
-    private lateinit var signInLauncher: ActivityResultLauncher<Intent>
 
     override fun setupPreferenceScreen(screen: PreferenceScreen): PreferenceScreen {
         screen.titleRes = R.string.pref_sync_title
@@ -165,15 +168,6 @@ class SyncSettingsController(
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        // Register for activity result before creating preferences
-        (activity as? androidx.activity.ComponentActivity)?.let { componentActivity ->
-            signInLauncher = componentActivity.registerForActivityResult(
-                ActivityResultContracts.StartActivityForResult()
-            ) { result ->
-                handleSignInResult(result.data)
-            }
-        }
-
         super.onCreatePreferences(savedInstanceState, rootKey)
         googleAuthManager = GoogleAuthManager(preferenceScreen.context)
         updateAccountUI()
@@ -181,7 +175,10 @@ class SyncSettingsController(
 
     private fun launchSignIn() {
         val signInIntent = googleAuthManager.getSignInIntent()
-        signInLauncher?.launch(signInIntent)
+        // ponytail: use startActivityForResult directly — registerForActivityResult
+        // crashes when called after activity is RESUMED (Conductor pushes controllers lazily)
+        pendingSignInHandler = { data -> handleSignInResult(data) }
+        activity?.startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
     private fun handleSignInResult(data: Intent?) {

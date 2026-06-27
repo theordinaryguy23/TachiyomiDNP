@@ -992,6 +992,16 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         showSyncOnboardingPrompt()
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        // ponytail: forward sign-in result to SyncSettingsController
+        if (requestCode == SyncSettingsController.RC_SIGN_IN) {
+            SyncSettingsController.pendingSignInHandler?.invoke(data)
+            SyncSettingsController.pendingSignInHandler = null
+        }
+    }
+
     private fun showSyncOnboardingPrompt() {
         if (!SyncOnboardingHelper.shouldShow(preferences)) return
         SyncOnboardingHelper.markShown(preferences)
