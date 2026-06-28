@@ -825,6 +825,23 @@
     </plurals>
     <string name="not_logged_into_">Not logged into %1$s</string>
 
+    <!-- Google Drive Sync -->
+    <string name="google_drive_sync">Google Drive Sync</string>
+    <string name="google_drive_account">Google Account</string>
+    <string name="google_drive_sign_in_summary">Sign in to sync your library, history, preferences, and custom repository URLs to the cloud.</string>
+    <string name="google_drive_signed_in_as">Signed in as %1$s</string>
+    <string name="google_drive_sign_out_title">Sign out</string>
+    <string name="google_drive_sign_out_confirm">Are you sure you want to sign out from Google Drive sync?</string>
+    <string name="google_drive_auto_sync">Auto-sync to Google Drive</string>
+    <string name="google_drive_auto_sync_summary">Automatically upload backups to Google Drive in the background.</string>
+    <string name="google_drive_sync_now">Sync Now</string>
+    <string name="google_drive_sync_now_summary">Upload current library, history, extensions, and repository URLs to Google Drive now.</string>
+    <string name="google_drive_restore_now">Restore from Cloud</string>
+    <string name="google_drive_restore_now_summary">Download and restore the latest backup from Google Drive.</string>
+    <string name="google_drive_sync_success">Google Drive sync completed successfully</string>
+    <string name="google_drive_sync_failed">Google Drive sync failed: %1$s</string>
+    <string name="google_drive_restore_started">Starting Google Drive restore...</string>
+
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Clear chapter cache</string>
     <string name="force_download_cache_refresh">Refresh the download cache</string>

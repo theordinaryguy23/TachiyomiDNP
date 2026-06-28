@@ -1060,4 +1060,21 @@
     </plurals>
     <string name="url_not_set_click_again">URL repositori belum diatur, silakan edit URL</string>
     <string name="open_source_repo">Repositori sumber terbuka</string>
+
+    <!-- Google Drive Sync -->
+    <string name="google_drive_sync">Sinkronisasi Google Drive</string>
+    <string name="google_drive_account">Akun Google</string>
+    <string name="google_drive_sign_in_summary">Masuk untuk menyinkronkan pustaka, riwayat, preferensi, dan URL repositori kustom ke awan.</string>
+    <string name="google_drive_signed_in_as">Masuk sebagai %1$s</string>
+    <string name="google_drive_sign_out_title">Keluar</string>
+    <string name="google_drive_sign_out_confirm">Apakah Anda yakin ingin keluar dari sinkronisasi Google Drive?</string>
+    <string name="google_drive_auto_sync">Sinkronisasi otomatis ke Google Drive</string>
+    <string name="google_drive_auto_sync_summary">Unggah cadangan ke Google Drive secara otomatis di latar belakang.</string>
+    <string name="google_drive_sync_now">Sinkronkan Sekarang</string>
+    <string name="google_drive_sync_now_summary">Unggah pustaka, riwayat, ekstensi, dan URL repositori saat ini ke Google Drive sekarang.</string>
+    <string name="google_drive_restore_now">Pulihkan dari Awan</string>
+    <string name="google_drive_restore_now_summary">Unduh dan pulihkan cadangan terbaru dari Google Drive.</string>
+    <string name="google_drive_sync_success">Sinkronisasi Google Drive berhasil diselesaikan</string>
+    <string name="google_drive_sync_failed">Sinkronisasi Google Drive gagal: %1$s</string>
+    <string name="google_drive_restore_started">Memulai pemulihan Google Drive...</string>
 </resources>

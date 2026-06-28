@@ -519,4 +519,8 @@ class PreferencesHelper(
     // History sync
     fun syncEnabled() = flowPrefs.getBoolean(Keys.syncEnabled, false)
     fun autoSync() = flowPrefs.getBoolean(Keys.autoSync, false)
+
+    fun googleSyncEnabled() = flowPrefs.getBoolean(Keys.googleSyncEnabled, false)
+    fun googleSyncAccount() = flowPrefs.getString(Keys.googleSyncAccount, "")
+    fun googleSyncLastTime() = flowPrefs.getLong(Keys.googleSyncLastTime, 0L)
 }

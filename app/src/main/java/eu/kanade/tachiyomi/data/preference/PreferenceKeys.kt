@@ -241,4 +241,8 @@ object PreferenceKeys {
     const val syncEnabled = "sync_enabled"
     const val autoSync = "auto_sync"
     const val syncAccount = "sync_account"
+
+    const val googleSyncEnabled = "google_sync_enabled"
+    const val googleSyncAccount = "google_sync_account"
+    const val googleSyncLastTime = "google_sync_last_time"
 }

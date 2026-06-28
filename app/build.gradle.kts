@@ -347,6 +347,7 @@ dependencies {
     // Text distance
     implementation("info.debatty:java-string-similarity:2.0.0")
 
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.android.gms:play-services-oss-licenses:17.1.0")
 
     // TLS 1.3 support for Android < 10
