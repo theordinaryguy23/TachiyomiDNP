@@ -152,7 +152,7 @@ class SettingsBackupController : SettingsController() {
             preferenceCategory {
                 titleRes = R.string.google_drive_sync
 
-                val accountPref = preference {
+                preference {
                     key = "google_drive_account_pref"
                     titleRes = R.string.google_drive_account
                     
@@ -179,8 +179,12 @@ class SettingsBackupController : SettingsController() {
                                 .setNegativeButton(android.R.string.cancel, null)
                                 .show()
                         } else {
-                            val client = GoogleDriveSyncHelper.getGoogleSignInClient(activity)
-                            startActivityForResult(client.signInIntent, CODE_GOOGLE_SIGN_IN)
+                            try {
+                                val client = GoogleDriveSyncHelper.getGoogleSignInClient(activity)
+                                startActivityForResult(client.signInIntent, CODE_GOOGLE_SIGN_IN)
+                            } catch (e: Exception) {
+                                activity.toast(R.string.google_drive_sign_in_failed)
+                            }
                         }
                     }
                 }
@@ -211,27 +215,33 @@ class SettingsBackupController : SettingsController() {
                         
                         viewScope.launchUI {
                             try {
-                                val tempFile = UniFile.fromFile(File(context.cacheDir, "google_sync_temp.tachibk"))
-                                    ?: throw Exception("Could not create temp file")
-                                val backupUri = tempFile.uri
-                                val location = BackupCreator(context).createBackup(backupUri, BackupConst.BACKUP_ALL, false)
-                                
-                                activity.toast("Uploading backup to Google Drive...")
-                                GoogleDriveSyncHelper.uploadSyncBackup(
-                                    context = context,
-                                    backupUri = Uri.parse(location),
-                                    onProgress = { _ -> },
-                                    onSuccess = {
-                                        activity.runOnUiThread {
-                                            activity.toast(R.string.google_drive_sync_success)
-                                        }
-                                    },
-                                    onError = { error ->
-                                        activity.runOnUiThread {
-                                            activity.toast(context.getString(R.string.google_drive_sync_failed, error.localizedMessage))
-                                        }
+                                val tempFile = File(context.cacheDir, "google_sync_temp.tachibk")
+                                try {
+                                    val uniFile = UniFile.fromFile(tempFile)
+                                        ?: throw Exception("Could not create temp file")
+                                    val location = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                        BackupCreator(context).createBackup(uniFile.uri, BackupConst.BACKUP_ALL, false)
                                     }
-                                )
+                                    
+                                    activity.toast(R.string.google_drive_uploading)
+                                    GoogleDriveSyncHelper.uploadSyncBackup(
+                                        context = context,
+                                        backupUri = Uri.parse(location),
+                                        onProgress = { _ -> },
+                                        onSuccess = {
+                                            activity.runOnUiThread {
+                                                activity.toast(R.string.google_drive_sync_success)
+                                            }
+                                        },
+                                        onError = { error ->
+                                            activity.runOnUiThread {
+                                                activity.toast(context.getString(R.string.google_drive_sync_failed, error.localizedMessage))
+                                            }
+                                        }
+                                    )
+                                } finally {
+                                    tempFile.delete()
+                                }
                             } catch (e: Exception) {
                                 activity.toast(context.getString(R.string.google_drive_sync_failed, e.localizedMessage))
                             }
@@ -263,7 +273,7 @@ class SettingsBackupController : SettingsController() {
                                 },
                                 onError = { error ->
                                     activity.runOnUiThread {
-                                        activity.toast("Restore failed: " + error.localizedMessage)
+                                        activity.toast(context.getString(R.string.google_drive_restore_failed, error.localizedMessage))
                                     }
                                 }
                             )
@@ -303,7 +313,7 @@ class SettingsBackupController : SettingsController() {
                     activity.toast(activity.getString(R.string.google_drive_signed_in_as, email))
                     activity.recreate()
                 } else {
-                    activity.toast("Google Sign-In failed")
+                    activity.toast(R.string.google_drive_sign_in_failed)
                 }
                 return
             }

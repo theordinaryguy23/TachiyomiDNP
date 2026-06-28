@@ -31,9 +31,12 @@ object GoogleDriveSyncHelper {
 
     private const val FILE_NAME = "tachiyomi_sync_backup.tachibk"
     private const val DRIVE_SCOPE = "oauth2:https://www.googleapis.com/auth/drive.appdata"
-    
+
     private val jsonParser = Json { ignoreUnknownKeys = true }
-    
+
+    /** Dedicated exception for expired/invalid OAuth tokens. */
+    private class TokenExpiredException : IOException("OAuth token expired or invalid")
+
     @Serializable
     private data class DriveFileList(val files: List<DriveFile>)
 
@@ -95,7 +98,7 @@ object GoogleDriveSyncHelper {
             throw IllegalStateException("Google account not linked")
         }
         val account = Account(email, "com.google")
-        
+
         if (forceRefresh) {
             try {
                 val token = GoogleAuthUtil.getToken(context, account, DRIVE_SCOPE)
@@ -104,16 +107,41 @@ object GoogleDriveSyncHelper {
                 Timber.e(e, "Error clearing old token")
             }
         }
-        
+
         GoogleAuthUtil.getToken(context, account, DRIVE_SCOPE)
+    }
+
+    private fun getAccessTokenSync(context: Context, forceRefresh: Boolean = false): String {
+        val preferences = Injekt.get<PreferencesHelper>()
+        val email = preferences.googleSyncAccount().get()
+        if (email.isEmpty()) {
+            throw IllegalStateException("Google account not linked")
+        }
+        val account = Account(email, "com.google")
+
+        if (forceRefresh) {
+            try {
+                val token = GoogleAuthUtil.getToken(context, account, DRIVE_SCOPE)
+                GoogleAuthUtil.clearToken(context, token)
+            } catch (e: Exception) {
+                Timber.e(e, "Error clearing old token")
+            }
+        }
+
+        return GoogleAuthUtil.getToken(context, account, DRIVE_SCOPE)
     }
 
     /**
      * Searches for our sync backup file in the appDataFolder.
      * Returns the file ID, or null if it doesn't exist.
+     * Orders by modifiedTime desc to always return the latest file.
      */
-    private suspend fun findBackupFileId(context: Context, client: OkHttpClient, token: String): String? = withContext(Dispatchers.IO) {
-        val url = "https://www.googleapis.com/drive/v3/files?q=name='$FILE_NAME'+and+'appDataFolder'+in+parents&spaces=appDataFolder"
+    private fun findBackupFileIdSync(client: OkHttpClient, token: String): String? {
+        val url = "https://www.googleapis.com/drive/v3/files" +
+            "?q=name='$FILE_NAME'+and+'appDataFolder'+in+parents" +
+            "&spaces=appDataFolder" +
+            "&orderBy=modifiedTime+desc" +
+            "&pageSize=1"
         val request = Request.Builder()
             .url(url)
             .header("Authorization", "Bearer $token")
@@ -122,15 +150,71 @@ object GoogleDriveSyncHelper {
 
         client.newCall(request).execute().use { response ->
             if (response.code == 401) {
-                // Token might be expired, let's throw IOException to trigger token refresh retry
-                throw IOException("Unauthorized token")
+                throw TokenExpiredException()
             }
             if (!response.isSuccessful) {
                 throw IOException("Google Drive search failed: ${response.code} ${response.message}")
             }
             val bodyString = response.body?.string() ?: throw IOException("Empty response from Google Drive")
             val fileList = jsonParser.decodeFromString<DriveFileList>(bodyString)
-            fileList.files.firstOrNull()?.id
+            return fileList.files.firstOrNull()?.id
+        }
+    }
+
+    /** Wraps findBackupFileIdSync with automatic token refresh on 401. */
+    private fun findBackupFileIdWithRetry(context: Context, client: OkHttpClient, tokenHolder: TokenHolder): String? {
+        return try {
+            findBackupFileIdSync(client, tokenHolder.token)
+        } catch (e: TokenExpiredException) {
+            tokenHolder.token = getAccessTokenSync(context, forceRefresh = true)
+            findBackupFileIdSync(client, tokenHolder.token)
+        }
+    }
+
+    /** Suspend wrapper for findBackupFileIdSync */
+    private suspend fun findBackupFileId(context: Context, client: OkHttpClient, token: String): String? = withContext(Dispatchers.IO) {
+        findBackupFileIdSync(client, token)
+    }
+
+    /** Mutable token wrapper so callees can update the token after refresh. */
+    private class TokenHolder(var token: String)
+
+    /**
+     * Creates a new file in the appDataFolder and returns its ID.
+     */
+    private fun createDriveFile(client: OkHttpClient, token: String): String {
+        val metadata = """{"name":"$FILE_NAME","parents":["appDataFolder"]}"""
+        val metadataRequest = Request.Builder()
+            .url("https://www.googleapis.com/drive/v3/files")
+            .header("Authorization", "Bearer $token")
+            .post(metadata.toRequestBody("application/json".toMediaType()))
+            .build()
+
+        client.newCall(metadataRequest).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("Metadata creation failed: ${response.code} ${response.message}")
+            }
+            val bodyString = response.body?.string() ?: throw IOException("Empty response on metadata creation")
+            val driveFile = jsonParser.decodeFromString<DriveFile>(bodyString)
+            return driveFile.id
+        }
+    }
+
+    /**
+     * Uploads bytes to an existing file ID.
+     */
+    private fun uploadFileContent(client: OkHttpClient, token: String, fileId: String, fileBytes: ByteArray) {
+        val uploadRequestBody = fileBytes.toRequestBody("application/octet-stream".toMediaType())
+        val uploadRequest = Request.Builder()
+            .url("https://www.googleapis.com/upload/drive/v3/files/$fileId?uploadType=media")
+            .header("Authorization", "Bearer $token")
+            .patch(uploadRequestBody)
+            .build()
+
+        client.newCall(uploadRequest).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("Content upload failed: ${response.code} ${response.message}")
+            }
         }
     }
 
@@ -147,7 +231,7 @@ object GoogleDriveSyncHelper {
         withContext(Dispatchers.IO) {
             try {
                 onProgress("Getting credentials...")
-                var token = getAccessToken(context)
+                val tokenHolder = TokenHolder(getAccessToken(context))
                 val networkHelper = Injekt.get<NetworkHelper>()
                 val client = networkHelper.client
 
@@ -157,53 +241,14 @@ object GoogleDriveSyncHelper {
                 val fileBytes = contentResolver.openInputStream(backupUri)?.use { it.readBytes() }
                     ?: throw IOException("Could not read backup file at $backupUri")
 
-                var fileId: String? = null
-                try {
-                    fileId = findBackupFileId(context, client, token)
-                } catch (e: IOException) {
-                    if (e.message == "Unauthorized token") {
-                        // Refresh token and retry once
-                        token = getAccessToken(context, forceRefresh = true)
-                        fileId = findBackupFileId(context, client, token)
-                    } else {
-                        throw e
+                val fileId = findBackupFileIdWithRetry(context, client, tokenHolder)
+                    ?: run {
+                        onProgress("Creating remote file...")
+                        createDriveFile(client, tokenHolder.token)
                     }
-                }
-
-                if (fileId == null) {
-                    onProgress("Creating remote file...")
-                    // 1. Create file metadata in AppData folder
-                    val metadata = """{"name":"$FILE_NAME","parents":["appDataFolder"]}"""
-                    val metadataRequest = Request.Builder()
-                        .url("https://www.googleapis.com/drive/v3/files")
-                        .header("Authorization", "Bearer $token")
-                        .post(metadata.toRequestBody("application/json".toMediaType()))
-                        .build()
-
-                    client.newCall(metadataRequest).execute().use { response ->
-                        if (!response.isSuccessful) {
-                            throw IOException("Metadata creation failed: ${response.code} ${response.message}")
-                        }
-                        val bodyString = response.body?.string() ?: throw IOException("Empty response on metadata creation")
-                        val driveFile = jsonParser.decodeFromString<DriveFile>(bodyString)
-                        fileId = driveFile.id
-                    }
-                }
 
                 onProgress("Uploading data to cloud...")
-                // 2. Upload file content to the file ID
-                val uploadRequestBody = fileBytes.toRequestBody("application/octet-stream".toMediaType())
-                val uploadRequest = Request.Builder()
-                    .url("https://www.googleapis.com/upload/drive/v3/files/$fileId?uploadType=media")
-                    .header("Authorization", "Bearer $token")
-                    .patch(uploadRequestBody)
-                    .build()
-
-                client.newCall(uploadRequest).execute().use { response ->
-                    if (!response.isSuccessful) {
-                        throw IOException("Content upload failed: ${response.code} ${response.message}")
-                    }
-                }
+                uploadFileContent(client, tokenHolder.token, fileId, fileBytes)
 
                 // Update sync metadata
                 val preferences = Injekt.get<PreferencesHelper>()
@@ -219,71 +264,28 @@ object GoogleDriveSyncHelper {
 
     /**
      * Uploads sync backup synchronously (to be used inside worker/jobs).
+     * Includes token refresh retry logic on 401.
      */
     fun uploadSyncBackupSync(context: Context, backupUri: Uri) {
         try {
-            var token = GoogleAuthUtil.getToken(
-                context, 
-                Account(Injekt.get<PreferencesHelper>().googleSyncAccount().get(), "com.google"), 
-                DRIVE_SCOPE
-            )
+            val tokenHolder = TokenHolder(getAccessTokenSync(context))
             val networkHelper = Injekt.get<NetworkHelper>()
             val client = networkHelper.client
             val contentResolver = context.contentResolver
-            val fileBytes = contentResolver.openInputStream(backupUri)?.use { it.readBytes() } ?: return
-
-            val url = "https://www.googleapis.com/drive/v3/files?q=name='$FILE_NAME'+and+'appDataFolder'+in+parents&spaces=appDataFolder"
-            val request = Request.Builder()
-                .url(url)
-                .header("Authorization", "Bearer $token")
-                .get()
-                .build()
-
-            var fileId: String? = null
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    val bodyString = response.body?.string()
-                    if (bodyString != null) {
-                        val fileList = jsonParser.decodeFromString<DriveFileList>(bodyString)
-                        fileId = fileList.files.firstOrNull()?.id
-                    }
-                }
+            val fileBytes = contentResolver.openInputStream(backupUri)?.use { it.readBytes() }
+            if (fileBytes == null) {
+                Timber.w("uploadSyncBackupSync: could not read backup file at $backupUri")
+                return
             }
 
-            if (fileId == null) {
-                val metadata = """{"name":"$FILE_NAME","parents":["appDataFolder"]}"""
-                val metadataRequest = Request.Builder()
-                    .url("https://www.googleapis.com/drive/v3/files")
-                    .header("Authorization", "Bearer $token")
-                    .post(metadata.toRequestBody("application/json".toMediaType()))
-                    .build()
+            val fileId = findBackupFileIdWithRetry(context, client, tokenHolder)
+                ?: createDriveFile(client, tokenHolder.token)
 
-                client.newCall(metadataRequest).execute().use { response ->
-                    if (response.isSuccessful) {
-                        val bodyString = response.body?.string()
-                        if (bodyString != null) {
-                            val driveFile = jsonParser.decodeFromString<DriveFile>(bodyString)
-                            fileId = driveFile.id
-                        }
-                    }
-                }
-            }
+            uploadFileContent(client, tokenHolder.token, fileId, fileBytes)
 
-            fileId?.let { id ->
-                val uploadRequestBody = fileBytes.toRequestBody("application/octet-stream".toMediaType())
-                val uploadRequest = Request.Builder()
-                    .url("https://www.googleapis.com/upload/drive/v3/files/$id?uploadType=media")
-                    .header("Authorization", "Bearer $token")
-                    .patch(uploadRequestBody)
-                    .build()
-
-                client.newCall(uploadRequest).execute().use { response ->
-                    if (response.isSuccessful) {
-                        val preferences = Injekt.get<PreferencesHelper>()
-                        preferences.googleSyncLastTime().set(System.currentTimeMillis())
-                    }
-                }
-            }
+            val preferences = Injekt.get<PreferencesHelper>()
+            preferences.googleSyncLastTime().set(System.currentTimeMillis())
+            Timber.i("Auto sync upload completed successfully")
         } catch (e: Exception) {
             Timber.e(e, "Synchronous auto sync upload failed")
         }
@@ -301,31 +303,18 @@ object GoogleDriveSyncHelper {
         withContext(Dispatchers.IO) {
             try {
                 onProgress("Getting credentials...")
-                var token = getAccessToken(context)
+                val tokenHolder = TokenHolder(getAccessToken(context))
                 val networkHelper = Injekt.get<NetworkHelper>()
                 val client = networkHelper.client
 
                 onProgress("Checking cloud backup...")
-                var fileId: String? = null
-                try {
-                    fileId = findBackupFileId(context, client, token)
-                } catch (e: IOException) {
-                    if (e.message == "Unauthorized token") {
-                        token = getAccessToken(context, forceRefresh = true)
-                        fileId = findBackupFileId(context, client, token)
-                    } else {
-                        throw e
-                    }
-                }
-
-                if (fileId == null) {
-                    throw IOException("No cloud backup found on Google Drive")
-                }
+                val fileId = findBackupFileIdWithRetry(context, client, tokenHolder)
+                    ?: throw IOException("No cloud backup found on Google Drive")
 
                 onProgress("Downloading cloud backup...")
                 val downloadRequest = Request.Builder()
                     .url("https://www.googleapis.com/drive/v3/files/$fileId?alt=media")
-                    .header("Authorization", "Bearer $token")
+                    .header("Authorization", "Bearer ${tokenHolder.token}")
                     .get()
                     .build()
 
@@ -335,21 +324,26 @@ object GoogleDriveSyncHelper {
                     }
 
                     val responseBody = response.body ?: throw IOException("Empty download response body")
-                    
+
                     // Save to a temporary file in the cache directory
                     val tempFile = File(context.cacheDir, "cloud_restore_temp.tachibk")
-                    FileOutputStream(tempFile).use { fos ->
-                        responseBody.byteStream().use { input ->
-                            input.copyTo(fos)
+                    try {
+                        FileOutputStream(tempFile).use { fos ->
+                            responseBody.byteStream().use { input ->
+                                input.copyTo(fos)
+                            }
                         }
-                    }
 
-                    // Start the restore job using the file's Uri
-                    onProgress("Restoring backup data...")
-                    val backupUri = Uri.fromFile(tempFile)
-                    BackupRestoreJob.start(context, backupUri)
-                    
-                    onSuccess()
+                        // Start the restore job using the file's Uri
+                        onProgress("Restoring backup data...")
+                        val backupUri = Uri.fromFile(tempFile)
+                        BackupRestoreJob.start(context, backupUri)
+
+                        onSuccess()
+                    } catch (e: Exception) {
+                        tempFile.delete()
+                        throw e
+                    }
                 }
             } catch (t: Throwable) {
                 Timber.e(t, "Google Drive restore sync failed")

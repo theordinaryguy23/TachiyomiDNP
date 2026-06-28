@@ -841,6 +841,9 @@
     <string name="google_drive_sync_success">Google Drive sync completed successfully</string>
     <string name="google_drive_sync_failed">Google Drive sync failed: %1$s</string>
     <string name="google_drive_restore_started">Starting Google Drive restore...</string>
+    <string name="google_drive_uploading">Uploading backup to Google Drive…</string>
+    <string name="google_drive_sign_in_failed">Google Sign-In failed</string>
+    <string name="google_drive_restore_failed">Restore failed: %1$s</string>
 
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Clear chapter cache</string>

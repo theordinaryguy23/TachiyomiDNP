@@ -1077,4 +1077,7 @@
     <string name="google_drive_sync_success">Sinkronisasi Google Drive berhasil diselesaikan</string>
     <string name="google_drive_sync_failed">Sinkronisasi Google Drive gagal: %1$s</string>
     <string name="google_drive_restore_started">Memulai pemulihan Google Drive...</string>
+    <string name="google_drive_uploading">Mengunggah cadangan ke Google Drive…</string>
+    <string name="google_drive_sign_in_failed">Masuk ke Google gagal</string>
+    <string name="google_drive_restore_failed">Pemulihan gagal: %1$s</string>
 </resources>
