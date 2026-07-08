@@ -125,12 +125,11 @@ class SyncSettingsController(
         }
 
         // Auto sync switch
-        screen.switchPreference {
+        val autoSyncPref = screen.switchPreference {
             key = PreferenceKeys.autoSync
             titleRes = R.string.pref_sync_auto
             summaryRes = R.string.pref_sync_auto_summary
             setDefaultValue(false)
-            dependency = PreferenceKeys.syncEnabled
             onChange { newValue ->
                 val autoEnabled = newValue as Boolean
                 val userId = googleAuthManager.getUserId()
@@ -144,15 +143,15 @@ class SyncSettingsController(
                 true
             }
         }
+        autoSyncPref.dependency = PreferenceKeys.syncEnabled
 
         // Sync now button
-        screen.preference {
+        val syncNowPref = screen.preference {
             key = "sync_now"
             titleRes = R.string.pref_sync_now
             summaryRes = R.string.pref_sync_now_summary
             iconRes = R.drawable.ic_sync_24dp
             iconTint = tintColor
-            dependency = PreferenceKeys.syncEnabled
             onClick {
                 val userId = googleAuthManager.getUserId()
                 if (userId != null) {
@@ -163,6 +162,7 @@ class SyncSettingsController(
                 }
             }
         }
+        syncNowPref.dependency = PreferenceKeys.syncEnabled
 
         return screen
     }

@@ -105,6 +105,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.data.sync.SyncOnboardingHelper
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
+import eu.kanade.tachiyomi.ui.setting.SettingsBackupController
 import eu.kanade.tachiyomi.ui.setting.sync.SyncSettingsController
 import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
@@ -1000,6 +1001,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         if (requestCode == SyncSettingsController.RC_SIGN_IN) {
             SyncSettingsController.pendingSignInHandler?.invoke(data)
             SyncSettingsController.pendingSignInHandler = null
+        }
+        if (requestCode == SettingsBackupController.CODE_GOOGLE_SIGN_IN) {
+            SettingsBackupController.pendingSignInHandler?.invoke(data)
+            SettingsBackupController.pendingSignInHandler = null
         }
     }
 

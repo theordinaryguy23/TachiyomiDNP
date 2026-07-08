@@ -35,6 +35,11 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import java.io.File
 
 class SettingsBackupController : SettingsController() {
+
+    companion object {
+        const val CODE_GOOGLE_SIGN_IN = 506
+        var pendingSignInHandler: ((Intent?) -> Unit)? = null
+    }
     /**
      * Flags containing information of what to backup.
      */
@@ -181,6 +186,15 @@ class SettingsBackupController : SettingsController() {
                         } else {
                             try {
                                 val client = GoogleDriveSyncHelper.getGoogleSignInClient(activity)
+                                pendingSignInHandler = { data ->
+                                    val email = GoogleDriveSyncHelper.handleSignInResult(activity, data)
+                                    if (email != null) {
+                                        activity.toast(activity.getString(R.string.google_drive_signed_in_as, email))
+                                        activity.recreate()
+                                    } else {
+                                        activity.toast(R.string.google_drive_sign_in_failed)
+                                    }
+                                }
                                 startActivityForResult(client.signInIntent, CODE_GOOGLE_SIGN_IN)
                             } catch (e: Exception) {
                                 activity.toast(R.string.google_drive_sign_in_failed)
@@ -468,6 +482,5 @@ class SettingsBackupController : SettingsController() {
 private const val CODE_BACKUP_DIR = 503
 private const val CODE_BACKUP_CREATE = 504
 private const val CODE_BACKUP_RESTORE = 505
-private const val CODE_GOOGLE_SIGN_IN = 506
 
 private const val HELP_URL = "https://tachiyomi.org/docs/guides/backups"
