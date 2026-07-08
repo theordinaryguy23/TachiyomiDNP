@@ -3,10 +3,15 @@ package eu.kanade.tachiyomi.data.sync
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.BitmapFactory
 import android.os.BatteryManager
 import androidx.work.*
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.notificationBuilder
+import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -31,6 +36,8 @@ class SyncWorker(
         private const val WORK_NAME = "history_sync"
         private const val KEY_USER_ID = "user_id"
         private const val KEY_SYNC_TYPE = "sync_type"
+        private const val ID_SYNC_PROGRESS = -510
+        private const val ID_SYNC_COMPLETE = -511
 
         const val SYNC_TYPE_UPLOAD = "upload"
         const val SYNC_TYPE_DOWNLOAD = "download"
@@ -117,6 +124,7 @@ class SyncWorker(
             val syncType = inputData.getString(KEY_SYNC_TYPE) ?: SYNC_TYPE_FULL
 
             Timber.d("Starting sync: type=$syncType, user=$userId, attempt=$runAttemptCount")
+            showProgressNotification()
 
             when (syncType) {
                 SYNC_TYPE_HISTORY -> {
@@ -162,14 +170,54 @@ class SyncWorker(
                 }
             }
 
+            showCompleteNotification()
             Result.success()
         } catch (e: Exception) {
             Timber.e(e, "Sync worker failed")
             if (runAttemptCount < 3) {
+                applicationContext.notificationManager.cancel(ID_SYNC_PROGRESS)
                 Result.retry()
             } else {
+                showErrorNotification(e.message)
                 Result.failure()
             }
         }
+    }
+
+    private fun showProgressNotification() {
+        val builder = applicationContext.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS) {
+            setLargeIcon(BitmapFactory.decodeResource(applicationContext.resources, R.mipmap.ic_launcher))
+            setSmallIcon(R.drawable.ic_tachij2k_notification)
+            setContentTitle(applicationContext.getString(R.string.pref_sync_title))
+            setContentText(applicationContext.getString(R.string.syncing))
+            setProgress(0, 0, true)
+            setOngoing(true)
+            setAutoCancel(false)
+        }
+        applicationContext.notificationManager.notify(ID_SYNC_PROGRESS, builder.build())
+    }
+
+    private fun showCompleteNotification() {
+        applicationContext.notificationManager.cancel(ID_SYNC_PROGRESS)
+        val builder = applicationContext.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE) {
+            setLargeIcon(BitmapFactory.decodeResource(applicationContext.resources, R.mipmap.ic_launcher))
+            setSmallIcon(R.drawable.ic_tachij2k_notification)
+            setContentTitle(applicationContext.getString(R.string.pref_sync_title))
+            setContentText(applicationContext.getString(R.string.sync_completed))
+            setAutoCancel(true)
+        }
+        applicationContext.notificationManager.notify(ID_SYNC_COMPLETE, builder.build())
+    }
+
+    private fun showErrorNotification(error: String?) {
+        applicationContext.notificationManager.cancel(ID_SYNC_PROGRESS)
+        val builder = applicationContext.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE) {
+            setLargeIcon(BitmapFactory.decodeResource(applicationContext.resources, R.mipmap.ic_launcher))
+            setSmallIcon(R.drawable.ic_tachij2k_notification)
+            setContentTitle(applicationContext.getString(R.string.sync_failed))
+            setContentText(error ?: applicationContext.getString(R.string.snack_backup_install_error))
+            setAutoCancel(true)
+        }
+        applicationContext.notificationManager.notify(ID_SYNC_COMPLETE, builder.build())
     }
 }

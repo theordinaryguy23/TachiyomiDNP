@@ -1253,4 +1253,7 @@
     <string name="pref_sync_onboarding_message">Sync your reading history across devices with Google. Sign in is required to enable sync.</string>
     <string name="pref_sync_onboarding_enable">Set up sync</string>
     <string name="pref_sync_onboarding_skip">Not now</string>
+    <string name="sync_completed">Sync completed successfully</string>
+    <string name="sync_failed">Sync failed</string>
+    <string name="syncing">Syncing…</string>
 </resources>

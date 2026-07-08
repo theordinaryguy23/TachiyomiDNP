@@ -1080,4 +1080,7 @@
     <string name="google_drive_uploading">Mengunggah cadangan ke Google Drive…</string>
     <string name="google_drive_sign_in_failed">Masuk ke Google gagal</string>
     <string name="google_drive_restore_failed">Pemulihan gagal: %1$s</string>
+    <string name="sync_completed">Sinkronisasi berhasil diselesaikan</string>
+    <string name="sync_failed">Sinkronisasi gagal</string>
+    <string name="syncing">Menyinkronkan…</string>
 </resources>
