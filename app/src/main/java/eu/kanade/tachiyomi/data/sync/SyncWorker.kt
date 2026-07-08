@@ -215,7 +215,7 @@ class SyncWorker(
             setLargeIcon(BitmapFactory.decodeResource(applicationContext.resources, R.mipmap.ic_launcher))
             setSmallIcon(R.drawable.ic_tachij2k_notification)
             setContentTitle(applicationContext.getString(R.string.sync_failed))
-            setContentText(error ?: applicationContext.getString(R.string.snack_backup_install_error))
+            setContentText(error ?: applicationContext.getString(R.string.unknown_error))
             setAutoCancel(true)
         }
         applicationContext.notificationManager.notify(ID_SYNC_COMPLETE, builder.build())
