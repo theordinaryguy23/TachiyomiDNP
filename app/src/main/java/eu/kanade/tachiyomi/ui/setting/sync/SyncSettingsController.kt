@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.ui.setting.iconRes
 import eu.kanade.tachiyomi.ui.setting.iconTint
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -90,9 +91,11 @@ class SyncSettingsController(
             onClick {
                 launchIO {
                     googleAuthManager.signOut()
-                    updateAccountUI()
-                    SyncWorker.cancelPeriodic(preferenceScreen.context)
-                    preferenceScreen.context.toast(R.string.pref_sync_signed_out)
+                    launchUI {
+                        updateAccountUI()
+                        SyncWorker.cancelPeriodic(preferenceScreen.context)
+                        preferenceScreen.context.toast(R.string.pref_sync_signed_out)
+                    }
                 }
             }
         }
@@ -198,11 +201,15 @@ class SyncSettingsController(
                 launchIO {
                     val result = googleAuthManager.signInWithGoogle(account)
                     if (result.isSuccess) {
-                        updateAccountUI()
-                        updateSyncUI(prefs.syncEnabled().get())
-                        preferenceScreen.context.toast(R.string.pref_sync_signed_in)
+                        launchUI {
+                            updateAccountUI()
+                            updateSyncUI(prefs.syncEnabled().get())
+                            preferenceScreen.context.toast(R.string.pref_sync_signed_in)
+                        }
                     } else {
-                        preferenceScreen.context.toast(R.string.pref_sync_sign_in_failed)
+                        launchUI {
+                            preferenceScreen.context.toast(R.string.pref_sync_sign_in_failed)
+                        }
                     }
                 }
             } else {
