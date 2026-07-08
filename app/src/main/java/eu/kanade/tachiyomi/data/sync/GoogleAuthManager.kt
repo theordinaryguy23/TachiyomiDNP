@@ -22,11 +22,19 @@ class GoogleAuthManager(private val context: Context) {
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
 
     private val googleSignInClient: GoogleSignInClient by lazy {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        val gsoBuilder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
-            .requestIdToken("602437167181-31854fe5851f25a88a5404.apps.googleusercontent.com")
-            .build()
-        GoogleSignIn.getClient(context, gso)
+        
+        val resId = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
+        if (resId != 0) {
+            val webClientId = context.getString(resId)
+            gsoBuilder.requestIdToken(webClientId)
+        } else {
+            Timber.w("default_web_client_id resource not found. Using fallback ID.")
+            gsoBuilder.requestIdToken("602437167181-31854fe5851f25a88a5404.apps.googleusercontent.com")
+        }
+        
+        GoogleSignIn.getClient(context, gsoBuilder.build())
     }
 
     /**
