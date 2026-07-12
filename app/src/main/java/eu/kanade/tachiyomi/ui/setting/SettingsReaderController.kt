@@ -140,15 +140,7 @@ class SettingsReaderController : SettingsController() {
                         )
                     entryRange = 0..1
                     defaultValue = 0
-                    isVisible =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            activity
-                                ?.getSystemService<DisplayManager>()
-                                ?.getDisplay(Display.DEFAULT_DISPLAY)
-                                ?.cutout != null
-                        } else {
-                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-                        }
+                    isVisible = hasCutoutDisplay()
                 }
             }
 
@@ -239,42 +231,7 @@ class SettingsReaderController : SettingsController() {
                     summaryRes = R.string.cutout_behavior_only_applies
                     entryRange = 0..2
                     defaultValue = 0
-                    // Calling this once to show only on cutout
-                    isVisible =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            activityBinding
-                                ?.root
-                                ?.rootWindowInsets
-                                ?.displayCutout
-                                ?.safeInsetTop != null ||
-                                activityBinding
-                                    ?.root
-                                    ?.rootWindowInsets
-                                    ?.displayCutout
-                                    ?.safeInsetBottom != null
-                        } else {
-                            false
-                        }
-                    // Calling this a second time in case activity is recreated while on this page
-                    // Keep the first so it shouldn't animate hiding the preference for phones without
-                    // cutouts
-                    activityBinding?.root?.post {
-                        isVisible =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                                activityBinding
-                                    ?.root
-                                    ?.rootWindowInsets
-                                    ?.displayCutout
-                                    ?.safeInsetTop != null ||
-                                    activityBinding
-                                        ?.root
-                                        ?.rootWindowInsets
-                                        ?.displayCutout
-                                        ?.safeInsetBottom != null
-                            } else {
-                                false
-                            }
-                    }
+                    isVisible = hasCutoutDisplay()
                 }
                 switchPreference {
                     bindTo(preferences.landscapeZoom())
@@ -444,4 +401,21 @@ class SettingsReaderController : SettingsController() {
                 }
             }
         }
+
+    private fun hasCutoutDisplay(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            activityBinding
+                ?.root
+                ?.rootWindowInsets
+                ?.displayCutout
+                ?.safeInsetTop != null ||
+                activityBinding
+                    ?.root
+                    ?.rootWindowInsets
+                    ?.displayCutout
+                    ?.safeInsetBottom != null
+        } else {
+            false
+        }
+    }
 }
