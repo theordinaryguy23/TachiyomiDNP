@@ -11,12 +11,17 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.protobuf.ProtoBuf
+import kotlinx.serialization.protobuf.ProtoNumber
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.io.ByteArrayInputStream
+import java.util.zip.InflaterInputStream
 
 internal class ExtensionApi {
     private val json: Json by injectLazy()
@@ -39,22 +44,144 @@ internal class ExtensionApi {
         }
     }
 
-    private suspend fun getExtensions(repoBaseUrl: String): List<Extension.Available> =
+    private suspend fun getExtensions(repoBaseUrl: String): List<Extension.Available> {
+        // 1. Try repo.json -> check index_v2 -> fetch protobuf
+        try {
+            val response =
+                networkService.client
+                    .newCall(GET("$repoBaseUrl/repo.json"))
+                    .awaitSuccess()
+
+            val bodyBytes = response.body?.bytes() ?: return emptyList()
+            val data = decompressIfGzip(bodyBytes)
+
+            if (data.isJson()) {
+                val text = data.toString(Charsets.UTF_8)
+                val repoInfo = json.decodeFromString<RepoInfo>(text)
+                val indexV2 = repoInfo.indexV2
+                if (indexV2 != null) {
+                    return fetchIndex(indexV2)
+                }
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to fetch repo.json from $repoBaseUrl")
+        }
+
+        // 2. Try index.pb directly
+        try {
+            val extensions = fetchIndex("$repoBaseUrl/index.pb")
+            if (extensions.isNotEmpty()) return extensions
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to fetch index.pb from $repoBaseUrl")
+        }
+
+        // 3. Fallback to index.min.json (legacy)
         try {
             val response =
                 networkService.client
                     .newCall(GET("$repoBaseUrl/index.min.json"))
                     .awaitSuccess()
 
-            with(json) {
-                response
-                    .parseAs<List<ExtensionJsonObject>>()
-                    .toExtensions(repoBaseUrl)
+            val bodyBytes = response.body?.bytes() ?: return emptyList()
+            val data = decompressIfGzip(bodyBytes)
+
+            if (data.isJson()) {
+                val text = data.toString(Charsets.UTF_8)
+                val extensions = json.decodeFromString<List<ExtensionJsonObject>>(text).toExtensions(repoBaseUrl)
+                if (extensions.isNotEmpty()) return extensions
             }
-        } catch (e: Throwable) {
-            Timber.e(e, "Failed to get extensions from $repoBaseUrl")
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to fetch index.min.json from $repoBaseUrl")
+        }
+
+        return emptyList()
+    }
+
+    private suspend fun fetchIndex(url: String): List<Extension.Available> {
+        val response =
+            networkService.client
+                .newCall(GET(url))
+                .awaitSuccess()
+
+        val bodyBytes = response.body?.bytes() ?: return emptyList()
+        val data = decompressIfGzip(bodyBytes)
+
+        val repoUrl = url.substringBeforeLast("/")
+
+        return when {
+            data.isEmpty() -> emptyList()
+            data.isJson() -> {
+                val text = data.toString(Charsets.UTF_8)
+                if (text.startsWith("{")) {
+                    val repoInfo = json.decodeFromString<RepoInfo>(text)
+                    val indexV2 = repoInfo.indexV2
+                    if (indexV2 != null) {
+                        fetchIndex(indexV2)
+                    } else {
+                        emptyList()
+                    }
+                } else {
+                    json.decodeFromString<List<ExtensionJsonObject>>(text).toExtensions(repoUrl)
+                }
+            }
+            else -> parseProtobuf(data, repoUrl)
+        }
+    }
+
+    private fun decompressIfGzip(data: ByteArray): ByteArray {
+        return if (data.size >= 2 && data[0] == 0x1f.toByte() && data[1] == 0x8b.toByte()) {
+            ByteArrayInputStream(data).use { gzipInput ->
+                InflaterInputStream(gzipInput).use { inflater ->
+                    inflater.readBytes()
+                }
+            }
+        } else {
+            data
+        }
+    }
+
+    private fun ByteArray.isJson(): Boolean {
+        return isNotEmpty() && (first() == '['.code.toByte() || first() == '{'.code.toByte())
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun parseProtobuf(data: ByteArray, repoUrl: String): List<Extension.Available> {
+        return try {
+            val store = ProtoBuf.decodeFromByteArray(NetworkExtensionStore.serializer(), data)
+            store.toExtensions(repoUrl)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to parse protobuf extension index")
             emptyList()
         }
+    }
+
+    private fun NetworkExtensionStore.toExtensions(repoUrl: String): List<Extension.Available> {
+        return extensionList?.extensions?.map { ext ->
+            Extension.Available(
+                name = ext.name,
+                pkgName = ext.packageName,
+                versionName = ext.versionName,
+                versionCode = ext.versionCode,
+                libVersion = ext.versionName.extractLibVersion(),
+                lang = ext.sources.firstOrNull()?.language ?: "",
+                isNsfw = ext.contentWarning == ContentWarning.NSFW,
+                sources = ext.sources.map { source ->
+                    Extension.AvailableSource(
+                        name = source.name,
+                        id = source.id,
+                        lang = source.language,
+                        baseUrl = source.homeUrl ?: "",
+                    )
+                },
+                apkName = "",
+                apkUrl = ext.resources.apkUrl,
+                iconUrl = ext.resources.iconUrl,
+                repoUrl = repoUrl,
+            )
+        } ?: emptyList()
+    }
+
+    private fun String.extractLibVersion(): Double = substringBeforeLast('.').toDoubleOrNull() ?: 0.0
 
     suspend fun checkForUpdates(
         context: Context,
@@ -108,10 +235,25 @@ internal class ExtensionApi {
                 )
             }
 
-    fun getApkUrl(extension: ExtensionManager.ExtensionInfo): String = "${extension.repoUrl}/apk/${extension.apkName}"
+    fun getApkUrl(extension: ExtensionManager.ExtensionInfo): String =
+        extension.apkUrl.takeIf { !it.isNullOrEmpty() }
+            ?: "${extension.repoUrl}/apk/${extension.apkName}"
 
     private fun ExtensionJsonObject.extractLibVersion(): Double = version.substringBeforeLast('.').toDouble()
 }
+
+@Serializable
+private data class RepoInfo(
+    val indexV2: String? = null,
+    val meta: MetaInfo? = null,
+)
+
+@Serializable
+private data class MetaInfo(
+    val name: String? = null,
+    val website: String? = null,
+    val signingKeyFingerprint: String? = null,
+)
 
 @Serializable
 private data class ExtensionJsonObject(
@@ -124,3 +266,61 @@ private data class ExtensionJsonObject(
     val nsfw: Int,
     val sources: List<Extension.AvailableSource>?,
 )
+
+@Serializable
+private data class NetworkExtensionStore(
+    @ProtoNumber(1) val name: String,
+    @ProtoNumber(2) val badgeLabel: String? = null,
+    @ProtoNumber(3) val signingKey: String? = null,
+    @ProtoNumber(4) val contact: Contact? = null,
+    @ProtoNumber(101) val extensionList: ExtensionList? = null,
+    @ProtoNumber(102) val extensionListUrl: String? = null,
+)
+
+@Serializable
+private data class Contact(
+    @ProtoNumber(1) val website: String? = null,
+    @ProtoNumber(2) val discord: String? = null,
+)
+
+@Serializable
+private data class ExtensionList(
+    @ProtoNumber(1) val extensions: List<NetworkExtension> = emptyList(),
+)
+
+@Serializable
+private data class NetworkExtension(
+    @ProtoNumber(1) val name: String,
+    @ProtoNumber(2) val packageName: String,
+    @ProtoNumber(3) val resources: Resources,
+    @ProtoNumber(4) val extensionLib: String,
+    @ProtoNumber(5) val versionCode: Long,
+    @ProtoNumber(6) val versionName: String,
+    @ProtoNumber(7) val contentWarning: ContentWarning = ContentWarning.UNSPECIFIED,
+    @ProtoNumber(8) val sources: List<Source> = emptyList(),
+)
+
+@Serializable
+private data class Resources(
+    @ProtoNumber(1) val apkUrl: String,
+    @ProtoNumber(2) val iconUrl: String,
+)
+
+@Serializable
+private data class Source(
+    @ProtoNumber(1) val id: Long,
+    @ProtoNumber(2) val name: String,
+    @ProtoNumber(3) val language: String,
+    @ProtoNumber(4) val homeUrl: String? = null,
+    @ProtoNumber(5) val mirrorUrls: List<String> = emptyList(),
+    @ProtoNumber(7) val message: String? = null,
+)
+
+@Suppress("unused")
+@Serializable
+private enum class ContentWarning {
+    @ProtoNumber(0) UNSPECIFIED,
+    @ProtoNumber(1) SAFE,
+    @ProtoNumber(2) MIXED,
+    @ProtoNumber(3) NSFW,
+}

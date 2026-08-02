@@ -117,8 +117,8 @@ class RepoPresenter(
     private fun repoExists(name: String): Boolean = repos.any { it.equals(name, true) }
 
     companion object {
-        private val repoRegex = """^https://.*/index\.min\.json$""".toRegex()
-        private val githubRepoRegex = """https://(?:raw.githubusercontent.com|github.com)/(.+?)/(.+?)/.+""".toRegex()
+        private val repoRegex = "^https://.*/(repo\\.json|index\\.min\\.json|index\\.pb)$".toRegex()
+        private val githubRepoRegex = "https://(?:raw.githubusercontent.com|github.com)/(.+?)/(.+?)/.+".toRegex()
         const val CREATE_REPO_ITEM = "create_repo"
     }
 }

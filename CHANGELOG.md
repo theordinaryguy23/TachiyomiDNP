@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.8.7
+
+### New Features
+- Support protobuf extension index format (Keiyoushi v2)
+- Backward compatible with legacy JSON extension repos
+- Auto-detect repo.json, index.pb, and index.min.json
+
+## v1.8.6
+
+### Bug Fixes
+- Fix version mismatch, APK naming, and updater logic
+- Inject keystore from GitHub Secrets for APK signing
+
+### New Features
+- Add workflow_dispatch trigger to build workflow
+
 ## v1.8.2
 
 ### Performance
