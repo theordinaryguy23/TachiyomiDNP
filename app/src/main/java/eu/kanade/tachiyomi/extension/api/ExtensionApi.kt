@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.protobuf.ProtoBuf
+import okio.source
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -41,20 +43,71 @@ internal class ExtensionApi {
 
     private suspend fun getExtensions(repoBaseUrl: String): List<Extension.Available> =
         try {
-            val response =
-                networkService.client
-                    .newCall(GET("$repoBaseUrl/index.min.json"))
-                    .awaitSuccess()
-
-            with(json) {
-                response
-                    .parseAs<List<ExtensionJsonObject>>()
-                    .toExtensions(repoBaseUrl)
+            when {
+                repoBaseUrl.endsWith("/index.pb") -> getExtensionsFromProtobuf(repoBaseUrl)
+                else -> getExtensionsFromJson(repoBaseUrl)
             }
         } catch (e: Throwable) {
             Timber.e(e, "Failed to get extensions from $repoBaseUrl")
             emptyList()
         }
+
+    private suspend fun getExtensionsFromJson(repoBaseUrl: String): List<Extension.Available> {
+        val url = if (repoBaseUrl.endsWith("/index.min.json")) {
+            repoBaseUrl
+        } else {
+            "$repoBaseUrl/index.min.json"
+        }
+
+        val response = networkService.client.newCall(GET(url)).awaitSuccess()
+
+        return with(json) {
+            response
+                .parseAs<List<ExtensionJsonObject>>()
+                .toExtensions(repoBaseUrl)
+        }
+    }
+
+    private suspend fun getExtensionsFromProtobuf(repoUrl: String): List<Extension.Available> {
+        val response = networkService.client.newCall(GET(repoUrl)).awaitSuccess()
+
+        val index = ProtoBuf.decodeFromByteArray<ExtensionRepoIndex>(response.body!!.bytes())
+
+        return index.extensions.mapNotNull { proto ->
+            try {
+                val libVersion = proto.version.substringBeforeLast('.').toDoubleOrNull() ?: return@mapNotNull null
+                if (libVersion < ExtensionLoader.LIB_VERSION_MIN || libVersion > ExtensionLoader.LIB_VERSION_MAX) {
+                    return@mapNotNull null
+                }
+
+                val baseRepoUrl = repoUrl.substringBeforeLast("/index.pb")
+
+                Extension.Available(
+                    name = proto.name.substringAfter("Tachiyomi: "),
+                    pkgName = proto.pkg,
+                    versionName = proto.version,
+                    versionCode = proto.code,
+                    libVersion = libVersion,
+                    lang = proto.lang,
+                    isNsfw = proto.nsfw == 1,
+                    sources = proto.sources.map { source ->
+                        Extension.AvailableSource(
+                            id = source.id,
+                            lang = source.lang,
+                            name = source.name,
+                            baseUrl = source.baseUrl,
+                        )
+                    },
+                    apkName = proto.apk,
+                    iconUrl = "$baseRepoUrl/icon/${proto.pkg}.png",
+                    repoUrl = baseRepoUrl,
+                )
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to parse extension from protobuf: ${proto.pkg}")
+                null
+            }
+        }
+    }
 
     suspend fun checkForUpdates(
         context: Context,

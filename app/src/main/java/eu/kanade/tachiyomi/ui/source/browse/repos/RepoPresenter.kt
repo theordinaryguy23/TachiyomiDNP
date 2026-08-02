@@ -27,10 +27,10 @@ class RepoPresenter(
             preferences
                 .extensionRepos()
                 .get()
-                .map { "$it/index.min.json" }
+                .map { normalizeRepoUrl(it) }
                 .sorted()
                 .toSet()
-        set(value) = preferences.extensionRepos().set(value.map { it.removeSuffix("/index.min.json") }.toSet())
+        set(value) = preferences.extensionRepos().set(value.map { denormalizeRepoUrl(it) }.toSet())
 
     /**
      * Called when the presenter is created.
@@ -116,8 +116,29 @@ class RepoPresenter(
      */
     private fun repoExists(name: String): Boolean = repos.any { it.equals(name, true) }
 
+    /**
+     * Normalize repo URL to include index file path
+     */
+    private fun normalizeRepoUrl(url: String): String {
+        return when {
+            url.endsWith("/index.min.json") || url.endsWith("/index.pb") -> url
+            else -> "$url/index.min.json"
+        }
+    }
+
+    /**
+     * Denormalize repo URL by removing index file path
+     */
+    private fun denormalizeRepoUrl(url: String): String {
+        return when {
+            url.endsWith("/index.min.json") -> url.removeSuffix("/index.min.json")
+            url.endsWith("/index.pb") -> url.removeSuffix("/index.pb")
+            else -> url
+        }
+    }
+
     companion object {
-        private val repoRegex = """^https://.*/index\.min\.json$""".toRegex()
+        private val repoRegex = """^https://.*(index\.min\.json|index\.pb)$""".toRegex()
         private val githubRepoRegex = """https://(?:raw.githubusercontent.com|github.com)/(.+?)/(.+?)/.+""".toRegex()
         const val CREATE_REPO_ITEM = "create_repo"
     }
