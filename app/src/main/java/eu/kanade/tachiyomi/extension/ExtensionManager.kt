@@ -465,6 +465,7 @@ class ExtensionManager(
     @Parcelize
     data class ExtensionInfo(
         val apkName: String,
+        val apkUrl: String? = null,
         val pkgName: String,
         val name: String,
         val versionCode: Long,
@@ -473,6 +474,7 @@ class ExtensionManager(
     ) : Parcelable {
         constructor(extension: Extension.Available) : this(
             apkName = extension.apkName,
+            apkUrl = extension.apkUrl,
             pkgName = extension.pkgName,
             name = extension.name,
             versionCode = extension.versionCode,

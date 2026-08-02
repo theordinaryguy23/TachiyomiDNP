@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.9.0-beta1
+
+### New Features
+- Support protobuf extension index format (Keiyoushi v2)
+- Backward compatible with legacy JSON extension repos
+- Auto-detect repo.json, index.pb, and index.min.json
+
 ## v1.8.2
 
 ### Performance
