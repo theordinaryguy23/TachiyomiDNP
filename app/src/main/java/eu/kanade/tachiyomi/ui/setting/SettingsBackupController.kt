@@ -13,14 +13,18 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupFileValidator
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
+import eu.kanade.tachiyomi.data.backup.GoogleDriveHelper
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
@@ -29,12 +33,17 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.Date
 
 class SettingsBackupController : SettingsController() {
     /**
      * Flags containing information of what to backup.
      */
     private var backupFlags = 0
+
+    private val googleDriveHelper by lazy { GoogleDriveHelper(activity!!) }
 
     override fun onViewCreated(
         view: View,
@@ -145,6 +154,69 @@ class SettingsBackupController : SettingsController() {
                 }
             }
 
+            preferenceCategory {
+                titleRes = R.string.google_drive_backup
+
+                preference {
+                    key = "pref_google_drive_account"
+                    titleRes = R.string.google_drive_sign_in
+
+                    val account = googleDriveHelper.getGoogleSignInAccount()
+                    if (account != null) {
+                        titleRes = R.string.google_drive_sign_out
+                        summary = context.getString(R.string.google_drive_sign_in_success, account.email)
+                    } else {
+                        summaryRes = R.string.google_drive_not_signed_in
+                    }
+
+                    onClick {
+                        val signedInAccount = googleDriveHelper.getGoogleSignInAccount()
+                        if (signedInAccount == null) {
+                            startActivityForResult(googleDriveHelper.getSignInIntent(), CODE_GOOGLE_SIGN_IN)
+                        } else {
+                            activity?.materialAlertDialog()
+                                ?.setTitle(R.string.google_drive_sign_out)
+                                ?.setMessage(R.string.google_drive_sign_out)
+                                ?.setPositiveButton(android.R.string.ok) { _, _ ->
+                                    viewScope.launch {
+                                        googleDriveHelper.signOut()
+                                        preferences.googleDriveBackupEnabled().set(false)
+                                        preferences.googleDriveBackupAccount().set("")
+                                        activity?.toast(R.string.google_drive_sign_out_success)
+                                        refreshPreferenceScreen()
+                                    }
+                                }
+                                ?.setNegativeButton(android.R.string.cancel, null)
+                                ?.show()
+                        }
+                    }
+                }
+
+                switchPreference {
+                    bindTo(preferences.googleDriveBackupEnabled())
+                    titleRes = R.string.google_drive_cloud_backup
+                    summaryRes = R.string.google_drive_cloud_backup_summary
+
+                    visibleIf(preferences.googleDriveBackupAccount()) { it.isNotEmpty() }
+                }
+
+                preference {
+                    key = "pref_google_drive_last_sync"
+                    titleRes = R.string.google_drive_last_sync
+
+                    preferences.googleDriveBackupLastSync().asImmediateFlow { lastSync: Long ->
+                        summary =
+                            if (lastSync > 0) {
+                                preferences.dateFormat().format(Date(lastSync))
+                            } else {
+                                "-"
+                            }
+                    }.launchIn(viewScope)
+
+                    visibleIf(preferences.googleDriveBackupAccount()) { it.isNotEmpty() }
+                }
+            }
+
             infoPreference(R.string.backup_info)
         }
 
@@ -201,8 +273,27 @@ class SettingsBackupController : SettingsController() {
                     (activity as? MainActivity)?.showNotificationPermissionPrompt(true)
                     showBackupRestoreDialog(uri)
                 }
+
+                CODE_GOOGLE_SIGN_IN -> {
+                    val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                    try {
+                        val account = task.getResult(ApiException::class.java)
+                        preferences.googleDriveBackupAccount().set(account?.email ?: "")
+                        activity?.toast(activity?.getString(R.string.google_drive_sign_in_success, account?.email) ?: "")
+                        refreshPreferenceScreen()
+                    } catch (e: ApiException) {
+                        Timber.e(e)
+                        activity?.toast(R.string.google_drive_sign_in_error)
+                    }
+                }
             }
         }
+    }
+
+    private fun refreshPreferenceScreen() {
+        val screen = preferenceScreen ?: return
+        screen.removeAll()
+        setupPreferenceScreen(screen)
     }
 
     fun createBackup(flags: Int) {
@@ -319,5 +410,6 @@ class SettingsBackupController : SettingsController() {
 private const val CODE_BACKUP_DIR = 503
 private const val CODE_BACKUP_CREATE = 504
 private const val CODE_BACKUP_RESTORE = 505
+private const val CODE_GOOGLE_SIGN_IN = 506
 
 private const val HELP_URL = "https://tachiyomi.org/docs/guides/backups"

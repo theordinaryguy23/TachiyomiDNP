@@ -35,10 +35,19 @@ fun Project.getBuildTime(): String {
 }
 
 fun Project.runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
+    return try {
+        val byteOut = ByteArrayOutputStream()
+        val result = project.exec {
+            commandLine = command.split(" ")
+            standardOutput = byteOut
+            isIgnoreExitValue = true
+        }
+        if (result.exitValue == 0) {
+            String(byteOut.toByteArray()).trim().ifEmpty { "0" }
+        } else {
+            "0"
+        }
+    } catch (e: Exception) {
+        "0"
     }
-    return String(byteOut.toByteArray()).trim()
 }

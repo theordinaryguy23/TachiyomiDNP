@@ -236,4 +236,8 @@ object PreferenceKeys {
     const val hideChapterTitles = "hide_chapter_titles"
 
     const val chaptersDescAsDefault = "chapters_desc_as_default"
+
+    const val googleDriveBackupEnabled = "google_drive_backup_enabled"
+    const val googleDriveBackupAccount = "google_drive_backup_account"
+    const val googleDriveBackupLastSync = "google_drive_backup_last_sync"
 }

@@ -31,10 +31,11 @@ A free and open source manga reader for **Android 6.0 (Marshmallow) and above**.
 ### APK Variants
 | Variant | Architecture | Size | Notes |
 |---------|-------------|------|-------|
-| `app-standard-arm64-v8a-release.apk` | arm64-v8a | ~35 MB | **Recommended** for most devices |
-| `app-standard-armeabi-v7a-release.apk` | armeabi-v7a | ~30 MB | Older 32-bit devices |
-| `app-standard-x86_64-release.apk` | x86_64 | ~38 MB | Emulators |
-| `app-standard-universal-release.apk` | All | ~90 MB | Universal (all ABIs) |
+| `TachiyomiDNP-1.8.8-release-arm64-v8a.apk` | arm64-v8a | ~35 MB | **Recommended** for most devices |
+| `TachiyomiDNP-1.8.8-release-armeabi-v7a.apk` | armeabi-v7a | ~30 MB | Older 32-bit devices |
+| `TachiyomiDNP-1.8.8-release-x86_64.apk` | x86_64 | ~38 MB | Emulators |
+| `TachiyomiDNP-1.8.8-release-x86.apk` | x86 | ~32 MB | Legacy emulators |
+| `TachiyomiDNP-1.8.8-release-universal.apk` | All | ~90 MB | Universal (all ABIs) |
 
 ---
 
@@ -71,7 +72,7 @@ A free and open source manga reader for **Android 6.0 (Marshmallow) and above**.
 - [x] Floating search bar for quick library/source search
 - [x] Stats page
 - [x] Dynamic shortcuts — open latest chapter from home screen
-- [x] Material Design You additions
+- [x] Material You additions
 - [x] Batch auto-source migration
 - [x] View all chapters right in the reader
 
@@ -98,12 +99,12 @@ Get the latest APK from the [Releases](https://github.com/theordinaryguy23/Tachi
 
 ### Environment Setup
 ```bash
-# Set Java 17
-export JAVA_HOME=~/jdk-17.0.11+9
-export PATH=$JAVA_HOME/bin:$PATH
-
-# Verify
+# Ensure Java 17 is installed
 java -version  # Should show 17.x.x
+
+# If needed, set JAVA_HOME to your JDK 17 installation path
+# export JAVA_HOME=/path/to/jdk-17
+# export PATH=$JAVA_HOME/bin:$PATH
 ```
 
 ### Build
@@ -122,11 +123,11 @@ cd TachiyomiDNP
 APKs are generated at:
 ```
 app/build/outputs/apk/standard/release/
-├── app-standard-arm64-v8a-release.apk
-├── app-standard-armeabi-v7a-release.apk
-├── app-standard-x86_64-release.apk
-├── app-standard-x86-release.apk
-└── app-standard-universal-release.apk
+├── TachiyomiDNP-1.8.8-release-arm64-v8a.apk
+├── TachiyomiDNP-1.8.8-release-armeabi-v7a.apk
+├── TachiyomiDNP-1.8.8-release-x86_64.apk
+├── TachiyomiDNP-1.8.8-release-x86.apk
+└── TachiyomiDNP-1.8.8-release-universal.apk
 ```
 
 ### Gradle Configuration
@@ -164,7 +165,7 @@ TachiyomiDNP/
 - **Dependency Injection:** Manual (ServiceLocator pattern)
 - **Networking:** OkHttp + Retrofit
 - **Image Loading:** Coil
-- **Database:** Room (via Tachiyomi's custom ORM)
+- **Database:** StorIO (custom ORM over SQLite)
 - **Async:** RxJava + Coroutines
 
 ---

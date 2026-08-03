@@ -20,19 +20,28 @@ plugins {
 
 // Auto-copy dummy google-services.json if real one doesn't exist
 // This allows building without committing real API keys
-val googleServicesFile = file("src/standard/google-services.json")
+val googleServicesFile = file("google-services.json")
 val googleServicesDummy = file("src/standard/google-services.json.dummy")
 if (!googleServicesFile.exists() && googleServicesDummy.exists()) {
     googleServicesDummy.copyTo(googleServicesFile, overwrite = false)
 }
 
 fun runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
+    return try {
+        val byteOut = ByteArrayOutputStream()
+        val result = project.exec {
+            commandLine = command.split(" ")
+            standardOutput = byteOut
+            isIgnoreExitValue = true
+        }
+        if (result.exitValue == 0) {
+            String(byteOut.toByteArray()).trim().ifEmpty { "0" }
+        } else {
+            "0"
+        }
+    } catch (e: Exception) {
+        "0"
     }
-    return String(byteOut.toByteArray()).trim()
 }
 
 fun getBuildVersion(): String {
@@ -122,6 +131,21 @@ android {
         aidl = false
         renderScript = false
         shaders = false
+    }
+
+    packaging {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/license.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/notice.txt"
+            excludes += "META-INF/ASL2.0"
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/*.kotlin_module"
+        }
     }
 
     flavorDimensions.add("default")
@@ -345,6 +369,16 @@ dependencies {
 
     // Android Chart
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // Google Drive Backup
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.api-client:google-api-client-android:2.7.2") {
+        exclude(group = "org.apache.httpcomponents")
+    }
+    implementation("com.google.apis:google-api-services-drive:v3-rev20260624-2.0.0")
+    implementation("com.google.http-client:google-http-client-gson:1.45.0") {
+        exclude(group = "org.apache.httpcomponents")
+    }
 }
 
 tasks {

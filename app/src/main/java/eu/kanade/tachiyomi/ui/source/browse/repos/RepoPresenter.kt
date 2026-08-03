@@ -22,21 +22,18 @@ class RepoPresenter(
     /**
      * List containing repos.
      */
+    /**
+     * List containing repos.
+     */
     private var repos: Set<String>
         get() =
             preferences
                 .extensionRepos()
                 .get()
-                .map {
-                    if (it.endsWith("/repo.json") || it.endsWith("/index.min.json") || it.endsWith("/index.pb")) {
-                        it
-                    } else {
-                        "$it/index.min.json"
-                    }
-                }
+                .map { normalizeRepoUrl(it) }
                 .sorted()
                 .toSet()
-        set(value) = preferences.extensionRepos().set(value.toSet())
+        set(value) = preferences.extensionRepos().set(value.map { normalizeRepoUrl(it) }.toSet())
 
     /**
      * Called when the presenter is created.
@@ -65,15 +62,16 @@ class RepoPresenter(
      * @param name The name of the repo to create.
      */
     fun createRepo(name: String): Boolean {
-        if (isInvalidRepo(name)) return false
+        val normalized = normalizeRepoUrl(name)
+        if (isInvalidRepo(normalized)) return false
 
         // Do not allow duplicate repos.
-        if (repoExists(name)) {
+        if (repoExists(normalized)) {
             controller.onRepoExistsError()
             return true
         }
 
-        repos += name
+        repos += normalized
         controller.updateRepos()
         return true
     }
@@ -85,7 +83,8 @@ class RepoPresenter(
      */
     fun deleteRepo(repo: String?) {
         val safeRepo = repo ?: return
-        repos -= safeRepo
+        val normalized = normalizeRepoUrl(safeRepo)
+        repos = repos.filterNot { it.equals(normalized, ignoreCase = true) || it.equals(safeRepo, ignoreCase = true) }.toSet()
         controller.updateRepos()
     }
 
@@ -99,10 +98,11 @@ class RepoPresenter(
         repo: String,
         name: String,
     ): Boolean {
-        if (!repo.equals(name, true)) {
-            if (isInvalidRepo(name)) return false
-            repos -= repo
-            repos += name
+        val normalizedName = normalizeRepoUrl(name)
+        if (!repo.equals(normalizedName, true)) {
+            if (isInvalidRepo(normalizedName)) return false
+            val currentRepos = repos.filterNot { it.equals(repo, ignoreCase = true) }.toSet()
+            repos = currentRepos + normalizedName
             controller.updateRepos()
         }
         return true
@@ -123,8 +123,26 @@ class RepoPresenter(
     private fun repoExists(name: String): Boolean = repos.any { it.equals(name, true) }
 
     companion object {
-        private val repoRegex = "^https://.*/(repo\\.json|index\\.min\\.json|index\\.pb)$".toRegex()
+        private val repoRegex = "^https?://.+$".toRegex()
         private val githubRepoRegex = "https://(?:raw.githubusercontent.com|github.com)/(.+?)/(.+?)/.+".toRegex()
         const val CREATE_REPO_ITEM = "create_repo"
+
+        fun normalizeRepoUrl(url: String): String {
+            var trimmed = url.trim().trimEnd('/')
+            if (trimmed.contains("github.com/keiyoushi/extensions-source") ||
+                trimmed.contains("github.com/keiyoushi/extensions") ||
+                trimmed.contains("raw.githubusercontent.com/keiyoushi/extensions") ||
+                trimmed.contains("keiyoushi.github.io/extensions")
+            ) {
+                return "https://raw.githubusercontent.com/keiyoushi/extensions/repo"
+            }
+            val ghMatch = "^https://github\\.com/([^/]+)/([^/]+)/?".toRegex().find(trimmed)
+            if (ghMatch != null) {
+                val (user, repo) = ghMatch.destructured
+                val cleanRepo = repo.removeSuffix(".git")
+                return "https://raw.githubusercontent.com/$user/$cleanRepo/repo"
+            }
+            return trimmed
+        }
     }
 }

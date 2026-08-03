@@ -39,6 +39,17 @@ interface Source {
     suspend fun getMangaDetails(manga: SManga): SManga = fetchMangaDetails(manga).awaitSingle()
 
     /**
+     * Get the updated details for a manga and its chapters in one call.
+     *
+     * @since extensions-lib 1.6
+     * @param manga the manga to update.
+     * @return a pair containing the updated manga and its chapters.
+     */
+    suspend fun getMangaUpdate(manga: SManga): Pair<SManga, List<SChapter>> {
+        return getMangaDetails(manga) to getChapterList(manga)
+    }
+
+    /**
      * Get all the available chapters for a manga.
      *
      * @since extensions-lib 1.5

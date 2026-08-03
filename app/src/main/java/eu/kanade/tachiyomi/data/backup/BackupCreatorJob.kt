@@ -3,13 +3,13 @@ package eu.kanade.tachiyomi.data.backup
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toUri
+import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.hippo.unifile.UniFile
@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit
 class BackupCreatorJob(
     private val context: Context,
     workerParams: WorkerParameters,
-) : Worker(context, workerParams) {
-    override fun doWork(): Result {
+) : CoroutineWorker(context, workerParams) {
+    override suspend fun doWork(): Result {
         val preferences = Injekt.get<PreferencesHelper>()
         val notifier = BackupNotifier(context.localeContext)
         val uri =
@@ -39,6 +39,15 @@ class BackupCreatorJob(
         return try {
             val location = BackupCreator(context).createBackup(uri, flags, isAutoBackup)
             if (!isAutoBackup) notifier.showBackupComplete(UniFile.fromUri(context, location.toUri()))
+
+            if (preferences.googleDriveBackupEnabled().get()) {
+                try {
+                    GoogleDriveHelper(context).uploadBackup(location.toUri())
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to upload backup to Google Drive")
+                }
+            }
+
             Result.success()
         } catch (e: Exception) {
             Timber.e(e)

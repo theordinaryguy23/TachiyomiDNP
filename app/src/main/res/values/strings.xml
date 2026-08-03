@@ -813,6 +813,19 @@
     <string name="backup_restore_invalid_uri">Error: empty URI</string>
     <string name="creating_backup">Creating backup</string>
     <string name="backup_info">Automatic backups are highly recommended. You should keep copies in other places as well.</string>
+
+    <!-- Google Drive Backup -->
+    <string name="google_drive_backup">Google Drive backup</string>
+    <string name="google_drive_backup_summary">Backup your library and settings to Google Drive</string>
+    <string name="google_drive_sign_in">Sign in with Google</string>
+    <string name="google_drive_sign_out">Sign out from Google</string>
+    <string name="google_drive_cloud_backup">Cloud backup</string>
+    <string name="google_drive_cloud_backup_summary">Automatically upload backups to Google Drive</string>
+    <string name="google_drive_last_sync">Last sync: %1$s</string>
+    <string name="google_drive_not_signed_in">Not signed in</string>
+    <string name="google_drive_sign_in_success">Signed in as %1$s</string>
+    <string name="google_drive_sign_in_error">Google Sign-in failed</string>
+    <string name="google_drive_sign_out_success">Signed out from Google</string>
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restore_duration">%02d min, %02d sec</string>
