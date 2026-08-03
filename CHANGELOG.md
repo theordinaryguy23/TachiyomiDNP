@@ -5,6 +5,11 @@
 ### Bug Fixes
 - Fix RepoPresenter getter/setter to preserve original repo URLs ending with index.pb, index.min.json, or repo.json
 - Prevent URL path duplication when user enters a direct index file URL
+- Preserve original URLs in setter instead of stripping suffixes
+
+### Technical Changes
+- Upgrade kotlinx-serialization from 1.8.1 to 1.11.0 for protobuf compatibility
+- Fix libVersion extraction to use extensionLib field instead of versionName
 - Stop appending /index.min.json to direct index.pb URLs which caused 404 errors
 
 ### New Features

@@ -184,7 +184,7 @@ internal class ExtensionApi {
                 pkgName = ext.packageName,
                 versionName = ext.versionName,
                 versionCode = ext.versionCode,
-                libVersion = ext.versionName.extractLibVersion(),
+                libVersion = ext.extensionLib.toDoubleOrNull() ?: 0.0,
                 lang = ext.sources.firstOrNull()?.language ?: "",
                 isNsfw = ext.contentWarning == ContentWarning.NSFW,
                 sources = ext.sources.map { source ->
