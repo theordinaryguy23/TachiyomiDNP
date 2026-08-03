@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.8.8
+
+### Bug Fixes
+- Fix RepoPresenter getter/setter to preserve original repo URLs ending with index.pb, index.min.json, or repo.json
+- Prevent URL path duplication when user enters a direct index file URL
+- Stop appending /index.min.json to direct index.pb URLs which caused 404 errors
+
+### New Features
+- Support protobuf extension index format (Keiyoushi v2)
+- Backward compatible with legacy JSON extension repos
+- Auto-detect repo.json, index.pb, and index.min.json
+
 ## v1.8.7
 
 ### Bug Fixes

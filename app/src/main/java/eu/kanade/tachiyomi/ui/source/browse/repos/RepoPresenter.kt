@@ -36,14 +36,7 @@ class RepoPresenter(
                 }
                 .sorted()
                 .toSet()
-        set(value) = preferences.extensionRepos().set(value.map {
-            when {
-                it.endsWith("/repo.json") -> it.removeSuffix("/repo.json")
-                it.endsWith("/index.min.json") -> it.removeSuffix("/index.min.json")
-                it.endsWith("/index.pb") -> it.removeSuffix("/index.pb")
-                else -> it
-            }
-        }.toSet())
+        set(value) = preferences.extensionRepos().set(value.toSet())
 
     /**
      * Called when the presenter is created.
