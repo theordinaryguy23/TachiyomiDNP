@@ -5,6 +5,7 @@
 ### Bug Fixes
 - Fix direct URL handling for extension repositories (index.pb, repo.json, index.min.json)
 - Prevent URL path duplication when user enters a direct index file URL
+- Preserve original repo URL in RepoPresenter to prevent unintended path modification
 
 ### New Features
 - Support protobuf extension index format (Keiyoushi v2)
