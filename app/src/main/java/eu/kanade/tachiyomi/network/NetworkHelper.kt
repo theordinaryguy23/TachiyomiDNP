@@ -40,6 +40,7 @@ class NetworkHelper(
                     .addInterceptor(BrotliInterceptor)
                     .addInterceptor(UncaughtExceptionInterceptor())
                     .addInterceptor(userAgentInterceptor)
+                    .addInterceptor(cloudflareInterceptor)
                     .apply {
 //                    if (BuildConfig.DEBUG) {
 //                        addInterceptor(
