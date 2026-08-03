@@ -45,53 +45,75 @@ internal class ExtensionApi {
     }
 
     private suspend fun getExtensions(repoBaseUrl: String): List<Extension.Available> {
+        val baseUrl = repoBaseUrl.trimEnd('/')
+
+        // Detect if URL already points directly to a known index file
+        val directRepoJson = baseUrl.endsWith("/repo.json")
+        val directIndexPb = baseUrl.endsWith("/index.pb")
+        val directIndexMinJson = baseUrl.endsWith("/index.min.json")
+
+        // Extract base directory for constructing relative paths
+        val baseDir = when {
+            directRepoJson -> baseUrl.substringBeforeLast("/")
+            directIndexPb -> baseUrl.substringBeforeLast("/")
+            directIndexMinJson -> baseUrl.substringBeforeLast("/")
+            else -> baseUrl
+        }
+
         // 1. Try repo.json -> check index_v2 -> fetch protobuf
-        try {
-            val response =
-                networkService.client
-                    .newCall(GET("$repoBaseUrl/repo.json"))
-                    .awaitSuccess()
+        if (!directIndexPb && !directIndexMinJson) {
+            try {
+                val repoJsonUrl = if (directRepoJson) baseUrl else "$baseDir/repo.json"
+                val response =
+                    networkService.client
+                        .newCall(GET(repoJsonUrl))
+                        .awaitSuccess()
 
-            val bodyBytes = response.body?.bytes() ?: return emptyList()
-            val data = decompressIfGzip(bodyBytes)
+                val bodyBytes = response.body?.bytes() ?: return emptyList()
+                val data = decompressIfGzip(bodyBytes)
 
-            if (data.isJson()) {
-                val text = data.toString(Charsets.UTF_8)
-                val repoInfo = json.decodeFromString<RepoInfo>(text)
-                val indexV2 = repoInfo.indexV2
-                if (indexV2 != null) {
-                    return fetchIndex(indexV2)
+                if (data.isJson()) {
+                    val text = data.toString(Charsets.UTF_8)
+                    val repoInfo = json.decodeFromString<RepoInfo>(text)
+                    val indexV2 = repoInfo.indexV2
+                    if (indexV2 != null) {
+                        return fetchIndex(indexV2)
+                    }
                 }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to fetch repo.json from $repoBaseUrl")
             }
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to fetch repo.json from $repoBaseUrl")
         }
 
         // 2. Try index.pb directly
         try {
-            val extensions = fetchIndex("$repoBaseUrl/index.pb")
+            val indexPbUrl = if (directIndexPb) baseUrl else "$baseDir/index.pb"
+            val extensions = fetchIndex(indexPbUrl)
             if (extensions.isNotEmpty()) return extensions
         } catch (e: Exception) {
             Timber.w(e, "Failed to fetch index.pb from $repoBaseUrl")
         }
 
         // 3. Fallback to index.min.json (legacy)
-        try {
-            val response =
-                networkService.client
-                    .newCall(GET("$repoBaseUrl/index.min.json"))
-                    .awaitSuccess()
+        if (!directIndexPb && !directRepoJson) {
+            try {
+                val indexMinJsonUrl = if (directIndexMinJson) baseUrl else "$baseDir/index.min.json"
+                val response =
+                    networkService.client
+                        .newCall(GET(indexMinJsonUrl))
+                        .awaitSuccess()
 
-            val bodyBytes = response.body?.bytes() ?: return emptyList()
-            val data = decompressIfGzip(bodyBytes)
+                val bodyBytes = response.body?.bytes() ?: return emptyList()
+                val data = decompressIfGzip(bodyBytes)
 
-            if (data.isJson()) {
-                val text = data.toString(Charsets.UTF_8)
-                val extensions = json.decodeFromString<List<ExtensionJsonObject>>(text).toExtensions(repoBaseUrl)
-                if (extensions.isNotEmpty()) return extensions
+                if (data.isJson()) {
+                    val text = data.toString(Charsets.UTF_8)
+                    val extensions = json.decodeFromString<List<ExtensionJsonObject>>(text).toExtensions(baseDir)
+                    if (extensions.isNotEmpty()) return extensions
+                }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to fetch index.min.json from $repoBaseUrl")
             }
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to fetch index.min.json from $repoBaseUrl")
         }
 
         return emptyList()

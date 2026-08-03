@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.8.8
+
+### Bug Fixes
+- Fix direct URL handling for extension repositories (index.pb, repo.json, index.min.json)
+- Prevent URL path duplication when user enters a direct index file URL
+
 ## v1.8.7
 
 ### New Features
