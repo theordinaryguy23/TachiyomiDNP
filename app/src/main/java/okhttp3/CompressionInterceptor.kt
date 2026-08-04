@@ -33,7 +33,7 @@ class CompressionInterceptor(
     companion object {
         @JvmStatic
         fun create(vararg algorithms: DecompressionAlgorithm): CompressionInterceptor {
-            return CompressionInterceptor(algorithms.toTypedArray())
+            return CompressionInterceptor(algorithms.clone())
         }
     }
 }
