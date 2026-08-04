@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.network.interceptor.UncaughtExceptionInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import okhttp3.Cache
 import okhttp3.OkHttpClient
-import okhttp3.brotli.BrotliInterceptor
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -37,7 +36,6 @@ class NetworkHelper(
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .callTimeout(2, TimeUnit.MINUTES)
-                    .addInterceptor(BrotliInterceptor())
                     .addInterceptor(UncaughtExceptionInterceptor())
                     .addInterceptor(userAgentInterceptor)
                     .addInterceptor(cloudflareInterceptor)
