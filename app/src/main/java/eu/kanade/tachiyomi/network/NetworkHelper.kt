@@ -37,7 +37,7 @@ class NetworkHelper(
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .callTimeout(2, TimeUnit.MINUTES)
-                    .addInterceptor(BrotliInterceptor)
+                    .addInterceptor(BrotliInterceptor())
                     .addInterceptor(UncaughtExceptionInterceptor())
                     .addInterceptor(userAgentInterceptor)
                     .addInterceptor(cloudflareInterceptor)
