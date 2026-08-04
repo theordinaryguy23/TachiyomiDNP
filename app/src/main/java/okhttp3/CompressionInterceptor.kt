@@ -5,7 +5,7 @@ import okio.Buffer
 import java.io.IOException
 
 class CompressionInterceptor(
-    private val algorithms: Array<DecompressionAlgorithm>,
+    private val algorithms: Array<out DecompressionAlgorithm>,
 ) : Interceptor {
     @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
