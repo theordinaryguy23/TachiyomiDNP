@@ -267,7 +267,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
-    implementation("com.squareup.okhttp3:okhttp-brotli:$okhttpVersion")
+    // implementation("com.squareup.okhttp3:okhttp-brotli:$okhttpVersion")  // removed: not available for OkHttp 4.12.0; stubs provided in source
     // removed invalid dependency
     implementation("com.squareup.okio:okio:3.11.0")
 
