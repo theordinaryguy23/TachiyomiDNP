@@ -1,12 +1,13 @@
 package okhttp3
 
-object Gzip {
-    @JvmStatic
-    fun isAvailable(): Boolean = false
+import okio.BufferedSource
+import okio.GzipSource
+import okio.Source
 
-    @JvmStatic
-    fun compress(source: ByteArray): ByteArray = source
+object Gzip : CompressionInterceptor.DecompressionAlgorithm {
+    override val encoding: String get() = "gzip"
 
-    @JvmStatic
-    fun decompress(source: ByteArray): ByteArray = source
+    override fun decompress(compressedSource: BufferedSource): Source {
+        return GzipSource(compressedSource)
+    }
 }

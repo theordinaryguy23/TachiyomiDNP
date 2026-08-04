@@ -1,39 +1,63 @@
 package okhttp3
 
-import okhttp3.Interceptor
-import okio.Buffer
-import java.io.IOException
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.asResponseBody
+import okio.BufferedSource
+import okio.GzipSource
+import okio.Source
+import okio.buffer
 
-class CompressionInterceptor(
-    private val algorithms: Array<out DecompressionAlgorithm>,
+open class CompressionInterceptor(
+    vararg val algorithms: DecompressionAlgorithm,
 ) : Interceptor {
-    @Throws(IOException::class)
+
     override fun intercept(chain: Interceptor.Chain): Response {
-        // No-op stub for compatibility with extensions expecting CompressionInterceptor
-        return chain.proceed(chain.request())
+        if (algorithms.isEmpty()) return chain.proceed(chain.request())
+        val request = chain.request()
+        if (request.header("Accept-Encoding") != null) {
+            return chain.proceed(request)
+        }
+
+        val acceptEncoding =
+            algorithms.joinToString(separator = ", ") { it.encoding }
+
+        val newRequest = request.newBuilder()
+            .header("Accept-Encoding", acceptEncoding)
+            .build()
+
+        val response = chain.proceed(newRequest)
+
+        return decompress(response)
     }
 
-    interface DecompressionAlgorithm
+    protected open fun decompress(response: Response): Response {
+        if (response.body == null) return response
+        val body = response.body!!
+        val encoding = response.header("Content-Encoding") ?: return response
+        val algorithm = lookupDecompressor(encoding) ?: return response
 
-    object Brotli : DecompressionAlgorithm {
-        @JvmStatic
-        val INSTANCE: DecompressionAlgorithm = Brotli
+        val decompressedSource = algorithm.decompress(body.source()).buffer()
+        return response.newBuilder()
+            .removeHeader("Content-Encoding")
+            .removeHeader("Content-Length")
+            .body(decompressedSource.asResponseBody(body.contentType(), -1L))
+            .build()
     }
 
-    object Gzip : DecompressionAlgorithm {
-        @JvmStatic
-        val INSTANCE: DecompressionAlgorithm = Gzip
+    protected open fun lookupDecompressor(encoding: String): DecompressionAlgorithm? {
+        return algorithms.find { it.encoding.equals(encoding, ignoreCase = true) }
     }
 
-    object Zstd : DecompressionAlgorithm {
-        @JvmStatic
-        val INSTANCE: DecompressionAlgorithm = Zstd
+    interface DecompressionAlgorithm {
+        val encoding: String
+
+        fun decompress(compressedSource: BufferedSource): Source
     }
 
     companion object {
         @JvmStatic
         fun create(vararg algorithms: DecompressionAlgorithm): CompressionInterceptor {
-            return CompressionInterceptor(algorithms.clone())
+            return CompressionInterceptor(algorithms = algorithms)
         }
     }
 }
