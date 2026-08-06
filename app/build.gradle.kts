@@ -263,7 +263,7 @@ dependencies {
     implementation("com.fredporciuncula:flow-preferences:1.6.0")
 
     // Network client
-    val okhttpVersion = "4.12.0"
+    val okhttpVersion = "5.4.0"
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
