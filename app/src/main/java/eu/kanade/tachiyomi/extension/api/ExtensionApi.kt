@@ -81,7 +81,7 @@ internal class ExtensionApi {
                 if (data.isJson()) {
                     val text = data.toString(Charsets.UTF_8)
                     val repoInfo = json.decodeFromString<RepoInfo>(text)
-                    val indexV2 = repoInfo.indexV2
+                    val indexV2 = repoInfo.effectiveIndexV2
                     if (indexV2 != null) {
                         val exts = fetchIndex(indexV2)
                         if (exts.isNotEmpty()) return exts
@@ -142,7 +142,7 @@ internal class ExtensionApi {
                 val text = data.toString(Charsets.UTF_8)
                 if (text.startsWith("{")) {
                     val repoInfo = json.decodeFromString<RepoInfo>(text)
-                    val indexV2 = repoInfo.indexV2
+                    val indexV2 = repoInfo.effectiveIndexV2
                     if (indexV2 != null) {
                         fetchIndex(indexV2)
                     } else {
@@ -277,9 +277,14 @@ internal class ExtensionApi {
 
 @Serializable
 private data class RepoInfo(
+    @kotlinx.serialization.SerialName("index_v2")
     val indexV2: String? = null,
+    @kotlinx.serialization.SerialName("indexV2")
+    val indexV2Alt: String? = null,
     val meta: MetaInfo? = null,
-)
+) {
+    val effectiveIndexV2: String? get() = indexV2 ?: indexV2Alt
+}
 
 @Serializable
 private data class MetaInfo(
