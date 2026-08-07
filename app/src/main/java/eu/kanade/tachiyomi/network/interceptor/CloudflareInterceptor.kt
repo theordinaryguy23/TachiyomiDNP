@@ -17,6 +17,7 @@ import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
+import timber.log.Timber
 
 class CloudflareInterceptor(
     private val context: Context,
@@ -26,8 +27,23 @@ class CloudflareInterceptor(
     private val executor = ContextCompat.getMainExecutor(context)
 
     override fun shouldIntercept(response: Response): Boolean {
-        // Check if Cloudflare anti-bot is on
-        return response.code in ERROR_CODES && response.header("Server") in SERVER_CHECK
+        // Check if Cloudflare anti-bot is on AND it's actually a JS challenge, not a geo-block
+        if (response.code !in ERROR_CODES || response.header("Server") !in SERVER_CHECK) return false
+        // Peek at the body: only trigger WebView solving on an actual Cloudflare challenge
+        // page (presence of the challenge-error elements). Geo-blocks (HTTP 451/522 etc.)
+        // or generic 403s should NOT trigger the WebView bypass — doing so causes an
+        // infinite-loop where the WebView keeps retrying forever.
+        return try {
+            val document = org.jsoup.Jsoup.parse(
+                response.peekBody(Long.MAX_VALUE).string(),
+                response.request.url.toString(),
+            )
+            document.getElementById("challenge-error-title") != null ||
+                document.getElementById("challenge-error-text") != null
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to parse response body for Cloudflare check")
+            false
+        }
     }
 
     override fun intercept(
