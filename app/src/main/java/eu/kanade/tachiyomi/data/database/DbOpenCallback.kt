@@ -4,6 +4,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
+import eu.kanade.tachiyomi.data.database.tables.ExtensionStoreTable
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
@@ -19,7 +20,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 17
+        const val DATABASE_VERSION = 18
     }
 
     override fun onOpen(db: SupportSQLiteDatabase) {
@@ -46,6 +47,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             execSQL(CategoryTable.createTableQuery)
             execSQL(MangaCategoryTable.createTableQuery)
             execSQL(HistoryTable.createTableQuery)
+            execSQL(ExtensionStoreTable.createTableQuery)
 
             // DB indexes
             execSQL(MangaTable.createUrlIndexQuery)
@@ -121,6 +123,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
         if (oldVersion < 17) {
             db.execSQL(TrackTable.updateMangaUpdatesScore)
+        }
+        if (oldVersion < 18) {
+            db.execSQL(ExtensionStoreTable.createTableQuery)
         }
     }
 

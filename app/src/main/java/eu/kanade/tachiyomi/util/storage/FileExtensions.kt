@@ -18,3 +18,22 @@ fun File.getUriCompat(context: Context): Uri =
     } else {
         Uri.fromFile(this)
     }
+
+/**
+ * Copies this file to the target [destination] and sets it read-only.
+ *
+ * @param destination The destination file.
+ * @param overwrite Whether to overwrite the destination if it already exists.
+ * @return The destination file.
+ */
+fun File.copyAndSetReadOnlyTo(
+    destination: File,
+    overwrite: Boolean = true,
+): File {
+    if (overwrite) {
+        destination.delete()
+    }
+    this.copyTo(destination, overwrite = overwrite)
+    destination.setReadOnly()
+    return destination
+}
