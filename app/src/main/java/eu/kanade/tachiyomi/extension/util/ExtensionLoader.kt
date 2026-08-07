@@ -43,8 +43,10 @@ internal object ExtensionLoader {
     private const val METADATA_SOURCE_CLASS = "tachiyomi.extension.class"
     private const val METADATA_SOURCE_FACTORY = "tachiyomi.extension.factory"
     private const val METADATA_NSFW = "tachiyomi.extension.nsfw"
-    const val LIB_VERSION_MIN = 1.3
-    const val LIB_VERSION_MAX = 1.6
+    private const val METADATA_NAME = "tachiyomix.name"
+    private const val METADATA_EXTENSION_LIB = "tachiyomix.extensionLib"
+    private const val METADATA_CONTENT_WARNING = "tachiyomix.contentWarning"
+    private val SUPPORTED_LIB_VERSIONS = listOf(1.4, 1.6)
 
     @Suppress("DEPRECATION")
     private val PACKAGE_FLAGS =
@@ -328,7 +330,8 @@ internal object ExtensionLoader {
         val appInfo = pkgInfo.applicationInfo!!
         val pkgName = pkgInfo.packageName
 
-        val extName = pkgManager.getApplicationLabel(appInfo).toString().substringAfter("Tachiyomi: ")
+        val extName = appInfo.metaData.getString(METADATA_NAME)
+            ?: pkgManager.getApplicationLabel(appInfo).toString().substringAfter("Tachiyomi: ")
         val versionName = pkgInfo.versionName
         val versionCode = PackageInfoCompat.getLongVersionCode(pkgInfo)
 
@@ -338,10 +341,14 @@ internal object ExtensionLoader {
         }
 
         // Validate lib version
-        val libVersion = versionName.substringBeforeLast('.').toDoubleOrNull()
-        if (libVersion == null || libVersion < LIB_VERSION_MIN || libVersion > LIB_VERSION_MAX) {
+        val libVersion = appInfo.metaData.getFloat(METADATA_EXTENSION_LIB)
+            .takeUnless { it == 0.0f }
+            ?.toString()
+            ?.toDouble()
+            ?: versionName.substringBeforeLast('.').toDoubleOrNull()
+        if (libVersion == null || libVersion !in SUPPORTED_LIB_VERSIONS) {
             Timber.w(
-                "Lib version is $libVersion, while only versions $LIB_VERSION_MIN to $LIB_VERSION_MAX are allowed",
+                "Lib version is $libVersion, while only version(s) ${SUPPORTED_LIB_VERSIONS.joinToString()} are supported",
             )
             return LoadResult.Error
         }
@@ -368,7 +375,8 @@ internal object ExtensionLoader {
             return LoadResult.Untrusted(extension)
         }
 
-        val isNsfw = appInfo.metaData.getInt(METADATA_NSFW) == 1
+        val isNsfw = appInfo.metaData.getInt(METADATA_CONTENT_WARNING) > 0 ||
+            appInfo.metaData.getInt(METADATA_NSFW) == 1
         if (!loadNsfwSource && isNsfw) {
             Timber.w("NSFW extension $pkgName not allowed")
             return LoadResult.Error

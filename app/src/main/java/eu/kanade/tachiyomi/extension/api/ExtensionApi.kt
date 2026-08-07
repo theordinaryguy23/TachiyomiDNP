@@ -251,7 +251,7 @@ internal class ExtensionApi {
         this
             .filter {
                 val libVersion = it.extractLibVersion()
-                libVersion >= ExtensionLoader.LIB_VERSION_MIN && libVersion <= ExtensionLoader.LIB_VERSION_MAX
+                libVersion in listOf(1.4, 1.6)
             }.map {
                 Extension.Available(
                     name = it.name.substringAfter("Tachiyomi: "),
