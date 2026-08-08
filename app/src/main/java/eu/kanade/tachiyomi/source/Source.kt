@@ -142,6 +142,9 @@ fun Source.preferenceKey(): String = "source_$id"
  * error" and zero chapters. Routing through `getMangaUpdate` lets 1.6 extensions
  * serve the request directly while 1.4 extensions fall through to the compatibility
  * bridge in [CatalogueSource].
+ *
+ * Use [awaitMangaUpdate] instead when details are needed too: a source may reject
+ * two concurrent [Source.getMangaUpdate] calls for the same manga.
  */
 suspend fun Source.awaitChapterList(manga: SManga): List<SChapter> = getMangaUpdate(
     manga = manga,
@@ -149,3 +152,47 @@ suspend fun Source.awaitChapterList(manga: SManga): List<SChapter> = getMangaUpd
     fetchDetails = false,
     fetchChapters = true,
 ).chapters
+
+/**
+ * Fetches only a manga's details through the extensions-lib 1.6 [Source.getMangaUpdate] API.
+ *
+ * Host code must use this rather than calling [Source.getMangaDetails] directly.
+ * On a lib 1.6 source the legacy detail path is unavailable — Keiyoushi's
+ * `KeiSource` declares `mangaDetailsRequest`/`mangaDetailsParse` as
+ * `throw UnsupportedOperationException()` — so the call must go through
+ * `getMangaUpdate`. 1.4 sources fall through to the bridge in [CatalogueSource].
+ */
+suspend fun Source.awaitMangaDetails(manga: SManga): SManga = getMangaUpdate(
+    manga = manga,
+    chapters = emptyList(),
+    fetchDetails = true,
+    fetchChapters = false,
+).manga
+
+/**
+ * Fetches a manga's details **and** chapter list in a single [Source.getMangaUpdate] call.
+ *
+ * Callers that need both must use this rather than issuing separate
+ * [Source.getMangaDetails] and [awaitChapterList] calls concurrently. Both of those
+ * funnel into `getMangaUpdate`, and Keiyoushi's `KeiSource` base class rejects
+ * overlapping calls for the same manga:
+ *
+ * ```
+ * check(updatesInFlight.putIfAbsent(manga.url, true) == null) {
+ *     "getMangaUpdate must not be called concurrently for same manga"
+ * }
+ * ```
+ *
+ * That guard is what surfaced as "Unknown error" on Weeb Central. Combining the two
+ * into one call also halves the requests, which is the whole point of the lib 1.6
+ * combined API.
+ */
+suspend fun Source.awaitMangaUpdate(
+    manga: SManga,
+    chapters: List<SChapter> = emptyList(),
+): SMangaUpdate = getMangaUpdate(
+    manga = manga,
+    chapters = chapters,
+    fetchDetails = true,
+    fetchChapters = true,
+)

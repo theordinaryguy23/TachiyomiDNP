@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.awaitChapterList
+import eu.kanade.tachiyomi.source.awaitMangaDetails
 import eu.kanade.tachiyomi.source.UnmeteredSource
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.UpdateStrategy
@@ -268,7 +269,7 @@ class LibraryUpdateJob(
                                 ensureActive()
                                 val networkManga =
                                     try {
-                                        source.getMangaDetails(manga.copy())
+                                        source.awaitMangaDetails(manga.copy())
                                     } catch (e: java.lang.Exception) {
                                         Timber.e(e)
                                         null

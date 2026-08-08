@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.awaitMangaDetails
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -263,7 +264,7 @@ open class GlobalSearchPresenter(
         manga: Manga,
         source: Source,
     ): Manga {
-        val networkManga = source.getMangaDetails(manga.copy())
+        val networkManga = source.awaitMangaDetails(manga.copy())
         manga.copyFrom(networkManga)
         manga.initialized = true
         db.insertManga(manga).executeAsBlocking()

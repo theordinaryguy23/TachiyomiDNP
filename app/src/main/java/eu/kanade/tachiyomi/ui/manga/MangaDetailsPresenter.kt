@@ -32,6 +32,8 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.SourceNotFoundException
 import eu.kanade.tachiyomi.source.awaitChapterList
+import eu.kanade.tachiyomi.source.awaitMangaUpdate
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -361,32 +363,30 @@ class MangaDetailsPresenter(
             isLoading = true
             var mangaError: java.lang.Exception? = null
             var chapterError: java.lang.Exception? = null
-            val chapters =
-                async(Dispatchers.IO) {
-                    try {
-                        source.awaitChapterList(manga)
-                    } catch (e: Exception) {
-                        chapterError = e
-                        emptyList()
-                    }
-                }
             val thumbnailUrl = manga.thumbnail_url
-            val nManga =
-                async(Dispatchers.IO) {
-                    try {
-                        source.getMangaDetails(manga.copy())
-                    } catch (e: java.lang.Exception) {
-                        mangaError = e
-                        null
-                    }
-                }
 
-            val networkManga = nManga.await()
+            // Details and chapters must be fetched in ONE getMangaUpdate call.
+            // Issuing them as two concurrent calls trips the KeiSource guard
+            // ("getMangaUpdate must not be called concurrently for same manga"),
+            // which surfaced as "Unknown error" with 0 chapters on Weeb Central.
+            var networkManga: SManga? = null
+            var finChapters: List<SChapter> = emptyList()
+            withContext(Dispatchers.IO) {
+                try {
+                    val update = source.awaitMangaUpdate(manga.copy())
+                    networkManga = update.manga
+                    finChapters = update.chapters
+                } catch (e: Exception) {
+                    mangaError = e
+                    chapterError = e
+                }
+            }
+
             if (networkManga != null) {
-                manga.copyFrom(networkManga)
+                manga.copyFrom(networkManga!!)
                 manga.initialized = true
 
-                if (thumbnailUrl != networkManga.thumbnail_url) {
+                if (thumbnailUrl != networkManga!!.thumbnail_url) {
                     coverCache.deleteFromCache(thumbnailUrl)
                 }
                 db.insertManga(manga).executeAsBlocking()
@@ -409,7 +409,6 @@ class MangaDetailsPresenter(
                     }
                 }
             }
-            val finChapters = chapters.await()
             if (finChapters.isNotEmpty()) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga, source)
                 if (newChapters.first.isNotEmpty()) {

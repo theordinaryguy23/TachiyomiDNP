@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.awaitChapterList
+import eu.kanade.tachiyomi.source.awaitMangaDetails
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.FadeChangeHandler
@@ -275,7 +276,7 @@ class MigrationListController(
                 if (result != null && result.thumbnail_url == null) {
                     try {
                         val newManga =
-                            sourceManager.getOrStub(result.source).getMangaDetails(result)
+                            sourceManager.getOrStub(result.source).awaitMangaDetails(result)
                         result.copyFrom(newManga)
 
                         db.insertManga(result).executeAsBlocking()
@@ -402,7 +403,7 @@ class MigrationListController(
             if (result != null) {
                 try {
                     val newManga =
-                        sourceManager.getOrStub(result.source).getMangaDetails(result)
+                        sourceManager.getOrStub(result.source).awaitMangaDetails(result)
                     result.copyFrom(newManga)
 
                     db.insertManga(result).executeAsBlocking()

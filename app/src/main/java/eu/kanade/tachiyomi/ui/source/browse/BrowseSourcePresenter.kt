@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.awaitMangaDetails
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
@@ -277,7 +278,7 @@ open class BrowseSourcePresenter(
      */
     private suspend fun getMangaDetails(manga: Manga): Manga {
         try {
-            val networkManga = source.getMangaDetails(manga.copy())
+            val networkManga = source.awaitMangaDetails(manga.copy())
             manga.copyFrom(networkManga)
             manga.initialized = true
             db.insertManga(manga).executeAsBlocking()

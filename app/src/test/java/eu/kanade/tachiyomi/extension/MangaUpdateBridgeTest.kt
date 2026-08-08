@@ -1,12 +1,15 @@
 package eu.kanade.tachiyomi.extension
 
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Verifies the extensions-lib 1.4 / 1.6 compatibility bridge.
@@ -176,5 +179,99 @@ class MangaUpdateBridgeTest {
         val update = ModernSource()
             .getMangaUpdate(manga, emptyList(), fetchDetails = false, fetchChapters = true)
         assertEquals("Test Manga", update.manga.title)
+    }
+
+    // --- Concurrency guard (KeiSource) --------------------------------------
+
+    /**
+     * Mirrors Keiyoushi's `KeiSource`, which rejects overlapping refreshes:
+     *
+     * ```
+     * check(updatesInFlight.putIfAbsent(manga.url, true) == null) {
+     *     "getMangaUpdate must not be called concurrently for same manga"
+     * }
+     * ```
+     */
+    private class GuardedSource : FakeCatalogueSource {
+        private val inFlight = ConcurrentHashMap<String, Boolean>()
+
+        override suspend fun getMangaUpdate(
+            manga: FakeManga,
+            chapters: List<FakeChapter>,
+            fetchDetails: Boolean,
+            fetchChapters: Boolean,
+        ): FakeUpdate {
+            check(fetchDetails || fetchChapters) { "nothing to fetch" }
+            check(inFlight.putIfAbsent(manga.title, true) == null) {
+                "getMangaUpdate must not be called concurrently for same manga"
+            }
+            try {
+                delay(20) // hold the slot so an overlapping call is observable
+                return FakeUpdate(
+                    if (fetchDetails) FakeManga("${manga.title} (detailed)") else manga,
+                    if (fetchChapters) listOf(FakeChapter("Ch. 1")) else chapters,
+                )
+            } finally {
+                inFlight.remove(manga.title)
+            }
+        }
+    }
+
+    @Test
+    fun `combined fetch satisfies the concurrency guard`() = runBlocking {
+        // What the host must do: one call carrying both flags.
+        val update = GuardedSource()
+            .getMangaUpdate(manga, emptyList(), fetchDetails = true, fetchChapters = true)
+
+        assertEquals("Test Manga (detailed)", update.manga.title)
+        assertEquals(1, update.chapters.size)
+    }
+
+    @Test
+    fun `concurrent detail and chapter fetches trip the guard`() {
+        // The regression this replaced: MangaDetailsPresenter.refreshAll ran
+        // getMangaDetails and awaitChapterList in two parallel async blocks, so the
+        // second call hit the in-flight guard and the UI showed "Unknown error".
+        val source = GuardedSource()
+
+        val error = assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                val details = async {
+                    source.getMangaUpdate(manga, emptyList(), fetchDetails = true, fetchChapters = false)
+                }
+                val chapters = async {
+                    source.getMangaUpdate(manga, emptyList(), fetchDetails = false, fetchChapters = true)
+                }
+                details.await()
+                chapters.await()
+            }
+        }
+
+        assertTrue(
+            "expected the KeiSource in-flight guard, got: ${error.message}",
+            error.message.orEmpty().contains("must not be called concurrently"),
+        )
+    }
+
+    @Test
+    fun `guarded source rejects a fetch that requests nothing`() {
+        // Confirms fetchDetails=false + fetchChapters=false is never a valid host call.
+        assertThrows(IllegalStateException::class.java) {
+            runBlocking {
+                GuardedSource()
+                    .getMangaUpdate(manga, emptyList(), fetchDetails = false, fetchChapters = false)
+            }
+        }
+        Unit
+    }
+
+    @Test
+    fun `sequential refreshes of the same manga are allowed`() = runBlocking {
+        // The guard must only reject overlap, not a later retry.
+        val source = GuardedSource()
+        source.getMangaUpdate(manga, emptyList(), fetchDetails = true, fetchChapters = true)
+        val second = source.getMangaUpdate(manga, emptyList(), fetchDetails = true, fetchChapters = true)
+
+        assertEquals(1, second.chapters.size)
     }
 }

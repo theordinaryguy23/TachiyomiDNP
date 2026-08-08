@@ -245,12 +245,53 @@ Host code must reach the chapter list through `Source.awaitChapterList(manga)`,
 which routes to `getMangaUpdate`. Calling `getChapterList`/`fetchChapterList`
 directly reintroduces the bug for every 1.6 extension.
 
+### 6.2 One refresh = one `getMangaUpdate` call
+
+Implementing the API is not enough; the **call pattern** matters too.
+
+Most current Keiyoushi sources extend `KeiSource`, which adds two runtime guards:
+
+```kotlin
+// keiyoushi/core/.../KeiSource.kt
+check(fetchDetails || fetchChapters) { "getMangaUpdate called with nothing to fetch" }
+check(updatesInFlight.putIfAbsent(manga.url, true) == null) {
+    "getMangaUpdate must not be called concurrently for same manga"
+}
+```
+
+`KeiSource` also seals off the legacy entry points entirely — `mangaDetailsRequest`,
+`mangaDetailsParse`, `chapterListRequest` and `chapterListParse` are all
+`final override … = throw UnsupportedOperationException()`.
+
+Two consequences for host code:
+
+1. **Never call `getMangaDetails` directly.** Use `awaitMangaDetails`, which routes
+   through `getMangaUpdate`. The legacy detail path does not exist on a 1.6 source.
+2. **Never issue two overlapping refreshes for the same manga.** Anything needing
+   both details and chapters must use `awaitMangaUpdate`, which sends a single call
+   with both flags set.
+
+The second rule is what originally broke Weeb Central. `MangaDetailsPresenter.refreshAll`
+fetched details and chapters in two parallel `async` blocks; both funnel into
+`getMangaUpdate`, the second one hit the in-flight guard, and the UI reported
+"Unknown error" with 0 chapters — even though the lib 1.6 API was implemented
+correctly. Combining them also halves the requests, which is the point of the
+combined API.
+
+| Helper | Flags | Use for |
+|---|---|---|
+| `awaitMangaUpdate` | details + chapters | opening/refreshing a manga (**preferred**) |
+| `awaitChapterList` | chapters only | chapter-only refresh |
+| `awaitMangaDetails` | details only | details-only refresh (e.g. cover backfill) |
+
+
 Note that `getMangaUpdate` is itself an interface default method, so it depends on
 the same API 26 guarantee described in section 2 — another reason `minSdk` cannot
 be lowered.
 
-Covered by `MangaUpdateBridgeTest`: 1.6 override path, 1.4 fallback path, and the
-`fetchDetails`/`fetchChapters` flag combinations.
+Covered by `MangaUpdateBridgeTest`: 1.6 override path, 1.4 fallback path, the
+`fetchDetails`/`fetchChapters` flag combinations, and the `KeiSource` concurrency
+guard (including a test asserting that the old two-parallel-call pattern trips it).
 
 
 ---
