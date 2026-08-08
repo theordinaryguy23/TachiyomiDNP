@@ -71,6 +71,9 @@ android {
         buildConfigField("String", "BUILD_VERSION", "\"${getBuildVersion()}\"")
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
         buildConfigField("boolean", "BETA", "false")
+        // Consumed by ExtensionCompatibilityTest to guard the >= 26 invariant that
+        // keeps kotlinx.serialization default methods from being desugared.
+        buildConfigField("int", "MIN_SDK", "${AndroidVersions.minSdk}")
 
         ndk {
             abiFilters += supportedAbis
@@ -268,8 +271,15 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
     implementation("com.squareup.okhttp3:okhttp-brotli:$okhttpVersion")
-    // removed invalid dependency
+    // Real Zstd decompression. Extensions reference `okhttp3.zstd.Zstd` via
+    // compileOnly, so the host MUST provide a working implementation — a no-op
+    // shim silently corrupts zstd-encoded responses. Matches Mihon/Keiyoushi.
+    implementation("com.squareup.okhttp3:okhttp-zstd:$okhttpVersion")
+    implementation("com.squareup.zstd:zstd-kmp-okio:0.4.0")
     implementation("com.squareup.okio:okio:3.11.0")
+
+    // Extension runtime compatibility regression tests
+    testImplementation("junit:junit:4.13.2")
 
     // Chucker
 //    val chuckerVersion = "3.5.2"
