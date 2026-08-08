@@ -2,7 +2,12 @@ package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import eu.kanade.tachiyomi.util.system.awaitSingle
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
 import rx.Observable
 
 interface CatalogueSource : Source {
@@ -48,6 +53,29 @@ interface CatalogueSource : Source {
      */
     @Suppress("DEPRECATION")
     suspend fun getLatestUpdates(page: Int): MangasPage = fetchLatestUpdates(page).awaitSingle()
+
+    /**
+     * Bridges extensions-lib 1.4 sources onto the 1.6 [getMangaUpdate] API.
+     *
+     * A 1.6 extension overrides [getMangaUpdate] itself and never reaches this.
+     * A 1.4 extension does not, so this default translates the call back into the
+     * legacy `fetchMangaDetails` / `fetchChapterList` pair — which is exactly how
+     * Mihon keeps both library versions working off a single host call site.
+     *
+     * Details and chapters are fetched concurrently, matching Mihon.
+     */
+    @Suppress("DEPRECATION")
+    override suspend fun getMangaUpdate(
+        manga: SManga,
+        chapters: List<SChapter>,
+        fetchDetails: Boolean,
+        fetchChapters: Boolean,
+    ): SMangaUpdate = supervisorScope {
+        val asyncManga = if (fetchDetails) async { fetchMangaDetails(manga).awaitSingle() } else null
+        val asyncChapters = if (fetchChapters) async { fetchChapterList(manga).awaitSingle() } else null
+        SMangaUpdate(asyncManga?.await() ?: manga, asyncChapters?.await() ?: chapters)
+    }
+
 
     /**
      * Returns the list of filters for the source.

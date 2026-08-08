@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.smartsearch.SmartSearchEngine
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.awaitChapterList
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.FadeChangeHandler
@@ -194,7 +195,7 @@ class MigrationListController(
                                                                     searchResult,
                                                                     source.id,
                                                                 )
-                                                            val chapters = source.getChapterList(localManga)
+                                                            val chapters = source.awaitChapterList(localManga)
                                                             try {
                                                                 syncChaptersWithSource(
                                                                     db,
@@ -239,7 +240,7 @@ class MigrationListController(
                                                         )
                                                     val chapters: List<SChapter> =
                                                         try {
-                                                            source.getChapterList(localManga)
+                                                            source.awaitChapterList(localManga)
                                                         } catch (e: java.lang.Exception) {
                                                             Timber.e(e)
                                                             emptyList()
@@ -390,7 +391,7 @@ class MigrationListController(
                     .async {
                         val localManga = smartSearchEngine.networkToLocalManga(manga, source.id)
                         try {
-                            val chapters = source.getChapterList(localManga)
+                            val chapters = source.awaitChapterList(localManga)
                             syncChaptersWithSource(db, chapters, localManga, source)
                         } catch (e: Exception) {
                             return@async null

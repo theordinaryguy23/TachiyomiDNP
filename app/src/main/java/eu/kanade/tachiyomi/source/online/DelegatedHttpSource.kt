@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.awaitChapterList
 import uy.kohesive.injekt.injectLazy
 
 abstract class DelegatedHttpSource {
@@ -47,6 +48,6 @@ abstract class DelegatedHttpSource {
     suspend fun getChapters(url: String): List<SChapter>? {
         val id = delegate?.id ?: return null
         val manga = Manga.create(url, "", id)
-        return delegate?.getChapterList(manga)
+        return delegate?.awaitChapterList(manga)
     }
 }

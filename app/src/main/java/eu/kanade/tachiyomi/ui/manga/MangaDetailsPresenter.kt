@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.SourceNotFoundException
+import eu.kanade.tachiyomi.source.awaitChapterList
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -363,7 +364,7 @@ class MangaDetailsPresenter(
             val chapters =
                 async(Dispatchers.IO) {
                     try {
-                        source.getChapterList(manga)
+                        source.awaitChapterList(manga)
                     } catch (e: Exception) {
                         chapterError = e
                         emptyList()
@@ -471,7 +472,7 @@ class MangaDetailsPresenter(
         presenterScope.launch(Dispatchers.IO) {
             val chapters =
                 try {
-                    source.getChapterList(manga)
+                    source.awaitChapterList(manga)
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) { view?.showError(trimException(e)) }
                     return@launch

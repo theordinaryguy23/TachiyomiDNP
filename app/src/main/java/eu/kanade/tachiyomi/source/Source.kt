@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.system.awaitSingle
 import rx.Observable
@@ -39,15 +40,35 @@ interface Source {
     suspend fun getMangaDetails(manga: SManga): SManga = fetchMangaDetails(manga).awaitSingle()
 
     /**
-     * Get the updated details for a manga and its chapters in one call.
+     * Fetches updated information for a manga: details, chapters, or both.
+     *
+     * This is the single entry point the host uses to refresh a manga.
+     *
+     * - extensions-lib **1.6** sources override this directly.
+     * - extensions-lib **1.4** sources do not, and fall through to the default
+     *   implementation in [CatalogueSource], which translates the call back into
+     *   the legacy `fetchMangaDetails` / `fetchChapterList` pair.
+     *
+     * Callers must never invoke `fetchChapterList` directly: in lib 1.6 that
+     * method is a stub that throws, which surfaced as "Unknown error" and an
+     * empty chapter list on sources such as Weeb Central.
      *
      * @since extensions-lib 1.6
-     * @param manga the manga to update.
-     * @return a pair containing the updated manga and its chapters.
+     * @param manga the manga to fetch updates for.
+     * @param chapters existing chapters of the manga, returned as-is when
+     *   [fetchChapters] is false.
+     * @param fetchDetails whether to fetch updated manga details.
+     * @param fetchChapters whether to fetch the available chapters.
      */
-    suspend fun getMangaUpdate(manga: SManga): Pair<SManga, List<SChapter>> {
-        return getMangaDetails(manga) to getChapterList(manga)
-    }
+    suspend fun getMangaUpdate(
+        manga: SManga,
+        chapters: List<SChapter>,
+        fetchDetails: Boolean,
+        fetchChapters: Boolean,
+    ): SMangaUpdate = SMangaUpdate(
+        if (fetchDetails) getMangaDetails(manga) else manga,
+        if (fetchChapters) getChapterList(manga) else chapters,
+    )
 
     /**
      * Get all the available chapters for a manga.
@@ -87,6 +108,7 @@ interface Source {
         extensionManager: ExtensionManager? = null,
     ): String = if (includeLangInName(enabledLanguages, extensionManager)) toString() else name
 
+
     @Deprecated(
         "Use the non-RxJava API instead",
         ReplaceWith("getMangaDetails"),
@@ -107,7 +129,23 @@ interface Source {
 }
 
 fun Source.icon(): Drawable? = Injekt.get<ExtensionManager>().getAppIconForSource(this)
-
 fun Source.pkgName() = Injekt.get<ExtensionManager>().getPackageName(id)
 
 fun Source.preferenceKey(): String = "source_$id"
+
+/**
+ * Fetches a manga's chapter list through the extensions-lib 1.6 [Source.getMangaUpdate] API.
+ *
+ * Host code must use this rather than calling [Source.getChapterList] directly.
+ * A lib 1.6 extension (e.g. Weeb Central) does not implement `fetchChapterList` at
+ * all — in lib 1.6 it is a stub that throws — so the legacy path yields "Unknown
+ * error" and zero chapters. Routing through `getMangaUpdate` lets 1.6 extensions
+ * serve the request directly while 1.4 extensions fall through to the compatibility
+ * bridge in [CatalogueSource].
+ */
+suspend fun Source.awaitChapterList(manga: SManga): List<SChapter> = getMangaUpdate(
+    manga = manga,
+    chapters = emptyList(),
+    fetchDetails = false,
+    fetchChapters = true,
+).chapters
