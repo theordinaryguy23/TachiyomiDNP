@@ -196,6 +196,63 @@ private val SUPPORTED_LIB_VERSIONS = listOf(1.4, 1.6)
 
 Covered by tests: missing, valid, older, newer-unsupported, and malformed `libVersion`.
 
+### 6.1 Supporting 1.4 and 1.6 from one call site
+
+Declaring support for a lib version is only honest if the host implements its API.
+DNP previously claimed `[1.4, 1.6]` while implementing only 1.4 — 1.6 extensions
+loaded and then failed at runtime, which is precisely the silent-breakage pattern
+this document exists to prevent.
+
+extensions-lib 1.6 replaced the separate detail/chapter calls with one combined
+method and turned the old ones into throwing stubs:
+
+```kotlin
+// extensions-lib @6e0c96cea8 (v1.6)
+suspend fun getMangaUpdate(
+    manga: SManga, chapters: List<SChapter>,
+    fetchDetails: Boolean, fetchChapters: Boolean,
+): SMangaUpdate
+
+@Deprecated("Use the combined suspend API instead", ReplaceWith("getMangaUpdate"))
+fun fetchChapterList(manga: SManga): Observable<List<SChapter>> = throw Exception("Stub!")
+```
+
+Mihon supports both versions without any version branching, by making 1.4 a
+*fallback* rather than a separate code path:
+
+- The host **always** calls `getMangaUpdate`.
+- A **1.6** extension overrides it and serves the call directly.
+- A **1.4** extension does not override it and lands on the default implementation
+  in `CatalogueSource`, which replays the legacy
+  `fetchMangaDetails` / `fetchChapterList` pair concurrently.
+
+DNP now does the same:
+
+```kotlin
+// source/CatalogueSource.kt
+@Suppress("DEPRECATION")
+override suspend fun getMangaUpdate(
+    manga: SManga, chapters: List<SChapter>,
+    fetchDetails: Boolean, fetchChapters: Boolean,
+): SMangaUpdate = supervisorScope {
+    val asyncManga    = if (fetchDetails)  async { fetchMangaDetails(manga).awaitSingle() } else null
+    val asyncChapters = if (fetchChapters) async { fetchChapterList(manga).awaitSingle() } else null
+    SMangaUpdate(asyncManga?.await() ?: manga, asyncChapters?.await() ?: chapters)
+}
+```
+
+Host code must reach the chapter list through `Source.awaitChapterList(manga)`,
+which routes to `getMangaUpdate`. Calling `getChapterList`/`fetchChapterList`
+directly reintroduces the bug for every 1.6 extension.
+
+Note that `getMangaUpdate` is itself an interface default method, so it depends on
+the same API 26 guarantee described in section 2 — another reason `minSdk` cannot
+be lowered.
+
+Covered by `MangaUpdateBridgeTest`: 1.6 override path, 1.4 fallback path, and the
+`fetchDetails`/`fetchChapters` flag combinations.
+
+
 ---
 
 ## 7. Cloudflare vs. geo-block
@@ -236,7 +293,7 @@ bare directory URL, and sibling-index resolution.
 | OkHttp | 5.4.0 | 5.4.0 | **Must match major.** `CompressionInterceptor` is 5.x-only. |
 | Brotli | okhttp-brotli 5.4.0 | okhttp-brotli 5.4.0 | Host-provided, version-locked to OkHttp. |
 | Zstd | okhttp-zstd 5.4.0 + zstd-kmp-okio 0.4.0 | same | Host-provided, version-locked to OkHttp. |
-| Extension API | Tachiyomi/J2K source API | tachiyomi-lib v1.4 / v1.6 | Host must satisfy both lib versions. |
+| Extension API | Tachiyomi/J2K source API + `getMangaUpdate` | tachiyomi-lib v1.4 / v1.6 | Host must implement the 1.6 API and bridge 1.4 onto it. |
 | Extension library | supports 1.4, 1.6 | emits 1.4, 1.6 | Host set ⊇ ecosystem set. |
 | **minSdk** | **26** | **26** | **Host ≥ 26**, or interface default methods desugar and serialization breaks. |
 
@@ -251,6 +308,7 @@ or the OkHttp version drifts out of this matrix.
 |---|---|---|---|
 | `ChildFirstPathClassLoader` | system → child → parent, all four overrides | identical | **Keep** — ported verbatim |
 | `ExtensionLoader` libVersion check | `tachiyomix.extensionLib`, `[1.4, 1.6]` | identical | **Keep** |
+| `getMangaUpdate` (lib 1.6 API) | implemented, with a 1.4 bridge in `CatalogueSource` | identical | **Ported** — host previously claimed 1.6 support without implementing it |
 | kotlinx.serialization | 1.11.0, host-provided | identical | **Keep** |
 | OkHttp | 5.4.0 | identical | **Keep** |
 | Brotli / Zstd | real artifacts | identical | **Ported** — replaced a no-op stub |

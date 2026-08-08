@@ -155,6 +155,7 @@ matrix and the classloader policy.
 | Symptom | Cause | Fix |
 |---|---|---|
 | `AbstractMethodError … GeneratedSerializer` | App built with minSdk < 26 | Update to v1.9.0+ |
+| "Unknown error" / 0 chapters on a source that browses fine | Host called the legacy chapter API, which libVersion 1.6 extensions define as a throwing stub | Fixed in v1.9.0 — host now uses `getMangaUpdate` |
 | Extension shows "not supported" | `libVersion` outside 1.4/1.6 | Update the extension |
 | Source loads forever behind Cloudflare | Geo-block mistaken for a challenge | Fixed in v1.9.0 — WebView now only opens on a real challenge page |
 | Corrupt/blank pages on some sources | zstd responses were not really decompressed | Fixed in v1.9.0 — real Zstd decoder now shipped |
