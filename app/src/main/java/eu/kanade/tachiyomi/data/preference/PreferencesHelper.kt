@@ -524,4 +524,7 @@ class PreferencesHelper(
     fun googleSyncEnabled() = flowPrefs.getBoolean(Keys.googleDriveBackupEnabled, false)
     fun googleSyncAccount() = flowPrefs.getString(Keys.googleDriveBackupAccount, "")
     fun googleSyncLastTime() = flowPrefs.getLong(Keys.googleDriveBackupLastSync, 0L)
+
+    fun googleDriveBackupAccount() = googleSyncAccount()
+    fun googleDriveBackupLastSync() = googleSyncLastTime()
 }
