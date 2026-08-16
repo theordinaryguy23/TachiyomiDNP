@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.9.0
+
+### New Features
+- **Cloud Sync**: Initial support for Google Drive sync (History, Library, and Categories).
+- **Sync Settings**: New dedicated settings menu for cloud synchronization.
+- **Improved Extension Repos**: Auto-completion and display now favor the modern `index.pb` format.
+
+### Bug Fixes
+- Fixed "Failed to fetch available extensions" caused by incorrect GZIP decompression handling.
+- Fixed version compatibility check by increasing supported `LIB_VERSION_MAX` to 1.6.
+
+### Performance & Stability
+- Updated various internal dependencies for better stability.
+- Improved network response parsing robustness.
+
+
 ## v1.9.0-beta1
 
 ### New Features
