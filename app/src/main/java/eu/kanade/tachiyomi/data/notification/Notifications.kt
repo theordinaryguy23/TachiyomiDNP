@@ -6,7 +6,6 @@ import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import androidx.core.app.NotificationManagerCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.notificationManager
 
@@ -238,16 +237,12 @@ object Notifications {
         context: Context,
         channelId: String?,
     ): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!channelId.isNullOrBlank()) {
-                val manager =
-                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                val channel = manager.getNotificationChannel(channelId)
-                return channel.importance != NotificationManager.IMPORTANCE_NONE
-            }
-            false
-        } else {
-            NotificationManagerCompat.from(context).areNotificationsEnabled()
+        if (!channelId.isNullOrBlank()) {
+            val manager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channel = manager.getNotificationChannel(channelId)
+            return channel.importance != NotificationManager.IMPORTANCE_NONE
         }
+        return false
     }
 }

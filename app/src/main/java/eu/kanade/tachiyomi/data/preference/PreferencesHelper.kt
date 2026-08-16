@@ -467,6 +467,9 @@ class PreferencesHelper(
 
     fun shownDownloadSwipeTutorial() = flowPrefs.getBoolean("shown_download_tutorial", false)
 
+    // Sync onboarding
+    fun shownSyncOnboarding() = flowPrefs.getBoolean("shown_sync_onboarding", false)
+
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
     fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
@@ -518,4 +521,12 @@ class PreferencesHelper(
     fun coverColors() = flowPrefs.getStringSet(Keys.coverColors, emptySet())
 
     fun useStaggeredGrid() = flowPrefs.getBoolean("use_staggered_grid", false)
+
+    // History sync
+    fun syncEnabled() = flowPrefs.getBoolean(Keys.syncEnabled, false)
+    fun autoSync() = flowPrefs.getBoolean(Keys.autoSync, false)
+
+    fun googleSyncEnabled() = flowPrefs.getBoolean(Keys.googleSyncEnabled, false)
+    fun googleSyncAccount() = flowPrefs.getString(Keys.googleSyncAccount, "")
+    fun googleSyncLastTime() = flowPrefs.getLong(Keys.googleSyncLastTime, 0L)
 }

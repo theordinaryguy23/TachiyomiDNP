@@ -33,11 +33,17 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import timber.log.Timber
-import java.util.Date
+import eu.kanade.tachiyomi.data.backup.GoogleDriveSyncHelper
+import eu.kanade.tachiyomi.data.backup.BackupCreator
+import eu.kanade.tachiyomi.util.system.launchUI
+import java.io.File
 
 class SettingsBackupController : SettingsController() {
+
+    companion object {
+        const val CODE_GOOGLE_SIGN_IN = 506
+        var pendingSignInHandler: ((Intent?) -> Unit)? = null
+    }
     /**
      * Flags containing information of what to backup.
      */
@@ -155,65 +161,144 @@ class SettingsBackupController : SettingsController() {
             }
 
             preferenceCategory {
-                titleRes = R.string.google_drive_backup
+                titleRes = R.string.google_drive_sync
 
                 preference {
-                    key = "pref_google_drive_account"
-                    titleRes = R.string.google_drive_sign_in
-
-                    val account = googleDriveHelper.getGoogleSignInAccount()
-                    if (account != null) {
-                        titleRes = R.string.google_drive_sign_out
-                        summary = context.getString(R.string.google_drive_sign_in_success, account.email)
+                    key = "google_drive_account_pref"
+                    titleRes = R.string.google_drive_account
+                    
+                    val email = preferences.googleSyncAccount().get()
+                    if (email.isNotEmpty()) {
+                        summary = context.getString(R.string.google_drive_signed_in_as, email)
                     } else {
-                        summaryRes = R.string.google_drive_not_signed_in
+                        summaryRes = R.string.google_drive_sign_in_summary
                     }
 
                     onClick {
-                        val signedInAccount = googleDriveHelper.getGoogleSignInAccount()
-                        if (signedInAccount == null) {
-                            startActivityForResult(googleDriveHelper.getSignInIntent(), CODE_GOOGLE_SIGN_IN)
-                        } else {
-                            activity?.materialAlertDialog()
-                                ?.setTitle(R.string.google_drive_sign_out)
-                                ?.setMessage(R.string.google_drive_sign_out)
-                                ?.setPositiveButton(android.R.string.ok) { _, _ ->
-                                    viewScope.launch {
-                                        googleDriveHelper.signOut()
-                                        preferences.googleDriveBackupEnabled().set(false)
-                                        preferences.googleDriveBackupAccount().set("")
-                                        activity?.toast(R.string.google_drive_sign_out_success)
-                                        refreshPreferenceScreen()
+                        val activity = activity ?: return@onClick
+                        if (preferences.googleSyncAccount().get().isNotEmpty()) {
+                            // Show sign out dialog
+                            activity.materialAlertDialog()
+                                .setTitle(R.string.google_drive_sign_out_title)
+                                .setMessage(R.string.google_drive_sign_out_confirm)
+                                .setPositiveButton(android.R.string.ok) { _, _ ->
+                                    GoogleDriveSyncHelper.signOut(context) {
+                                        activity.toast(R.string.successfully_logged_out)
+                                        activity.recreate()
                                     }
                                 }
-                                ?.setNegativeButton(android.R.string.cancel, null)
-                                ?.show()
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .show()
+                        } else {
+                            try {
+                                val client = GoogleDriveSyncHelper.getGoogleSignInClient(activity)
+                                pendingSignInHandler = { data ->
+                                    val email = GoogleDriveSyncHelper.handleSignInResult(activity, data)
+                                    if (email != null) {
+                                        activity.toast(activity.getString(R.string.google_drive_signed_in_as, email))
+                                        activity.recreate()
+                                    } else {
+                                        activity.toast(R.string.google_drive_sign_in_failed)
+                                    }
+                                }
+                                startActivityForResult(client.signInIntent, CODE_GOOGLE_SIGN_IN)
+                            } catch (e: Exception) {
+                                activity.toast(R.string.google_drive_sign_in_failed)
+                            }
                         }
                     }
                 }
 
                 switchPreference {
-                    bindTo(preferences.googleDriveBackupEnabled())
-                    titleRes = R.string.google_drive_cloud_backup
-                    summaryRes = R.string.google_drive_cloud_backup_summary
-
-                    visibleIf(preferences.googleDriveBackupAccount()) { it.isNotEmpty() }
+                    bindTo(preferences.googleSyncEnabled())
+                    titleRes = R.string.google_drive_auto_sync
+                    summaryRes = R.string.google_drive_auto_sync_summary
+                    defaultValue = false
+                    
+                    preferences.googleSyncAccount().asFlow().onEach { email ->
+                        isVisible = email.isNotEmpty()
+                    }.launchIn(viewScope)
                 }
 
                 preference {
-                    key = "pref_google_drive_last_sync"
-                    titleRes = R.string.google_drive_last_sync
-
-                    preferences.googleDriveBackupLastSync().asImmediateFlow { lastSync: Long ->
-                        summary =
-                            if (lastSync > 0) {
-                                preferences.dateFormat().format(Date(lastSync))
-                            } else {
-                                "-"
-                            }
+                    key = "google_drive_sync_now_pref"
+                    titleRes = R.string.google_drive_sync_now
+                    summaryRes = R.string.google_drive_sync_now_summary
+                    
+                    preferences.googleSyncAccount().asFlow().onEach { email ->
+                        isVisible = email.isNotEmpty()
                     }.launchIn(viewScope)
 
-                    visibleIf(preferences.googleDriveBackupAccount()) { it.isNotEmpty() }
+                    onClick {
+                        val activity = activity ?: return@onClick
+                        activity.toast(R.string.creating_backup)
+                        
+                        viewScope.launchUI {
+                            try {
+                                val tempFile = File(context.cacheDir, "google_sync_temp.tachibk")
+                                try {
+                                    val uniFile = UniFile.fromFile(tempFile)
+                                        ?: throw Exception("Could not create temp file")
+                                    val location = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                        BackupCreator(context).createBackup(uniFile.uri, BackupConst.BACKUP_ALL, false)
+                                    }
+                                    
+                                    activity.toast(R.string.google_drive_uploading)
+                                    GoogleDriveSyncHelper.uploadSyncBackup(
+                                        context = context,
+                                        backupUri = Uri.parse(location),
+                                        onProgress = { _ -> },
+                                        onSuccess = {
+                                            activity.runOnUiThread {
+                                                activity.toast(R.string.google_drive_sync_success)
+                                            }
+                                        },
+                                        onError = { error ->
+                                            activity.runOnUiThread {
+                                                activity.toast(context.getString(R.string.google_drive_sync_failed, error.localizedMessage))
+                                            }
+                                        }
+                                    )
+                                } finally {
+                                    tempFile.delete()
+                                }
+                            } catch (e: Exception) {
+                                activity.toast(context.getString(R.string.google_drive_sync_failed, e.localizedMessage))
+                            }
+                        }
+                    }
+                }
+
+                preference {
+                    key = "google_drive_restore_now_pref"
+                    titleRes = R.string.google_drive_restore_now
+                    summaryRes = R.string.google_drive_restore_now_summary
+                    
+                    preferences.googleSyncAccount().asFlow().onEach { email ->
+                        isVisible = email.isNotEmpty()
+                    }.launchIn(viewScope)
+
+                    onClick {
+                        val activity = activity ?: return@onClick
+                        activity.toast(R.string.google_drive_restore_started)
+                        
+                        viewScope.launchUI {
+                            GoogleDriveSyncHelper.downloadAndRestoreSyncBackup(
+                                context = context,
+                                onProgress = { _ -> },
+                                onSuccess = {
+                                    activity.runOnUiThread {
+                                        activity.toast(R.string.restoring_backup)
+                                    }
+                                },
+                                onError = { error ->
+                                    activity.runOnUiThread {
+                                        activity.toast(context.getString(R.string.google_drive_restore_failed, error.localizedMessage))
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
@@ -241,6 +326,18 @@ class SettingsBackupController : SettingsController() {
     ) {
         if (data != null && resultCode == Activity.RESULT_OK) {
             val activity = activity ?: return
+
+            if (requestCode == CODE_GOOGLE_SIGN_IN) {
+                val email = GoogleDriveSyncHelper.handleSignInResult(activity, data)
+                if (email != null) {
+                    activity.toast(activity.getString(R.string.google_drive_signed_in_as, email))
+                    activity.recreate()
+                } else {
+                    activity.toast(R.string.google_drive_sign_in_failed)
+                }
+                return
+            }
+
             val uri = data.data
 
             if (uri == null) {

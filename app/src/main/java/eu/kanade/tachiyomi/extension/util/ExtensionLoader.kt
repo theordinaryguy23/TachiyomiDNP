@@ -43,10 +43,8 @@ internal object ExtensionLoader {
     private const val METADATA_SOURCE_CLASS = "tachiyomi.extension.class"
     private const val METADATA_SOURCE_FACTORY = "tachiyomi.extension.factory"
     private const val METADATA_NSFW = "tachiyomi.extension.nsfw"
-    private const val METADATA_NAME = "tachiyomix.name"
-    private const val METADATA_EXTENSION_LIB = "tachiyomix.extensionLib"
-    private const val METADATA_CONTENT_WARNING = "tachiyomix.contentWarning"
-    private val SUPPORTED_LIB_VERSIONS = listOf(1.4, 1.6)
+    const val LIB_VERSION_MIN = 1.3
+    const val LIB_VERSION_MAX = 1.6
 
     @Suppress("DEPRECATION")
     private val PACKAGE_FLAGS =
@@ -229,12 +227,8 @@ internal object ExtensionLoader {
         try {
             if (!extension.isShared) {
                 val file = ExtensionLoader.privateExtensionFile(context, extension.pkgName)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val attr = Files.readAttributes(file.toPath(), BasicFileAttributes::class.java)
-                    attr.creationTime().toMillis()
-                } else {
-                    file.lastModified()
-                }
+                val attr = Files.readAttributes(file.toPath(), BasicFileAttributes::class.java)
+                attr.creationTime().toMillis()
             } else {
                 context.packageManager.getPackageInfo(extension.pkgName, 0).firstInstallTime
             }

@@ -1,26 +1,13 @@
 import java.util.Locale
 
 object AndroidVersions {
-    const val compileSdk = 36
-    // minSdk MUST stay >= 26.
-    //
-    // Below API 26 the D8 compiler desugars Java 8 interface default methods into
-    // synthetic `$-CC` helper classes and strips the default body from the interface
-    // itself. kotlinx.serialization's `GeneratedSerializer.typeParametersSerializers()`
-    // is such a default method. Keiyoushi/Mihon extensions are compiled against
-    // minSdk 26 with `compileOnly` serialization, so their generated `$$serializer`
-    // classes do NOT emit that method and rely on the host-provided default body.
-    // With minSdk 23 the host's interface no longer has one, producing:
-    //   AbstractMethodError: abstract method
-    //   "kotlinx.serialization.KSerializer[] ...GeneratedSerializer.typeParametersSerializers()"
-    // Raising minSdk to 26 (matching mihonapp/mihon and keiyoushi/extensions-source)
-    // is the actual fix; it cannot be worked around with version bumps or stubs.
+    const val compileSdk = 37
     const val minSdk = 26
-    const val targetSdk = 36
-    const val versionCode = 126
-    const val versionName = "1.9.0"
+    const val targetSdk = 37
+    const val versionCode = 119
+    const val versionName = "1.9.0-beta1"
     const val ndk = "23.1.7779620"
-    const val kotlin = "2.3.10"
+    const val kotlin = "2.4.10"
 }
 
 object Plugins {
@@ -40,7 +27,7 @@ data class PluginClass(val name: String, val version: String) {
 }
 
 fun isNonStable(version: String): Boolean {
-    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase(Locale.ROOT).contains(it) }
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase(Locale.ROOT).contains(it) }
     val regex = "^[0-9,.v-]+(-r)?$".toRegex()
     val isStable = stableKeyword || regex.matches(version)
     return isStable.not()

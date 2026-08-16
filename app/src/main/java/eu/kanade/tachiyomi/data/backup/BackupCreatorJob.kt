@@ -39,15 +39,11 @@ class BackupCreatorJob(
         return try {
             val location = BackupCreator(context).createBackup(uri, flags, isAutoBackup)
             if (!isAutoBackup) notifier.showBackupComplete(UniFile.fromUri(context, location.toUri()))
-
-            if (preferences.googleDriveBackupEnabled().get()) {
-                try {
-                    GoogleDriveHelper(context).uploadBackup(location.toUri())
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to upload backup to Google Drive")
-                }
+            
+            if (GoogleDriveSyncHelper.isAutoSyncEnabled(context)) {
+                GoogleDriveSyncHelper.uploadSyncBackupSync(context, Uri.parse(location))
             }
-
+            
             Result.success()
         } catch (e: Exception) {
             Timber.e(e)

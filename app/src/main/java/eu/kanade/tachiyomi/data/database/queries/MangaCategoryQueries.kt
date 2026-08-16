@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.queries
 
 import com.pushtorefresh.storio.Queries
 import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
+import com.pushtorefresh.storio.sqlite.queries.RawQuery
 import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.inTransaction
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -34,4 +35,29 @@ interface MangaCategoryQueries : DbProvider {
             insertMangasCategories(mangasCategories).executeAsBlocking()
         }
     }
+
+    fun getMangaCategories() =
+        db
+            .get()
+            .listOfObjects(MangaCategory::class.java)
+            .withQuery(
+                RawQuery
+                    .builder()
+                    .query("SELECT * FROM ${MangaCategoryTable.TABLE}")
+                    .observesTables(MangaCategoryTable.TABLE)
+                    .build(),
+            ).prepare()
+
+    fun getMangaCategory(mangaId: Long, categoryId: Long) =
+        db
+            .get()
+            .`object`(MangaCategory::class.java)
+            .withQuery(
+                RawQuery
+                    .builder()
+                    .query("SELECT * FROM ${MangaCategoryTable.TABLE} WHERE ${MangaCategoryTable.COL_MANGA_ID} = ? AND ${MangaCategoryTable.COL_CATEGORY_ID} = ? LIMIT 1")
+                    .args(mangaId, categoryId)
+                    .observesTables(MangaCategoryTable.TABLE)
+                    .build(),
+            ).prepare()
 }

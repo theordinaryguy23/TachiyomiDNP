@@ -22,7 +22,6 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.ByteArrayInputStream
 import java.util.zip.GZIPInputStream
-import java.util.zip.InflaterInputStream
 
 internal class ExtensionApi {
     private val json: Json by injectLazy()
@@ -46,46 +45,22 @@ internal class ExtensionApi {
     }
 
     private suspend fun getExtensions(repoBaseUrl: String): List<Extension.Available> {
-        var baseUrl = repoBaseUrl.trimEnd('/')
-
-        // Normalize GitHub repository URLs for Keiyoushi
-        if (baseUrl.contains("github.com/keiyoushi/extensions-source") ||
-            baseUrl.contains("github.com/keiyoushi/extensions") ||
-            baseUrl.contains("keiyoushi.github.io/extensions")
-        ) {
-            baseUrl = "https://raw.githubusercontent.com/keiyoushi/extensions/repo"
-        }
-
-        // Detect if URL already points directly to a known index file
-        val directRepoJson = baseUrl.endsWith("/repo.json")
-        val directIndexPb = baseUrl.endsWith("/index.pb")
-        val directIndexMinJson = baseUrl.endsWith("/index.min.json")
-
-        // Extract base directory for constructing relative paths
-        val baseDir = when {
-            directRepoJson || directIndexPb || directIndexMinJson -> baseUrl.substringBeforeLast("/")
-            else -> baseUrl
-        }
-
         // 1. Try repo.json -> check index_v2 -> fetch protobuf
         try {
-            val repoJsonUrl = if (directRepoJson) baseUrl else "$baseDir/repo.json"
             val response =
                 networkService.client
-                    .newCall(GET(repoJsonUrl))
+                    .newCall(GET("$repoBaseUrl/repo.json"))
                     .awaitSuccess()
 
-            val bodyBytes = response.body?.bytes()
-            if (bodyBytes != null) {
-                val data = decompressIfGzip(bodyBytes)
-                if (data.isJson()) {
-                    val text = data.toString(Charsets.UTF_8)
-                    val repoInfo = json.decodeFromString<RepoInfo>(text)
-                    val indexV2 = repoInfo.effectiveIndexV2
-                    if (indexV2 != null) {
-                        val exts = fetchIndex(indexV2)
-                        if (exts.isNotEmpty()) return exts
-                    }
+            val bodyBytes = response.body?.bytes() ?: return emptyList()
+            val data = decompressIfGzip(bodyBytes)
+
+            if (data.isJson()) {
+                val text = data.toString(Charsets.UTF_8)
+                val repoInfo = json.decodeFromString<RepoInfo>(text)
+                val indexV2 = repoInfo.indexV2
+                if (indexV2 != null) {
+                    return fetchIndex(indexV2)
                 }
             }
         } catch (e: Exception) {
@@ -94,8 +69,7 @@ internal class ExtensionApi {
 
         // 2. Try index.pb directly
         try {
-            val indexPbUrl = if (directIndexPb) baseUrl else "$baseDir/index.pb"
-            val extensions = fetchIndex(indexPbUrl)
+            val extensions = fetchIndex("$repoBaseUrl/index.pb")
             if (extensions.isNotEmpty()) return extensions
         } catch (e: Exception) {
             Timber.w(e, "Failed to fetch index.pb from $repoBaseUrl")
@@ -103,20 +77,19 @@ internal class ExtensionApi {
 
         // 3. Fallback to index.min.json (legacy)
         try {
-            val indexMinJsonUrl = if (directIndexMinJson) baseUrl else "$baseDir/index.min.json"
+            val repoJsonUrl = if (directRepoJson) baseUrl else "$baseDir/repo.json"
             val response =
                 networkService.client
-                    .newCall(GET(indexMinJsonUrl))
+                    .newCall(GET(repoJsonUrl))
                     .awaitSuccess()
 
-            val bodyBytes = response.body?.bytes()
-            if (bodyBytes != null) {
-                val data = decompressIfGzip(bodyBytes)
-                if (data.isJson()) {
-                    val text = data.toString(Charsets.UTF_8)
-                    val extensions = json.decodeFromString<List<ExtensionJsonObject>>(text).toExtensions(baseDir)
-                    if (extensions.isNotEmpty()) return extensions
-                }
+            val bodyBytes = response.body?.bytes() ?: return emptyList()
+            val data = decompressIfGzip(bodyBytes)
+
+            if (data.isJson()) {
+                val text = data.toString(Charsets.UTF_8)
+                val extensions = json.decodeFromString<List<ExtensionJsonObject>>(text).toExtensions(repoBaseUrl)
+                if (extensions.isNotEmpty()) return extensions
             }
         } catch (e: Exception) {
             Timber.w(e, "Failed to fetch index.min.json from $repoBaseUrl")
@@ -142,7 +115,7 @@ internal class ExtensionApi {
                 val text = data.toString(Charsets.UTF_8)
                 if (text.startsWith("{")) {
                     val repoInfo = json.decodeFromString<RepoInfo>(text)
-                    val indexV2 = repoInfo.effectiveIndexV2
+                    val indexV2 = repoInfo.indexV2
                     if (indexV2 != null) {
                         fetchIndex(indexV2)
                     } else {
@@ -158,15 +131,10 @@ internal class ExtensionApi {
 
     private fun decompressIfGzip(data: ByteArray): ByteArray {
         return if (data.size >= 2 && data[0] == 0x1f.toByte() && data[1] == 0x8b.toByte()) {
-            try {
-                ByteArrayInputStream(data).use { bais ->
-                    GZIPInputStream(bais).use { gzipInput ->
-                        gzipInput.readBytes()
-                    }
+            ByteArrayInputStream(data).use { inputStream ->
+                GZIPInputStream(inputStream).use { gzipInputStream ->
+                    gzipInputStream.readBytes()
                 }
-            } catch (e: Exception) {
-                Timber.w(e, "Failed to decompress gzip data")
-                data
             }
         } else {
             data
@@ -195,7 +163,7 @@ internal class ExtensionApi {
                 pkgName = ext.packageName,
                 versionName = ext.versionName,
                 versionCode = ext.versionCode,
-                libVersion = ext.extensionLib.toDoubleOrNull() ?: 0.0,
+                libVersion = ext.versionName.extractLibVersion(),
                 lang = ext.sources.firstOrNull()?.language ?: "",
                 isNsfw = ext.contentWarning == ContentWarning.NSFW,
                 sources = ext.sources.map { source ->
@@ -207,8 +175,8 @@ internal class ExtensionApi {
                     )
                 },
                 apkName = "",
-                apkUrl = if (ext.resources.apkUrl.startsWith("http")) ext.resources.apkUrl else "$repoUrl/${ext.resources.apkUrl}",
-                iconUrl = if (ext.resources.iconUrl.startsWith("http")) ext.resources.iconUrl else "$repoUrl/${ext.resources.iconUrl}",
+                apkUrl = ext.resources.apkUrl,
+                iconUrl = ext.resources.iconUrl,
                 repoUrl = repoUrl,
             )
         } ?: emptyList()
@@ -272,19 +240,14 @@ internal class ExtensionApi {
         extension.apkUrl.takeIf { !it.isNullOrEmpty() }
             ?: "${extension.repoUrl}/apk/${extension.apkName}"
 
-    private fun ExtensionJsonObject.extractLibVersion(): Double = version.substringBeforeLast('.').toDouble()
+    private fun ExtensionJsonObject.extractLibVersion(): Double = version.extractLibVersion()
 }
 
 @Serializable
 private data class RepoInfo(
-    @kotlinx.serialization.SerialName("index_v2")
     val indexV2: String? = null,
-    @kotlinx.serialization.SerialName("indexV2")
-    val indexV2Alt: String? = null,
     val meta: MetaInfo? = null,
-) {
-    val effectiveIndexV2: String? get() = indexV2 ?: indexV2Alt
-}
+)
 
 @Serializable
 private data class MetaInfo(

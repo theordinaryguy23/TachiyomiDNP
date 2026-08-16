@@ -30,10 +30,16 @@ class RepoPresenter(
             preferences
                 .extensionRepos()
                 .get()
-                .map { normalizeRepoUrl(it) }
+                .map { "$it/index.pb" }
                 .sorted()
                 .toSet()
-        set(value) = preferences.extensionRepos().set(value.map { normalizeRepoUrl(it) }.toSet())
+        set(value) = preferences.extensionRepos().set(
+            value.map {
+                it.removeSuffix("/index.min.json")
+                    .removeSuffix("/index.pb")
+                    .removeSuffix("/repo.json")
+            }.toSet(),
+        )
 
     /**
      * Called when the presenter is created.
@@ -123,7 +129,7 @@ class RepoPresenter(
     private fun repoExists(name: String): Boolean = repos.any { it.equals(name, true) }
 
     companion object {
-        private val repoRegex = "^https?://.+$".toRegex()
+        private val repoRegex = "^https://.*/(repo\\.json|index\\.min\\.json|index\\.pb)$".toRegex()
         private val githubRepoRegex = "https://(?:raw.githubusercontent.com|github.com)/(.+?)/(.+?)/.+".toRegex()
         const val CREATE_REPO_ITEM = "create_repo"
 

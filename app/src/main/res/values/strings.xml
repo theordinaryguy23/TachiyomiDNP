@@ -368,7 +368,7 @@
 
     <!-- Extension Repos -->
     <string name="action_add_repo">Add repo</string>
-    <string name="action_add_repo_message">Add additional repos to Tachiyomi. This should be a URL that ends with \"index.min.json\"</string>
+    <string name="action_add_repo_message">Add additional repos to Tachiyomi. This should be a URL that ends with \"index.pb\" or \"repo.json\"</string>
     <string name="extension_repos">Extension repos</string>
     <plurals name="num_repos">
         <item quantity="one">%d repo</item>
@@ -838,6 +838,26 @@
     </plurals>
     <string name="not_logged_into_">Not logged into %1$s</string>
 
+    <!-- Google Drive Sync -->
+    <string name="google_drive_sync">Google Drive Sync</string>
+    <string name="google_drive_account">Google Account</string>
+    <string name="google_drive_sign_in_summary">Sign in to sync your library, history, preferences, and custom repository URLs to the cloud.</string>
+    <string name="google_drive_signed_in_as">Signed in as %1$s</string>
+    <string name="google_drive_sign_out_title">Sign out</string>
+    <string name="google_drive_sign_out_confirm">Are you sure you want to sign out from Google Drive sync?</string>
+    <string name="google_drive_auto_sync">Auto-sync to Google Drive</string>
+    <string name="google_drive_auto_sync_summary">Automatically upload backups to Google Drive in the background.</string>
+    <string name="google_drive_sync_now">Sync Now</string>
+    <string name="google_drive_sync_now_summary">Upload current library, history, extensions, and repository URLs to Google Drive now.</string>
+    <string name="google_drive_restore_now">Restore from Cloud</string>
+    <string name="google_drive_restore_now_summary">Download and restore the latest backup from Google Drive.</string>
+    <string name="google_drive_sync_success">Google Drive sync completed successfully</string>
+    <string name="google_drive_sync_failed">Google Drive sync failed: %1$s</string>
+    <string name="google_drive_restore_started">Starting Google Drive restore...</string>
+    <string name="google_drive_uploading">Uploading backup to Google Drive…</string>
+    <string name="google_drive_sign_in_failed">Google Sign-In failed</string>
+    <string name="google_drive_restore_failed">Restore failed: %1$s</string>
+
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Clear chapter cache</string>
     <string name="force_download_cache_refresh">Refresh the download cache</string>
@@ -1218,4 +1238,35 @@
     <string name="view_chapters">View chapters</string>
     <string name="warning">Warning</string>
     <string name="wifi">Wi-Fi</string>
+
+    <!-- History Sync -->
+    <string name="pref_sync_title">History sync</string>
+    <string name="pref_sync_account">Account</string>
+    <string name="pref_sync_account_none">Not signed in</string>
+    <string name="pref_sync_account_summary">Sign in with Google to sync reading history across devices</string>
+    <string name="pref_sync_account_logged_in">Signed in as %s</string>
+    <string name="pref_sync_account_sync_enabled">Sync enabled — history will be uploaded and merged across devices</string>
+    <string name="pref_sync_sign_in">Sign in with Google</string>
+    <string name="pref_sync_sign_in_summary">Use Google account to sync reading history on multiple devices</string>
+    <string name="pref_sync_sign_out">Sign out</string>
+    <string name="pref_sync_sign_out_summary">Stop syncing and remove account from this device</string>
+    <string name="pref_sync_settings">Sync settings</string>
+    <string name="pref_sync_enabled">Enable sync</string>
+    <string name="pref_sync_enabled_summary">Automatically sync reading history across devices</string>
+    <string name="pref_sync_auto">Auto sync</string>
+    <string name="pref_sync_auto_summary">Sync periodically in the background when network is available</string>
+    <string name="pref_sync_now">Sync now</string>
+    <string name="pref_sync_now_summary">Manually sync reading history</string>
+    <string name="pref_sync_signed_in">Signed in successfully</string>
+    <string name="pref_sync_signed_out">Signed out</string>
+    <string name="pref_sync_sign_in_first">Please sign in first to use sync</string>
+    <string name="pref_sync_started">Sync started</string>
+    <string name="pref_sync_sign_in_failed">Sign in failed</string>
+    <string name="pref_sync_sign_in_error">Sign in error: %s</string>
+    <string name="pref_sync_onboarding_message">Sync your reading history across devices with Google. Sign in is required to enable sync.</string>
+    <string name="pref_sync_onboarding_enable">Set up sync</string>
+    <string name="pref_sync_onboarding_skip">Not now</string>
+    <string name="sync_completed">Sync completed successfully</string>
+    <string name="sync_failed">Sync failed</string>
+    <string name="syncing">Syncing…</string>
 </resources>

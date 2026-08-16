@@ -1,4 +1,6 @@
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.TimeZone
@@ -37,7 +39,8 @@ fun Project.getBuildTime(): String {
 fun Project.runCommand(command: String): String {
     return try {
         val byteOut = ByteArrayOutputStream()
-        val result = project.exec {
+        val execOperations = serviceOf<ExecOperations>()
+        val result = execOperations.exec {
             commandLine = command.split(" ")
             standardOutput = byteOut
             isIgnoreExitValue = true
