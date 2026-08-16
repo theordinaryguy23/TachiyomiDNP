@@ -3,6 +3,7 @@ name: Build
 on:
   push:
     branches: [ main, develop, beta ]
+    tags: [ v* ]
   pull_request:
     branches: [ main, beta ]
   workflow_dispatch:
@@ -95,3 +96,12 @@ jobs:
       with:
         name: release-apk
         path: app/build/outputs/apk/standard/release/*.apk
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: app/build/outputs/apk/standard/release/*.apk
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
