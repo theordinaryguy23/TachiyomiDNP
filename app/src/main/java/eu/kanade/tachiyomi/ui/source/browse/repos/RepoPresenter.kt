@@ -27,10 +27,16 @@ class RepoPresenter(
             preferences
                 .extensionRepos()
                 .get()
-                .map { "$it/index.min.json" }
+                .map { "$it/index.pb" }
                 .sorted()
                 .toSet()
-        set(value) = preferences.extensionRepos().set(value.map { it.removeSuffix("/index.min.json") }.toSet())
+        set(value) = preferences.extensionRepos().set(
+            value.map {
+                it.removeSuffix("/index.min.json")
+                    .removeSuffix("/index.pb")
+                    .removeSuffix("/repo.json")
+            }.toSet(),
+        )
 
     /**
      * Called when the presenter is created.

@@ -139,16 +139,16 @@ fun OkHttpClient.newCachelessCallWithProgress(
     return progressClient.newCall(request)
 }
 
-context(Json)
+context(json: Json)
 inline fun <reified T> Response.parseAs(): T = decodeFromJsonResponse(serializer(), this)
 
-context(Json)
+context(json: Json)
 fun <T> decodeFromJsonResponse(
     deserializer: DeserializationStrategy<T>,
     response: Response,
 ): T =
     response.body?.source()?.use {
-        decodeFromBufferedSource(deserializer, it)
+        json.decodeFromBufferedSource(deserializer, it)
     } ?: throw IOException("Empty response body")
 
 /**

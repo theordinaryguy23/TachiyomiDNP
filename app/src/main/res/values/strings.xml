@@ -368,7 +368,7 @@
 
     <!-- Extension Repos -->
     <string name="action_add_repo">Add repo</string>
-    <string name="action_add_repo_message">Add additional repos to Tachiyomi. This should be a URL that ends with \"index.min.json\"</string>
+    <string name="action_add_repo_message">Add additional repos to Tachiyomi. This should be a URL that ends with \"index.pb\" or \"repo.json\"</string>
     <string name="extension_repos">Extension repos</string>
     <plurals name="num_repos">
         <item quantity="one">%d repo</item>

@@ -21,7 +21,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.ByteArrayInputStream
-import java.util.zip.InflaterInputStream
+import java.util.zip.GZIPInputStream
 
 internal class ExtensionApi {
     private val json: Json by injectLazy()
@@ -130,9 +130,9 @@ internal class ExtensionApi {
 
     private fun decompressIfGzip(data: ByteArray): ByteArray {
         return if (data.size >= 2 && data[0] == 0x1f.toByte() && data[1] == 0x8b.toByte()) {
-            ByteArrayInputStream(data).use { gzipInput ->
-                InflaterInputStream(gzipInput).use { inflater ->
-                    inflater.readBytes()
+            ByteArrayInputStream(data).use { inputStream ->
+                GZIPInputStream(inputStream).use { gzipInputStream ->
+                    gzipInputStream.readBytes()
                 }
             }
         } else {
@@ -239,7 +239,7 @@ internal class ExtensionApi {
         extension.apkUrl.takeIf { !it.isNullOrEmpty() }
             ?: "${extension.repoUrl}/apk/${extension.apkName}"
 
-    private fun ExtensionJsonObject.extractLibVersion(): Double = version.substringBeforeLast('.').toDouble()
+    private fun ExtensionJsonObject.extractLibVersion(): Double = version.extractLibVersion()
 }
 
 @Serializable
