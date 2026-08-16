@@ -242,7 +242,7 @@ object PreferenceKeys {
     const val autoSync = "auto_sync"
     const val syncAccount = "sync_account"
 
-    const val googleSyncEnabled = "google_sync_enabled"
-    const val googleSyncAccount = "google_sync_account"
-    const val googleSyncLastTime = "google_sync_last_time"
+    const val googleDriveBackupEnabled = "google_drive_backup_enabled"
+    const val googleDriveBackupAccount = "google_drive_backup_account"
+    const val googleDriveBackupLastSync = "google_drive_backup_last_sync"
 }

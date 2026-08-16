@@ -43,8 +43,12 @@ internal object ExtensionLoader {
     private const val METADATA_SOURCE_CLASS = "tachiyomi.extension.class"
     private const val METADATA_SOURCE_FACTORY = "tachiyomi.extension.factory"
     private const val METADATA_NSFW = "tachiyomi.extension.nsfw"
+    private const val METADATA_NAME = "tachiyomi.extension.name"
+    private const val METADATA_EXTENSION_LIB = "tachiyomi.extension.lib.version"
+    private const val METADATA_CONTENT_WARNING = "tachiyomi.extension.content.warning"
     const val LIB_VERSION_MIN = 1.3
     const val LIB_VERSION_MAX = 1.6
+    private val SUPPORTED_LIB_VERSIONS = LIB_VERSION_MIN..LIB_VERSION_MAX
 
     @Suppress("DEPRECATION")
     private val PACKAGE_FLAGS =
@@ -342,7 +346,7 @@ internal object ExtensionLoader {
             ?: versionName.substringBeforeLast('.').toDoubleOrNull()
         if (libVersion == null || libVersion !in SUPPORTED_LIB_VERSIONS) {
             Timber.w(
-                "Lib version is $libVersion, while only version(s) ${SUPPORTED_LIB_VERSIONS.joinToString()} are supported",
+                "Lib version is $libVersion, while only version(s) $SUPPORTED_LIB_VERSIONS are supported",
             )
             return LoadResult.Error
         }

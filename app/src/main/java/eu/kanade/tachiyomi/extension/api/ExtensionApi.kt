@@ -77,10 +77,9 @@ internal class ExtensionApi {
 
         // 3. Fallback to index.min.json (legacy)
         try {
-            val repoJsonUrl = if (directRepoJson) baseUrl else "$baseDir/repo.json"
             val response =
                 networkService.client
-                    .newCall(GET(repoJsonUrl))
+                    .newCall(GET("$repoBaseUrl/index.min.json"))
                     .awaitSuccess()
 
             val bodyBytes = response.body?.bytes() ?: return emptyList()

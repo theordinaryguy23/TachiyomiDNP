@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.onEach
 import eu.kanade.tachiyomi.data.backup.GoogleDriveSyncHelper
 import eu.kanade.tachiyomi.data.backup.BackupCreator
 import eu.kanade.tachiyomi.util.system.launchUI
+import timber.log.Timber
 import java.io.File
 
 class SettingsBackupController : SettingsController() {
