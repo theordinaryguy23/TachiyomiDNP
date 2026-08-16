@@ -4,7 +4,8 @@ import java.util.Date
 import java.util.Locale
 import org.gradle.api.tasks.Copy
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.android.build.OutputFile
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 
 plugins {
     id(Plugins.androidApplication)
@@ -27,12 +28,22 @@ if (!googleServicesFile.exists() && googleServicesDummy.exists()) {
 }
 
 fun runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
+    return try {
+        val byteOut = ByteArrayOutputStream()
+        val execOperations = project.serviceOf<ExecOperations>()
+        val result = execOperations.exec {
+            commandLine = command.split(" ")
+            standardOutput = byteOut
+            isIgnoreExitValue = true
+        }
+        if (result.exitValue == 0) {
+            String(byteOut.toByteArray()).trim().ifEmpty { "0" }
+        } else {
+            "0"
+        }
+    } catch (e: Exception) {
+        "0"
     }
-    return String(byteOut.toByteArray()).trim()
 }
 
 fun getBuildVersion(): String {
@@ -117,6 +128,7 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
 
         // Disable some unused things
         aidl = false
@@ -145,7 +157,7 @@ android {
                 // Use clean versionName (without suffix) for consistent APK naming
                 val cleanVersion = AndroidVersions.versionName
                 val buildType = variant.buildType.name
-                val abi = output.getFilter(com.android.build.OutputFile.ABI) ?: "universal"
+                val abi = output.getFilter("ABI") ?: "universal"
                 // Standard naming: TachiyomiDNP-{version}-{buildType}-{abi}.apk
                 output.outputFileName =
                     "TachiyomiDNP$sep$cleanVersion$sep$buildType$sep$abi.apk"
@@ -283,8 +295,6 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.10.1")
     implementation("com.google.guava:guava:32.0.1-jre")
 
-    implementation("com.google.android.gms:play-services-gcm:17.0.0")
-
     // Database
     implementation("androidx.sqlite:sqlite-ktx:2.5.0")
     implementation("com.github.requery:sqlite-android:3.45.0")
@@ -397,13 +407,13 @@ tasks {
     }
 
     // Duplicating Hebrew string assets due to some locale code issues on different devices
-    val copyHebrewStrings = task("copyHebrewStrings", type = Copy::class) {
+    val copyHebrewStrings = register("copyHebrewStrings", Copy::class.java) {
         from("./src/main/res/values-he")
         into("./src/main/res/values-iw")
         include("**/*")
     }
 
-    preBuild {
+    named("preBuild") {
         dependsOn(copyHebrewStrings)
     }
 }
