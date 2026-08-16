@@ -248,11 +248,6 @@ class PreferencesHelper(
 
     fun backupsDirectory() = flowPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun googleDriveBackupEnabled() = flowPrefs.getBoolean(Keys.googleDriveBackupEnabled, false)
-
-    fun googleDriveBackupAccount() = flowPrefs.getString(Keys.googleDriveBackupAccount, "")
-
-    fun googleDriveBackupLastSync() = flowPrefs.getLong(Keys.googleDriveBackupLastSync, 0L)
 
     fun dateFormat(format: String = flowPrefs.getString(Keys.dateFormat, "").get()): DateFormat =
         when (format) {
@@ -526,7 +521,7 @@ class PreferencesHelper(
     fun syncEnabled() = flowPrefs.getBoolean(Keys.syncEnabled, false)
     fun autoSync() = flowPrefs.getBoolean(Keys.autoSync, false)
 
-    fun googleSyncEnabled() = flowPrefs.getBoolean(Keys.googleSyncEnabled, false)
-    fun googleSyncAccount() = flowPrefs.getString(Keys.googleSyncAccount, "")
-    fun googleSyncLastTime() = flowPrefs.getLong(Keys.googleSyncLastTime, 0L)
+    fun googleSyncEnabled() = flowPrefs.getBoolean(Keys.googleDriveBackupEnabled, false)
+    fun googleSyncAccount() = flowPrefs.getString(Keys.googleDriveBackupAccount, "")
+    fun googleSyncLastTime() = flowPrefs.getLong(Keys.googleDriveBackupLastSync, 0L)
 }
