@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.9.0
+## v1.9.1
 
 ### New Features
 - **Cloud Sync**: Initial support for Google Drive sync (History, Library, and Categories).
