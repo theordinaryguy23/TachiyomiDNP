@@ -11,14 +11,20 @@ open class BrowseSourcePager(
     override suspend fun requestNextPage() {
         val page = currentPage
 
-        val mangasPage =
+        val mangasPage = try {
             if (query.isBlank() && filters.isEmpty()) {
                 source.getPopularManga(page)
             } else {
                 source.getSearchManga(page, query, filters)
             }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw if (e is Exception) e else Exception(e.message ?: e.toString(), e)
+        }
 
-        if (mangasPage.mangas.isNotEmpty()) {
+        val mangas = mangasPage?.mangas
+        if (!mangas.isNullOrEmpty()) {
             onPageReceived(mangasPage)
         } else {
             throw NoResultsException()

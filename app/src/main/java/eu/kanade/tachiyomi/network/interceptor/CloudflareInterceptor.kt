@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.network.AndroidCookieJar
 import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.isOutdated
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -22,13 +23,14 @@ import timber.log.Timber
 class CloudflareInterceptor(
     private val context: Context,
     private val cookieManager: AndroidCookieJar,
-    defaultUserAgentProvider: () -> String,
+    private val defaultUserAgentProvider: () -> String,
+    private val rotateUserAgent: (() -> String)? = null,
 ) : WebViewInterceptor(context, defaultUserAgentProvider) {
     private val executor = ContextCompat.getMainExecutor(context)
 
     override fun shouldIntercept(response: Response): Boolean {
         // Check if Cloudflare anti-bot is on AND it's actually a JS challenge, not a geo-block
-        if (response.code !in ERROR_CODES || response.header("Server") !in SERVER_CHECK) return false
+        if ((response.code !in ERROR_CODES) || (response.header("Server") !in SERVER_CHECK)) return false
         // Peek at the body: only trigger WebView solving on an actual Cloudflare challenge
         // page (presence of the challenge-error elements). Geo-blocks (HTTP 451/522 etc.)
         // or generic 403s should NOT trigger the WebView bypass — doing so causes an
@@ -39,7 +41,14 @@ class CloudflareInterceptor(
                 response.request.url.toString(),
             )
             document.getElementById("challenge-error-title") != null ||
-                document.getElementById("challenge-error-text") != null
+                document.getElementById("challenge-error-text") != null ||
+                document.getElementById("challenge-form") != null ||
+                document.getElementById("challenge-running") != null ||
+                document.getElementById("cf-challenge") != null ||
+                document.getElementById("cf-wrapper") != null ||
+                document.getElementsByClass("cf-turnstile").isNotEmpty() ||
+                document.title().contains("Just a moment", ignoreCase = true) ||
+                document.title().contains("Attention Required", ignoreCase = true)
         } catch (e: Exception) {
             Timber.w(e, "Failed to parse response body for Cloudflare check")
             false
@@ -51,24 +60,58 @@ class CloudflareInterceptor(
         request: Request,
         response: Response,
     ): Response {
-        try {
-            response.close()
-            cookieManager.remove(request.url, COOKIE_NAMES, 0)
-            val oldCookie =
-                cookieManager
-                    .get(request.url)
-                    .firstOrNull { it.name == "cf_clearance" }
-            resolveWithWebView(request, oldCookie)
+        var currentRequest = request
+        var currentResponse = response
+        var attempts = 0
+        val maxAttempts = 2
 
-            return chain.proceed(request)
-            // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
-            // we don't crash the entire app
-        } catch (e: CloudflareBypassException) {
-            throw IOException(context.getString(R.string.failed_to_bypass_cloudflare))
-        } catch (e: Exception) {
-            throw IOException(e)
+        while (attempts < maxAttempts) {
+            try {
+                currentResponse.close()
+                cookieManager.remove(currentRequest.url, COOKIE_NAMES, 0)
+                val oldCookie =
+                    cookieManager
+                        .get(currentRequest.url)
+                        .firstOrNull { it.name == "cf_clearance" }
+                resolveWithWebView(currentRequest, oldCookie)
+
+                val newRequest = currentRequest.newBuilder()
+                    .removeHeader("User-Agent")
+                    .addHeader("User-Agent", defaultUserAgentProvider())
+                    .build()
+
+                val newResponse = chain.proceed(newRequest)
+                if (!shouldIntercept(newResponse)) {
+                    return newResponse
+                }
+                currentRequest = newRequest
+                currentResponse = newResponse
+                attempts++
+            } catch (e: CloudflareBypassException) {
+                attempts++
+                if (attempts < maxAttempts && rotateUserAgent != null) {
+                    val newUa = rotateUserAgent.invoke()
+                    Timber.d("Cloudflare bypass failed on attempt $attempts. Rotating User-Agent to: $newUa")
+                    currentRequest = currentRequest.newBuilder()
+                        .removeHeader("User-Agent")
+                        .addHeader("User-Agent", newUa)
+                        .build()
+                } else {
+                    launchUI {
+                        context.toast(R.string.failed_to_bypass_cloudflare, Toast.LENGTH_LONG)
+                    }
+                    throw IOException(context.getString(R.string.failed_to_bypass_cloudflare))
+                }
+            } catch (e: Exception) {
+                throw IOException(e)
+            }
         }
+        launchUI {
+            context.toast(R.string.failed_to_bypass_cloudflare, Toast.LENGTH_LONG)
+        }
+        throw IOException(context.getString(R.string.failed_to_bypass_cloudflare))
     }
+
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun resolveWithWebView(
@@ -97,11 +140,19 @@ class CloudflareInterceptor(
                         view: WebView,
                         url: String,
                     ) {
-                        fun isCloudFlareBypassed(): Boolean =
-                            cookieManager
+                        fun isCloudFlareBypassed(): Boolean {
+                            try {
+                                android.webkit.CookieManager.getInstance().flush()
+                            } catch (_: Exception) {}
+                            val webviewCookies = try {
+                                android.webkit.CookieManager.getInstance().getCookie(origRequestUrl) ?: ""
+                            } catch (_: Exception) { "" }
+                            val hasWebviewClearance = webviewCookies.contains("cf_clearance")
+                            val jarCookie = cookieManager
                                 .get(origRequestUrl.toHttpUrl())
                                 .firstOrNull { it.name == "cf_clearance" }
-                                .let { it != null && it != oldCookie }
+                            return hasWebviewClearance || (jarCookie != null && jarCookie != oldCookie)
+                        }
 
                         if (isCloudFlareBypassed()) {
                             cloudflareBypassed = true
@@ -136,7 +187,7 @@ class CloudflareInterceptor(
             webView?.loadUrl(origRequestUrl, headers)
         }
 
-        latch.awaitFor30Seconds()
+        latch.awaitFor15Seconds()
 
         executor.execute {
             if (!cloudflareBypassed) {
@@ -161,7 +212,7 @@ class CloudflareInterceptor(
     }
 }
 
-private val ERROR_CODES = listOf(403, 503)
+private val ERROR_CODES = listOf(403, 429, 503)
 private val SERVER_CHECK = arrayOf("cloudflare-nginx", "cloudflare")
 private val COOKIE_NAMES = listOf("cf_clearance")
 

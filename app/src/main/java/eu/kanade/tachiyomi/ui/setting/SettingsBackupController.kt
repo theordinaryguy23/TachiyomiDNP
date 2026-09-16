@@ -18,24 +18,22 @@ import com.google.android.gms.common.api.ApiException
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst
+import eu.kanade.tachiyomi.data.backup.BackupCreator
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupFileValidator
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
-import eu.kanade.tachiyomi.data.backup.GoogleDriveHelper
+import eu.kanade.tachiyomi.data.backup.GoogleDriveSyncHelper
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.disableItems
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import eu.kanade.tachiyomi.data.backup.GoogleDriveSyncHelper
-import eu.kanade.tachiyomi.data.backup.BackupCreator
-import eu.kanade.tachiyomi.util.system.launchUI
 import timber.log.Timber
 import java.io.File
 
@@ -49,8 +47,6 @@ class SettingsBackupController : SettingsController() {
      * Flags containing information of what to backup.
      */
     private var backupFlags = 0
-
-    private val googleDriveHelper by lazy { GoogleDriveHelper(activity!!) }
 
     override fun onViewCreated(
         view: View,

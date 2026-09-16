@@ -1,9 +1,13 @@
 package eu.kanade.tachiyomi.source.model
 
+import kotlinx.serialization.json.JsonObject
+
 sealed class Filter<T>(
     val name: String,
     var state: T,
 ) {
+    open var memo: JsonObject? = null
+
     open class Header(
         name: String,
     ) : Filter<Any>(name, 0)

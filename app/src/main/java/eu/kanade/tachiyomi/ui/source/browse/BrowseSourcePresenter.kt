@@ -103,7 +103,12 @@ open class BrowseSourcePresenter(
         if (!::pager.isInitialized) {
             source = sourceManager.get(sourceId) as? CatalogueSource ?: return
 
-            sourceFilters = source.getFilterList()
+            sourceFilters = try {
+                source.getFilterList()
+            } catch (e: Throwable) {
+                Timber.e(e, "Failed to get filter list from source ${source.id}")
+                FilterList()
+            }
 
             if (oldFilters.isEmpty()) {
                 for (i in sourceFilters) {
@@ -158,7 +163,7 @@ open class BrowseSourcePresenter(
             createPager(
                 query,
                 filters.takeIf { it.isNotEmpty() || query.isBlank() }
-                    ?: source.getFilterList(),
+                    ?: (try { source.getFilterList() } catch (e: Throwable) { FilterList() }),
             )
 
         val sourceId = source.id
@@ -282,7 +287,8 @@ open class BrowseSourcePresenter(
             manga.copyFrom(networkManga)
             manga.initialized = true
             db.insertManga(manga).executeAsBlocking()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             Timber.e(e)
         }
         return manga

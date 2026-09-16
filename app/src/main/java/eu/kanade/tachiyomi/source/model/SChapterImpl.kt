@@ -10,4 +10,11 @@ class SChapterImpl : SChapter {
     override var chapter_number: Float = -1f
 
     override var scanlator: String? = null
+
+    private var _memo: kotlinx.serialization.json.JsonObject? = null
+    override var memo: kotlinx.serialization.json.JsonObject?
+        get() = _memo ?: kotlinx.serialization.json.buildJsonObject { }
+        set(value) {
+            _memo = value
+        }
 }

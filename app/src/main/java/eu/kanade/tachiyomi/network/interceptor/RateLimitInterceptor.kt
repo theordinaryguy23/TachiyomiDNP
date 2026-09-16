@@ -35,6 +35,13 @@ private class RateLimitInterceptor(
     private val requestQueue = ArrayList<Long>(permits)
     private val rateLimitMillis = unit.toMillis(period)
 
+    private fun now(): Long =
+        try {
+            SystemClock.elapsedRealtime()
+        } catch (_: Throwable) {
+            System.currentTimeMillis()
+        }
+
     override fun intercept(chain: Interceptor.Chain): Response {
         // Ignore canceled calls, otherwise they would jam the queue
         if (chain.call().isCanceled()) {
@@ -42,18 +49,17 @@ private class RateLimitInterceptor(
         }
 
         synchronized(requestQueue) {
-            val now = SystemClock.elapsedRealtime()
+            val now = now()
             val waitTime =
                 if (requestQueue.size < permits) {
                     0
                 } else {
                     val oldestReq = requestQueue[0]
-                    val newestReq = requestQueue[permits - 1]
 
-                    if (newestReq - oldestReq > rateLimitMillis) {
+                    if ((now - oldestReq) >= rateLimitMillis) {
                         0
                     } else {
-                        oldestReq + rateLimitMillis - now // Remaining time
+                        (oldestReq + rateLimitMillis) - now // Remaining time
                     }
                 }
 
@@ -73,6 +79,30 @@ private class RateLimitInterceptor(
             }
         }
 
-        return chain.proceed(chain.request())
+        var response = chain.proceed(chain.request())
+        var retryCount = 0
+        val maxRetries = 3
+
+        while ((response.code == 429) && (retryCount < maxRetries)) {
+            if (chain.call().isCanceled()) {
+                break
+            }
+            response.close()
+            retryCount++
+            val retryAfterSeconds = response.header("Retry-After")?.toLongOrNull()
+            val delayMillis = if ((retryAfterSeconds != null) && (retryAfterSeconds > 0)) {
+                retryAfterSeconds * 1000L
+            } else {
+                1000L * (1 shl (retryCount - 1))
+            }
+            try {
+                Thread.sleep(delayMillis)
+            } catch (e: InterruptedException) {
+                throw IOException("Interrupted during rate limit backoff", e)
+            }
+            response = chain.proceed(chain.request())
+        }
+
+        return response
     }
 }

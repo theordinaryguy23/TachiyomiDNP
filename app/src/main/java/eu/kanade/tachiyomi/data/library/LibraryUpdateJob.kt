@@ -270,7 +270,8 @@ class LibraryUpdateJob(
                                 val networkManga =
                                     try {
                                         source.awaitMangaDetails(manga.copy())
-                                    } catch (e: java.lang.Exception) {
+                                    } catch (e: Throwable) {
+                                        if (e is CancellationException) throw e
                                         Timber.e(e)
                                         null
                                     }
@@ -455,10 +456,12 @@ class LibraryUpdateJob(
                     }
                 }
                 return@coroutineScope hasDownloads
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 if (e !is CancellationException) {
                     failedUpdates[manga] = e.message
                     Timber.e("Failed updating: ${manga.title}: $e")
+                } else {
+                    throw e
                 }
                 return@coroutineScope false
             }

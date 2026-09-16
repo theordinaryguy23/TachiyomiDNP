@@ -213,7 +213,16 @@ class SyncSettingsController(
                     }
                 }
             } else {
-                Timber.e("Sign-in failed: ${task.exception}")
+                val exception = task.exception
+                if (exception is com.google.android.gms.common.api.ApiException) {
+                    if (exception.statusCode == com.google.android.gms.common.api.CommonStatusCodes.DEVELOPER_ERROR) {
+                        Timber.e(exception, "Sign-in failed: DEVELOPER_ERROR (10). Google OAuth Web Client ID or SHA-1 fingerprint is not configured in Firebase / Google Cloud Console.")
+                    } else {
+                        Timber.e(exception, "Sign-in failed with API status code: ${exception.statusCode}")
+                    }
+                } else {
+                    Timber.e(exception, "Sign-in failed")
+                }
                 preferenceScreen.context.toast(R.string.pref_sync_sign_in_failed)
             }
         } catch (e: Exception) {

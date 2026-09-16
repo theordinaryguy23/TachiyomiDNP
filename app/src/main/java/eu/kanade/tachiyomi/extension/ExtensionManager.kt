@@ -83,13 +83,13 @@ class ExtensionManager(
         val pkgName = getPackageName(sourceId)
         return if (pkgName != null) {
             try {
-                return iconMap.getOrPut(pkgName) {
-                    ExtensionLoader
-                        .getExtensionPackageInfoFromPkgName(context, pkgName)!!
-                        .applicationInfo!!
-                        .loadIcon(context.packageManager)
+                iconMap.getOrPut(pkgName) {
+                    val appInfo = ExtensionLoader
+                        .getExtensionPackageInfoFromPkgName(context, pkgName)
+                        ?.applicationInfo ?: return null
+                    appInfo.loadIcon(context.packageManager)
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 null
             }
         } else {

@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.awaitMangaDetails
+import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -176,14 +177,17 @@ open class GlobalSearchPresenter(
                             if (this@GlobalSearchPresenter.items.find { it.source == source }?.results != null) {
                                 return@mainLaunch
                             }
-                            val mangas =
+                            val mangasPage =
                                 try {
-                                    source.getSearchManga(1, query, source.getFilterList())
-                                } catch (error: Exception) {
+                                    val filters = try { source.getFilterList() } catch (e: Throwable) { FilterList() }
+                                    source.getSearchManga(1, query, filters)
+                                } catch (error: Throwable) {
+                                    if (error is kotlinx.coroutines.CancellationException) throw error
                                     MangasPage(emptyList(), false)
-                                }.mangas
-                                    .take(10)
-                                    .map { networkToLocalManga(it, source.id) }
+                                }
+                            val mangas = (mangasPage?.mangas ?: emptyList())
+                                .take(10)
+                                .map { networkToLocalManga(it, source.id) }
                             fetchImage(mangas, source)
                             if (mangas.isNotEmpty() && !loadTime.containsKey(source.id)) {
                                 loadTime[source.id] = Date().time

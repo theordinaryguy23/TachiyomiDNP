@@ -77,6 +77,10 @@ abstract class WebViewInterceptor(
             }.groupBy(keySelector = { (name, _) -> name }) { (_, value) -> value }
             .mapValues { it.value.getOrNull(0).orEmpty() }
 
+    fun CountDownLatch.awaitFor15Seconds() {
+        await(15, TimeUnit.SECONDS)
+    }
+
     fun CountDownLatch.awaitFor30Seconds() {
         await(30, TimeUnit.SECONDS)
     }

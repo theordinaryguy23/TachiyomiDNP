@@ -376,9 +376,11 @@ class MangaDetailsPresenter(
                     val update = source.awaitMangaUpdate(manga.copy())
                     networkManga = update.manga
                     finChapters = update.chapters
-                } catch (e: Exception) {
-                    mangaError = e
-                    chapterError = e
+                } catch (e: Throwable) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
+                    val ex = e as? Exception ?: Exception(e.message ?: e.toString(), e)
+                    mangaError = ex
+                    chapterError = ex
                 }
             }
 
@@ -472,8 +474,10 @@ class MangaDetailsPresenter(
             val chapters =
                 try {
                     source.awaitChapterList(manga)
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) { view?.showError(trimException(e)) }
+                } catch (e: Throwable) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
+                    val ex = e as? Exception ?: Exception(e.message ?: e.toString(), e)
+                    withContext(Dispatchers.Main) { view?.showError(trimException(ex)) }
                     return@launch
                 }
             isLoading = false
@@ -485,9 +489,11 @@ class MangaDetailsPresenter(
                     view?.updateChapters(this@MangaDetailsPresenter.chapters)
                 }
                 getHistory()
-            } catch (e: java.lang.Exception) {
+            } catch (e: Throwable) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                val ex = e as? Exception ?: Exception(e.message ?: e.toString(), e)
                 withContext(Dispatchers.Main) {
-                    view?.showError(trimException(e))
+                    view?.showError(trimException(ex))
                 }
             }
         }

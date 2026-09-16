@@ -100,22 +100,24 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
 
-            preference {
-                key = "dump_crash_logs"
-                titleRes = R.string.dump_crash_logs
-                summaryRes = R.string.saves_error_logs
+            if (BuildConfig.DEBUG) {
+                preference {
+                    key = "dump_crash_logs"
+                    titleRes = R.string.dump_crash_logs
+                    summaryRes = R.string.saves_error_logs
 
-                onClick {
-                    CrashLogUtil(context.localeContext).dumpLogs()
+                    onClick {
+                        CrashLogUtil(context.localeContext).dumpLogs()
+                    }
                 }
-            }
 
-            preference {
-                key = "debug_info"
-                titleRes = R.string.pref_debug_info
+                preference {
+                    key = "debug_info"
+                    titleRes = R.string.pref_debug_info
 
-                onClick {
-                    router.pushController(DebugController().withFadeTransaction())
+                    onClick {
+                        router.pushController(DebugController().withFadeTransaction())
+                    }
                 }
             }
 
@@ -141,16 +143,6 @@ class SettingsAdvancedController : SettingsController() {
                                 context.toast(R.string.battery_optimization_disabled)
                             }
                         }
-                    }
-                }
-
-                preference {
-                    key = "pref_dont_kill_my_app"
-                    title = "Don't kill my app!"
-                    summaryRes = R.string.about_dont_kill_my_app
-
-                    onClick {
-                        openInBrowser("https://dontkillmyapp.com/")
                     }
                 }
             }

@@ -84,6 +84,13 @@ open class MangaImpl : Manga {
 
     override var filtered_scanlators: String? = null
 
+    private var _memo: kotlinx.serialization.json.JsonObject? = null
+    override var memo: kotlinx.serialization.json.JsonObject?
+        get() = _memo ?: kotlinx.serialization.json.buildJsonObject { }
+        set(value) {
+            _memo = value
+        }
+
     lateinit var ogTitle: String
         private set
     var ogAuthor: String? = null

@@ -16,10 +16,8 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.ui.source.browse.repos.RepoController
-import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.injectLazy
 
@@ -126,7 +124,6 @@ class SettingsBrowseController : SettingsController() {
 
             preferenceCategory {
                 titleRes = R.string.migration
-                // Only show this if someone has mass migrated manga once
 
                 preference {
                     titleRes = R.string.source_migration
@@ -144,56 +141,6 @@ class SettingsBrowseController : SettingsController() {
                         defaultValue = false
                     }
                 }
-                preference {
-                    key = "match_pinned_sources"
-                    titleRes = R.string.match_pinned_sources
-                    summaryRes = R.string.only_enable_pinned_for_migration
-                    onClick {
-                        val ogSources = preferences.migrationSources().get()
-                        val pinnedSources =
-                            preferences.pinnedCatalogues().get().joinToString("/")
-                        preferences.migrationSources().set(pinnedSources)
-                        (activity as? MainActivity)?.setUndoSnackBar(
-                            view?.snack(
-                                R.string.migration_sources_changed,
-                            ) {
-                                setAction(R.string.undo) {
-                                    preferences.migrationSources().set(ogSources)
-                                }
-                            },
-                        )
-                    }
-                }
-
-                preference {
-                    key = "match_enabled_sources"
-                    titleRes = R.string.match_enabled_sources
-                    summaryRes = R.string.only_enable_enabled_for_migration
-                    onClick {
-                        val ogSources = preferences.migrationSources().get()
-                        val languages = preferences.enabledLanguages().get()
-                        val hiddenCatalogues = preferences.hiddenSources().get()
-                        val enabledSources =
-                            sourceManager
-                                .getCatalogueSources()
-                                .filter { it.lang in languages }
-                                .filterNot { it.id.toString() in hiddenCatalogues }
-                                .sortedBy { "(${it.lang}) ${it.name}" }
-                                .joinToString("/") { it.id.toString() }
-                        preferences.migrationSources().set(enabledSources)
-                        (activity as? MainActivity)?.setUndoSnackBar(
-                            view?.snack(
-                                R.string.migration_sources_changed,
-                            ) {
-                                setAction(R.string.undo) {
-                                    preferences.migrationSources().set(ogSources)
-                                }
-                            },
-                        )
-                    }
-                }
-
-                infoPreference(R.string.you_can_migrate_in_library)
             }
 
             preferenceCategory {

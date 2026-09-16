@@ -203,12 +203,22 @@ sealed class AndroidPreference<T>(
             preferences: SharedPreferences,
             key: String,
             defaultValue: T,
-        ): T =
-            try {
-                preferences.getString(key, null)?.let(deserializer) ?: defaultValue
+        ): T {
+            val raw = preferences.getString(key, null)
+            if (raw == null || raw == "null") {
+                if (raw == "null") {
+                    delete()
+                }
+                return defaultValue
+            }
+            return try {
+                deserializer(raw)
             } catch (e: Exception) {
+                Timber.d(e, "Invalid object value for $key; deleting")
+                delete()
                 defaultValue
             }
+        }
 
         override fun write(
             key: String,

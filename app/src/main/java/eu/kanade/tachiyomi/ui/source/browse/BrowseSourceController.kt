@@ -418,7 +418,12 @@ open class BrowseSourceController(
 
         sheet.onResetClicked = {
             presenter.appliedFilters = FilterList()
-            val newFilters = presenter.source.getFilterList()
+            val newFilters = try {
+                presenter.source.getFilterList()
+            } catch (e: Throwable) {
+                Timber.e(e, "Failed to get filter list from source ${presenter.source.id}")
+                FilterList()
+            }
             presenter.sourceFilters = newFilters
             sheet.setFilters(presenter.filterItems)
         }
@@ -444,7 +449,12 @@ open class BrowseSourceController(
         names: List<String>,
         useContains: Boolean = false,
     ) {
-        presenter.sourceFilters = presenter.source.getFilterList()
+        presenter.sourceFilters = try {
+            presenter.source.getFilterList()
+        } catch (e: Throwable) {
+            Timber.e(e, "Failed to get filter list from source ${presenter.source.id}")
+            FilterList()
+        }
         val genreNames = names.map { it.split(":").last().trim() }
         var filterList: FilterList? = null
         genres@ for (genreName in genreNames) {
@@ -656,7 +666,11 @@ open class BrowseSourceController(
         }
 
         return when {
+            error is eu.kanade.tachiyomi.network.HttpException && error.code == 429 ->
+                "${error.message}: ${activity!!.getString(R.string.rate_limit_exceeded)}"
             error.message == null -> ""
+            error.message!!.startsWith("HTTP error 429") ->
+                "${error.message}: ${activity!!.getString(R.string.rate_limit_exceeded)}"
             error.message!!.startsWith("HTTP error") -> "${error.message}: ${activity!!.getString(R.string.check_site_in_web)}"
             else -> error.message!!
         }
@@ -732,7 +746,12 @@ open class BrowseSourceController(
         searchItem?.collapseActionView()
 
         presenter.appliedFilters = FilterList()
-        val newFilters = presenter.source.getFilterList()
+        val newFilters = try {
+            presenter.source.getFilterList()
+        } catch (e: Throwable) {
+            Timber.e(e, "Failed to get filter list from source ${presenter.source.id}")
+            FilterList()
+        }
         presenter.sourceFilters = newFilters
         presenter.filtersChanged = false
 

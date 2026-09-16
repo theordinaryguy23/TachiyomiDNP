@@ -3,9 +3,11 @@ package eu.kanade.tachiyomi.smartsearch
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.lang.toNormalized
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein
+import timber.log.Timber
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -64,8 +66,14 @@ class SmartSearchEngine(
                     } else {
                         titleNormalized
                     }
+                val filters = try {
+                    source.getFilterList()
+                } catch (e: Throwable) {
+                    Timber.e(e, "Failed to get filter list from source ${source.id}")
+                    FilterList()
+                }
                 val searchResults =
-                    source.getSearchManga(1, searchQuery, source.getFilterList())
+                    source.getSearchManga(1, searchQuery, filters)
 
                 if (searchResults.mangas.size == 1) {
                     return@supervisorScope listOf(SearchEntry(searchResults.mangas.first(), 0.0))

@@ -63,6 +63,8 @@ class AppModule(
             Json {
                 ignoreUnknownKeys = true
                 explicitNulls = false
+                isLenient = true
+                coerceInputValues = true
             }
         }
 

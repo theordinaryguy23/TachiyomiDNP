@@ -30,49 +30,64 @@ class SourceHolder(
     }
 
     fun bind(item: SourceItem) {
-        val source = item.source
-        // setCardEdges(item)
+        try {
+            val source = item.source
 
-        val underPinnedSection = item.header?.code?.equals(SourcePresenter.PINNED_KEY) ?: false
-        val underLastUsedSection = item.header?.code?.equals(SourcePresenter.LAST_USED_KEY) ?: false
-        val isPinned = item.isPinned ?: underPinnedSection
-        val showLanguage = source.includeLangInName(adapter.enabledLanguages, adapter.extensionManager)
-        val sourceName = if (showLanguage && (underPinnedSection || underLastUsedSection)) source.toString() else source.name
-        binding.title.text = sourceName
-
-        binding.sourcePin.apply {
-            iconTint =
-                ColorStateList.valueOf(
-                    context.getResourceColor(
-                        if (isPinned) {
-                            R.attr.colorSecondary
-                        } else {
-                            android.R.attr.textColorSecondary
-                        },
-                    ),
-                )
-            compatToolTipText = context.getString(if (isPinned) R.string.unpin else R.string.pin)
-            contentDescription = context.getString(if (isPinned) R.string.unpin else R.string.pin)
-            setIconResource(
-                if (isPinned) {
-                    R.drawable.ic_pin_24dp
-                } else {
-                    R.drawable.ic_pin_outline_24dp
-                },
-            )
-        }
-
-        // Set circle letter image.
-        itemView.post {
-            val icon = source.icon()
-            when {
-                icon != null -> binding.sourceImage.setImageDrawable(icon)
-                item.source.id == LocalSource.ID -> binding.sourceImage.setImageResource(R.mipmap.ic_local_source)
+            val underPinnedSection = item.header?.code?.equals(SourcePresenter.PINNED_KEY) ?: false
+            val underLastUsedSection = item.header?.code?.equals(SourcePresenter.LAST_USED_KEY) ?: false
+            val isPinned = item.isPinned ?: underPinnedSection
+            val showLanguage = try {
+                source.includeLangInName(adapter.enabledLanguages, adapter.extensionManager)
+            } catch (e: Throwable) {
+                true
             }
-        }
+            val sourceName = try {
+                if (showLanguage && (underPinnedSection || underLastUsedSection)) source.toString() else source.name
+            } catch (e: Throwable) {
+                item.source.id.toString()
+            }
+            binding.title.text = sourceName
 
-        binding.sourceLatest.isVisible = source.supportsLatest
+            binding.sourcePin.apply {
+                iconTint =
+                    ColorStateList.valueOf(
+                        context.getResourceColor(
+                            if (isPinned) {
+                                R.attr.colorSecondary
+                            } else {
+                                android.R.attr.textColorSecondary
+                            },
+                        ),
+                    )
+                compatToolTipText = context.getString(if (isPinned) R.string.unpin else R.string.pin)
+                contentDescription = context.getString(if (isPinned) R.string.unpin else R.string.pin)
+                setIconResource(
+                    if (isPinned) {
+                        R.drawable.ic_pin_24dp
+                    } else {
+                        R.drawable.ic_pin_outline_24dp
+                    },
+                )
+            }
+
+            itemView.post {
+                try {
+                    val icon = source.icon()
+                    when {
+                        icon != null -> binding.sourceImage.setImageDrawable(icon)
+                        item.source.id == LocalSource.ID -> binding.sourceImage.setImageResource(R.mipmap.ic_local_source)
+                    }
+                } catch (e: Throwable) {
+                    // Ignore icon load error
+                }
+            }
+
+            binding.sourceLatest.isVisible = try { source.supportsLatest } catch (e: Throwable) { false }
+        } catch (e: Throwable) {
+            timber.log.Timber.e(e, "Error binding SourceHolder")
+        }
     }
+
 
     override fun getFrontView(): View = binding.sourceCard
 

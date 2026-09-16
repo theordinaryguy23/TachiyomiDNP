@@ -130,10 +130,15 @@ internal class ExtensionApi {
 
     private fun decompressIfGzip(data: ByteArray): ByteArray {
         return if (data.size >= 2 && data[0] == 0x1f.toByte() && data[1] == 0x8b.toByte()) {
-            ByteArrayInputStream(data).use { inputStream ->
-                GZIPInputStream(inputStream).use { gzipInputStream ->
-                    gzipInputStream.readBytes()
+            try {
+                ByteArrayInputStream(data).use { inputStream ->
+                    GZIPInputStream(inputStream).use { gzipInputStream ->
+                        gzipInputStream.readBytes()
+                    }
                 }
+            } catch (e: Throwable) {
+                Timber.w(e, "Failed to decompress gzip data")
+                data
             }
         } else {
             data
@@ -149,37 +154,43 @@ internal class ExtensionApi {
         return try {
             val store = ProtoBuf.decodeFromByteArray(NetworkExtensionStore.serializer(), data)
             store.toExtensions(repoUrl)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Timber.e(e, "Failed to parse protobuf extension index")
             emptyList()
         }
     }
 
     private fun NetworkExtensionStore.toExtensions(repoUrl: String): List<Extension.Available> {
-        return extensionList?.extensions?.map { ext ->
-            Extension.Available(
-                name = ext.name,
-                pkgName = ext.packageName,
-                versionName = ext.versionName,
-                versionCode = ext.versionCode,
-                libVersion = ext.versionName.extractLibVersion(),
-                lang = ext.sources.firstOrNull()?.language ?: "",
-                isNsfw = ext.contentWarning == ContentWarning.NSFW,
-                sources = ext.sources.map { source ->
-                    Extension.AvailableSource(
-                        name = source.name,
-                        id = source.id,
-                        lang = source.language,
-                        baseUrl = source.homeUrl ?: "",
-                    )
-                },
-                apkName = "",
-                apkUrl = ext.resources.apkUrl,
-                iconUrl = ext.resources.iconUrl,
-                repoUrl = repoUrl,
-            )
+        return extensionList?.extensions?.mapNotNull { ext ->
+            try {
+                Extension.Available(
+                    name = ext.name,
+                    pkgName = ext.packageName,
+                    versionName = ext.versionName,
+                    versionCode = ext.versionCode,
+                    libVersion = ext.versionName.extractLibVersion(),
+                    lang = ext.sources.firstOrNull()?.language ?: "",
+                    isNsfw = ext.contentWarning == ContentWarning.NSFW,
+                    sources = ext.sources.map { source ->
+                        Extension.AvailableSource(
+                            name = source.name,
+                            id = source.id,
+                            lang = source.language,
+                            baseUrl = source.homeUrl ?: "",
+                        )
+                    },
+                    apkName = "",
+                    apkUrl = ext.resources.apkUrl,
+                    iconUrl = ext.resources.iconUrl,
+                    repoUrl = repoUrl,
+                )
+            } catch (e: Throwable) {
+                Timber.e(e, "Failed to parse network extension ${ext.packageName}")
+                null
+            }
         } ?: emptyList()
     }
+
 
     private fun String.extractLibVersion(): Double = substringBeforeLast('.').toDoubleOrNull() ?: 0.0
 
@@ -218,22 +229,28 @@ internal class ExtensionApi {
         this
             .filter {
                 val libVersion = it.extractLibVersion()
-                libVersion in listOf(1.4, 1.6)
-            }.map {
-                Extension.Available(
-                    name = it.name.substringAfter("Tachiyomi: "),
-                    pkgName = it.pkg,
-                    versionName = it.version,
-                    versionCode = it.code,
-                    libVersion = it.extractLibVersion(),
-                    lang = it.lang,
-                    isNsfw = it.nsfw == 1,
-                    sources = it.sources ?: emptyList(),
-                    apkName = it.apk,
-                    iconUrl = "$repoUrl/icon/${it.pkg}.png",
-                    repoUrl = repoUrl,
-                )
+                libVersion >= ExtensionLoader.LIB_VERSION_MIN && libVersion <= ExtensionLoader.LIB_VERSION_MAX
+            }.mapNotNull {
+                try {
+                    Extension.Available(
+                        name = it.name.substringAfter("Tachiyomi: "),
+                        pkgName = it.pkg,
+                        versionName = it.version,
+                        versionCode = it.code,
+                        libVersion = it.extractLibVersion(),
+                        lang = it.lang,
+                        isNsfw = it.nsfw == 1,
+                        sources = it.sources ?: emptyList(),
+                        apkName = it.apk,
+                        iconUrl = "$repoUrl/icon/${it.pkg}.png",
+                        repoUrl = repoUrl,
+                    )
+                } catch (e: Throwable) {
+                    Timber.e(e, "Failed to parse json extension ${it.pkg}")
+                    null
+                }
             }
+
 
     fun getApkUrl(extension: ExtensionManager.ExtensionInfo): String =
         extension.apkUrl.takeIf { !it.isNullOrEmpty() }

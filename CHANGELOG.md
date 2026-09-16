@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.9.2
+
+### Network & Rate Limiting Fixes
+- **Fixed Rate Limiting Bug**: Resolved issue in `RateLimitInterceptor` and `SpecificHostRateLimitInterceptor` where requests bypassed throttling and triggered `HTTP error 429` (Too Many Requests).
+- **Automated HTTP 429 Retry**: Added automatic retry backoff (respecting `Retry-After` header or exponential delay) for transient rate limit responses.
+- **Enhanced Cloudflare Bypass**: Expanded `CloudflareInterceptor` to handle HTTP 429 Cloudflare Turnstile/Managed Challenges during searches.
+
+### UI & Settings Optimization
+- **Cleaned Up Settings**: Streamlined settings categories, hiding internal debug diagnostics in release builds and removing redundant link options.
+- **Simplified Backup & Sync Menus**: Consolidated cloud backups into a single fully functional Google Drive sync implementation and removed duplicate non-functional sync menus.
+- **Improved Error Messaging**: Display clearer, user-friendly messages when rate limits or HTTP errors occur.
+
 ## v1.9.1
 
 ### New Features

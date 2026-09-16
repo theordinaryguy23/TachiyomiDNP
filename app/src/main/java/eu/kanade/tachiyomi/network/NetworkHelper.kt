@@ -7,9 +7,35 @@ import eu.kanade.tachiyomi.network.interceptor.UncaughtExceptionInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import okhttp3.Cache
 import okhttp3.OkHttpClient
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
+
+object UserAgentPool {
+    const val DEFAULT_USER_AGENT =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+
+    val USER_AGENTS = listOf(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15",
+        "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36",
+        "Mozilla/5.0 (Android 14; Mobile; rv:135.0) Gecko/135.0 Firefox/135.0",
+    )
+
+    fun getNextUserAgent(current: String): String {
+        val trimmed = current.trim()
+        val index = USER_AGENTS.indexOf(trimmed)
+        return if (index != -1 && index + 1 < USER_AGENTS.size) {
+            USER_AGENTS[index + 1]
+        } else {
+            USER_AGENTS.first()
+        }
+    }
+}
 
 class NetworkHelper(
     val context: Context,
@@ -24,7 +50,15 @@ class NetworkHelper(
 
     private val userAgentInterceptor by lazy { UserAgentInterceptor(::defaultUserAgent) }
     private val cloudflareInterceptor by lazy {
-        CloudflareInterceptor(context, cookieJar, ::defaultUserAgent)
+        CloudflareInterceptor(context, cookieJar, ::defaultUserAgent, ::rotateUserAgent)
+    }
+
+    fun rotateUserAgent(): String {
+        val currentUa = defaultUserAgent
+        val nextUa = UserAgentPool.getNextUserAgent(currentUa)
+        preferences.defaultUserAgent().set(nextUa)
+        Timber.d("Rotated User-Agent to: $nextUa")
+        return nextUa
     }
 
     private val baseClientBuilder: OkHttpClient.Builder
@@ -40,17 +74,6 @@ class NetworkHelper(
                     .addInterceptor(userAgentInterceptor)
                     .addInterceptor(cloudflareInterceptor)
                     .apply {
-//                    if (BuildConfig.DEBUG) {
-//                        addInterceptor(
-//                            ChuckerInterceptor.Builder(context)
-//                                .collector(ChuckerCollector(context))
-//                                .maxContentLength(250000L)
-//                                .redactHeaders(emptySet())
-//                                .alwaysReadResponseBody(false)
-//                                .build(),
-//                        )
-//                    }
-
                         when (preferences.dohProvider()) {
                             PREF_DOH_CLOUDFLARE -> dohCloudflare()
                             PREF_DOH_GOOGLE -> dohGoogle()
@@ -81,6 +104,7 @@ class NetworkHelper(
                 .trim()
 
     companion object {
-        const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"
+        val DEFAULT_USER_AGENT = UserAgentPool.DEFAULT_USER_AGENT
     }
 }
+

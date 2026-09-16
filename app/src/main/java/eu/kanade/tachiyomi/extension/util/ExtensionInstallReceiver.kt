@@ -107,13 +107,19 @@ internal class ExtensionInstallReceiver(
         val pkgName =
             getPackageNameFromIntent(intent)
                 ?: return LoadResult.Error
-        return GlobalScope
-            .async(
-                Dispatchers.Default,
-                CoroutineStart.DEFAULT,
-            ) { ExtensionLoader.loadExtensionFromPkgName(context, pkgName) }
-            .await()
+        return try {
+            GlobalScope
+                .async(
+                    Dispatchers.Default,
+                    CoroutineStart.DEFAULT,
+                ) { ExtensionLoader.loadExtensionFromPkgName(context, pkgName) }
+                .await()
+        } catch (e: Throwable) {
+            timber.log.Timber.e(e, "Error loading extension from intent for $pkgName")
+            LoadResult.Error
+        }
     }
+
 
     /**
      * Returns the package name of the installed, updated or removed application.

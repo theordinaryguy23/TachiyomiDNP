@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.model
 
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import kotlinx.serialization.json.JsonObject
 import java.io.Serializable
 
 interface SManga : Serializable {
@@ -23,6 +24,8 @@ interface SManga : Serializable {
     var update_strategy: UpdateStrategy
 
     var initialized: Boolean
+
+    var memo: JsonObject?
 
     val originalTitle: String
         get() = (this as? MangaImpl)?.ogTitle ?: title
@@ -71,6 +74,10 @@ interface SManga : Serializable {
         if (!initialized) {
             initialized = other.initialized
         }
+
+        if (other.memo != null) {
+            memo = other.memo
+        }
     }
 
     fun copy() =
@@ -84,6 +91,7 @@ interface SManga : Serializable {
             it.status = status
             it.thumbnail_url = thumbnail_url
             it.initialized = initialized
+            it.memo = memo ?: kotlinx.serialization.json.buildJsonObject { }
         }
 
     companion object {

@@ -196,7 +196,12 @@ class MigrationListController(
                                                                     searchResult,
                                                                     source.id,
                                                                 )
-                                                            val chapters = source.awaitChapterList(localManga)
+                                                            val chapters = try {
+                                                                source.awaitChapterList(localManga)
+                                                            } catch (e: Throwable) {
+                                                                if (e is CancellationException) throw e
+                                                                emptyList()
+                                                            }
                                                             try {
                                                                 syncChaptersWithSource(
                                                                     db,
@@ -204,7 +209,8 @@ class MigrationListController(
                                                                     localManga,
                                                                     source,
                                                                 )
-                                                            } catch (e: Exception) {
+                                                            } catch (e: Throwable) {
+                                                                if (e is CancellationException) throw e
                                                                 return@source null
                                                             }
 //                                                            manga.progress.send(validSources.size to processedSources.incrementAndGet())
@@ -242,7 +248,8 @@ class MigrationListController(
                                                     val chapters: List<SChapter> =
                                                         try {
                                                             source.awaitChapterList(localManga)
-                                                        } catch (e: java.lang.Exception) {
+                                                        } catch (e: Throwable) {
+                                                            if (e is CancellationException) throw e
                                                             Timber.e(e)
                                                             emptyList()
                                                         }
@@ -256,7 +263,7 @@ class MigrationListController(
                                             } catch (e: CancellationException) {
                                                 // Ignore cancellations
                                                 throw e
-                                            } catch (e: Exception) {
+                                            } catch (e: Throwable) {
                                                 null
                                             }
 
@@ -283,7 +290,7 @@ class MigrationListController(
                     } catch (e: CancellationException) {
                         // Ignore cancellations
                         throw e
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                     }
                 }
 
@@ -394,7 +401,8 @@ class MigrationListController(
                         try {
                             val chapters = source.awaitChapterList(localManga)
                             syncChaptersWithSource(db, chapters, localManga, source)
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
+                            if (e is CancellationException) throw e
                             return@async null
                         }
                         localManga
@@ -410,7 +418,7 @@ class MigrationListController(
                 } catch (e: CancellationException) {
                     // Ignore cancellations
                     throw e
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                 }
 
                 migratingManga.manga.migrationStatus = MigrationStatus.MANGA_FOUND

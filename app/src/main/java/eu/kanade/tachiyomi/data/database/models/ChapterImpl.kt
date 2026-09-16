@@ -27,6 +27,13 @@ class ChapterImpl : Chapter {
 
     override var source_order: Int = 0
 
+    private var _memo: kotlinx.serialization.json.JsonObject? = null
+    override var memo: kotlinx.serialization.json.JsonObject?
+        get() = _memo ?: kotlinx.serialization.json.buildJsonObject { }
+        set(value) {
+            _memo = value
+        }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false

@@ -310,6 +310,7 @@
     <string name="last_used">Last used</string>
     <string name="local_source_help_guide">Local source guide</string>
     <string name="check_site_in_web">Check website in WebView</string>
+    <string name="rate_limit_exceeded">Too many requests. Please wait a moment.</string>
 
     <!-- Other Screens -->
 

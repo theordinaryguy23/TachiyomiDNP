@@ -323,117 +323,146 @@ internal object ExtensionLoader {
         context: Context,
         extensionInfo: ExtensionInfo,
     ): LoadResult {
-        val pkgManager = context.packageManager
-        val pkgInfo = extensionInfo.packageInfo
-        val appInfo = pkgInfo.applicationInfo!!
-        val pkgName = pkgInfo.packageName
+        return try {
+            val pkgManager = context.packageManager
+            val pkgInfo = extensionInfo.packageInfo
+            val appInfo = pkgInfo.applicationInfo ?: return LoadResult.Error
+            val pkgName = pkgInfo.packageName
 
-        val extName = appInfo.metaData.getString(METADATA_NAME)
-            ?: pkgManager.getApplicationLabel(appInfo).toString().substringAfter("Tachiyomi: ")
-        val versionName = pkgInfo.versionName
-        val versionCode = PackageInfoCompat.getLongVersionCode(pkgInfo)
+            val metaData = appInfo.metaData
+            val extName = metaData?.getString(METADATA_NAME)
+                ?: pkgManager.getApplicationLabel(appInfo).toString().substringAfter("Tachiyomi: ")
+            val versionName = pkgInfo.versionName
+            val versionCode = PackageInfoCompat.getLongVersionCode(pkgInfo)
 
-        if (versionName.isNullOrEmpty()) {
-            Timber.w("Missing versionName for extension $extName")
-            return LoadResult.Error
-        }
-
-        // Validate lib version
-        val libVersion = appInfo.metaData.getFloat(METADATA_EXTENSION_LIB)
-            .takeUnless { it == 0.0f }
-            ?.toString()
-            ?.toDouble()
-            ?: versionName.substringBeforeLast('.').toDoubleOrNull()
-        if (libVersion == null || libVersion !in SUPPORTED_LIB_VERSIONS) {
-            Timber.w(
-                "Lib version is $libVersion, while only version(s) $SUPPORTED_LIB_VERSIONS are supported",
-            )
-            return LoadResult.Error
-        }
-
-        val signatures = getSignatures(pkgInfo)
-        if (signatures.isNullOrEmpty()) {
-            Timber.w("Package $pkgName isn't signed")
-            return LoadResult.Error
-        } else if (isExtensionInstalledByApp(context, pkgName)) {
-            if (!trustSignatures.contains(signatures.last())) {
-                trustSignatures.add(signatures.last())
+            if (versionName.isNullOrEmpty()) {
+                Timber.w("Missing versionName for extension $extName")
+                return LoadResult.Error
             }
-        } else if (!isTrusted(pkgInfo, signatures) && signatures.any { !trustSignatures.contains(it) }) {
-            val extension =
-                Extension.Untrusted(
-                    extName,
-                    pkgName,
-                    versionName,
-                    versionCode,
-                    libVersion,
-                    signatures.last(),
+
+            // Validate lib version
+            val libVersion = metaData?.getFloat(METADATA_EXTENSION_LIB)
+                ?.takeUnless { it == 0.0f }
+                ?.toString()
+                ?.toDouble()
+                ?: versionName.substringBeforeLast('.').toDoubleOrNull()
+            if (libVersion == null || libVersion !in SUPPORTED_LIB_VERSIONS) {
+                Timber.w(
+                    "Lib version is $libVersion, while only version(s) $SUPPORTED_LIB_VERSIONS are supported",
                 )
-            Timber.w("Extension $pkgName isn't trusted")
-            return LoadResult.Untrusted(extension)
-        }
+                return LoadResult.Error
+            }
 
-        val isNsfw = appInfo.metaData.getInt(METADATA_CONTENT_WARNING) > 0 ||
-            appInfo.metaData.getInt(METADATA_NSFW) == 1
-        if (!loadNsfwSource && isNsfw) {
-            Timber.w("NSFW extension $pkgName not allowed")
-            return LoadResult.Error
-        }
+            val signatures = getSignatures(pkgInfo)
+            if (signatures.isNullOrEmpty()) {
+                Timber.w("Package $pkgName isn't signed")
+                return LoadResult.Error
+            } else if (isExtensionInstalledByApp(context, pkgName)) {
+                if (!trustSignatures.contains(signatures.last())) {
+                    trustSignatures.add(signatures.last())
+                }
+            } else if (!isTrusted(pkgInfo, signatures) && signatures.any { !trustSignatures.contains(it) }) {
+                val extension =
+                    Extension.Untrusted(
+                        extName,
+                        pkgName,
+                        versionName,
+                        versionCode,
+                        libVersion,
+                        signatures.last(),
+                    )
+                Timber.w("Extension $pkgName isn't trusted")
+                return LoadResult.Untrusted(extension)
+            }
 
-        val classLoader = ChildFirstPathClassLoader(appInfo.sourceDir, parent = context.classLoader)
+            val isNsfw = (metaData?.getInt(METADATA_CONTENT_WARNING) ?: 0) > 0 ||
+                (metaData?.getInt(METADATA_NSFW) ?: 0) == 1
+            if (!loadNsfwSource && isNsfw) {
+                Timber.w("NSFW extension $pkgName not allowed")
+                return LoadResult.Error
+            }
 
-        val sources =
-            appInfo.metaData
-                .getString(METADATA_SOURCE_CLASS)!!
-                .split(";")
-                .map {
-                    val sourceClass = it.trim()
-                    if (sourceClass.startsWith(".")) {
-                        pkgInfo.packageName + sourceClass
-                    } else {
-                        sourceClass
-                    }
-                }.flatMap {
-                    try {
-                        when (val obj = Class.forName(it, false, classLoader).getDeclaredConstructor().newInstance()) {
-                            is Source -> listOf(obj)
-                            is SourceFactory -> obj.createSources()
-                            else -> throw Exception("Unknown source class type! ${obj.javaClass}")
+            val classLoader = ChildFirstPathClassLoader(appInfo.sourceDir, parent = context.classLoader)
+
+            val sourceClassString = metaData?.getString(METADATA_SOURCE_CLASS)
+            if (sourceClassString.isNullOrBlank()) {
+                Timber.w("Extension $pkgName missing $METADATA_SOURCE_CLASS")
+                return LoadResult.Error
+            }
+
+            val sources =
+                sourceClassString
+                    .split(";")
+                    .map {
+                        val sourceClass = it.trim()
+                        if (sourceClass.startsWith(".")) {
+                            pkgInfo.packageName + sourceClass
+                        } else {
+                            sourceClass
                         }
-                    } catch (e: Throwable) {
-                        Timber.e(e, "Extension load error: $extName.")
-                        return LoadResult.Error
+                    }.flatMap { sourceClass ->
+                        try {
+                            val clazz = Class.forName(sourceClass, false, classLoader)
+                            val obj = clazz.getDeclaredConstructor().newInstance()
+                            when (obj) {
+                                is Source -> listOf(obj)
+                                is SourceFactory -> {
+                                    try {
+                                        obj.createSources()
+                                    } catch (e: Throwable) {
+                                        Timber.e(e, "Error creating sources from factory ${obj.javaClass.name} in $extName")
+                                        emptyList()
+                                    }
+                                }
+                                else -> {
+                                    Timber.e("Unknown source class type: ${obj.javaClass.name} in $extName")
+                                    emptyList()
+                                }
+                            }
+                        } catch (e: Throwable) {
+                            Timber.e(e, "Extension load error for class $sourceClass in $extName.")
+                            emptyList()
+                        }
                     }
+
+            if (sources.isEmpty()) {
+                Timber.w("No valid sources found for extension $extName ($pkgName)")
+                return LoadResult.Error
+            }
+
+            val langs =
+                sources
+                    .filterIsInstance<CatalogueSource>()
+                    .map { it.lang }
+                    .toSet()
+            val lang =
+                when (langs.size) {
+                    0 -> ""
+                    1 -> langs.first()
+                    else -> "all"
                 }
 
-        val langs =
-            sources
-                .filterIsInstance<CatalogueSource>()
-                .map { it.lang }
-                .toSet()
-        val lang =
-            when (langs.size) {
-                0 -> ""
-                1 -> langs.first()
-                else -> "all"
-            }
-
-        val extension =
-            Extension.Installed(
-                name = extName,
-                pkgName = pkgName,
-                versionName = versionName,
-                versionCode = versionCode,
-                libVersion = libVersion,
-                lang = lang,
-                isNsfw = isNsfw,
-                sources = sources,
-                pkgFactory = appInfo.metaData.getString(METADATA_SOURCE_FACTORY),
-                icon = appInfo.loadIcon(pkgManager),
-                isShared = extensionInfo.isShared,
-            )
-        return LoadResult.Success(extension)
+            val extension =
+                Extension.Installed(
+                    name = extName,
+                    pkgName = pkgName,
+                    versionName = versionName,
+                    versionCode = versionCode,
+                    libVersion = libVersion,
+                    lang = lang,
+                    isNsfw = isNsfw,
+                    sources = sources,
+                    pkgFactory = metaData?.getString(METADATA_SOURCE_FACTORY),
+                    icon = appInfo.loadIcon(pkgManager),
+                    isShared = extensionInfo.isShared,
+                )
+            LoadResult.Success(extension)
+        } catch (e: Throwable) {
+            Timber.e(e, "Failed to load extension ${extensionInfo.packageInfo.packageName}")
+            LoadResult.Error
+        }
     }
+
 
     /**
      * Choose which extension package to use based on version code
@@ -480,7 +509,7 @@ internal object ExtensionLoader {
      */
     private fun getSignatures(pkgInfo: PackageInfo): List<String>? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val signingInfo = pkgInfo.signingInfo!!
+            val signingInfo = pkgInfo.signingInfo ?: return null
             if (signingInfo.hasMultipleSigners()) {
                 signingInfo.apkContentsSigners
             } else {

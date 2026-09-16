@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.system.awaitSingle
+import kotlinx.serialization.json.JsonObject
 import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -28,6 +29,10 @@ interface Source {
 
     val lang: String
         get() = ""
+
+    var memo: JsonObject?
+        get() = null
+        set(_) {}
 
     /**
      * Get the updated details for a manga.
@@ -95,18 +100,26 @@ interface Source {
         enabledLanguages: Set<String>,
         extensionManager: ExtensionManager? = null,
     ): Boolean {
-        val httpSource = this as? HttpSource ?: return true
-        val extManager = extensionManager ?: Injekt.get()
-        val allExt = httpSource.getExtension(extManager)?.lang == "all"
-        val onlyAll = httpSource.extOnlyHasAllLanguage(extManager)
-        val isMultiLingual = enabledLanguages.filterNot { it == "all" }.size > 1
-        return (isMultiLingual && allExt) || (lang == "all" && !onlyAll)
+        return try {
+            val httpSource = this as? HttpSource ?: return true
+            val extManager = extensionManager ?: Injekt.get()
+            val allExt = httpSource.getExtension(extManager)?.lang == "all"
+            val onlyAll = httpSource.extOnlyHasAllLanguage(extManager)
+            val isMultiLingual = enabledLanguages.filterNot { it == "all" }.size > 1
+            (isMultiLingual && allExt) || (lang == "all" && !onlyAll)
+        } catch (e: Throwable) {
+            true
+        }
     }
 
     fun nameBasedOnEnabledLanguages(
         enabledLanguages: Set<String>,
         extensionManager: ExtensionManager? = null,
-    ): String = if (includeLangInName(enabledLanguages, extensionManager)) toString() else name
+    ): String = try {
+        if (includeLangInName(enabledLanguages, extensionManager)) toString() else name
+    } catch (e: Throwable) {
+        name
+    }
 
 
     @Deprecated(
@@ -128,8 +141,17 @@ interface Source {
     fun fetchPageList(chapter: SChapter): Observable<List<Page>> = throw IllegalStateException("Not used")
 }
 
-fun Source.icon(): Drawable? = Injekt.get<ExtensionManager>().getAppIconForSource(this)
-fun Source.pkgName() = Injekt.get<ExtensionManager>().getPackageName(id)
+fun Source.icon(): Drawable? = try {
+    Injekt.get<ExtensionManager>().getAppIconForSource(this)
+} catch (e: Throwable) {
+    null
+}
+
+fun Source.pkgName() = try {
+    Injekt.get<ExtensionManager>().getPackageName(id)
+} catch (e: Throwable) {
+    null
+}
 
 fun Source.preferenceKey(): String = "source_$id"
 
@@ -146,12 +168,18 @@ fun Source.preferenceKey(): String = "source_$id"
  * Use [awaitMangaUpdate] instead when details are needed too: a source may reject
  * two concurrent [Source.getMangaUpdate] calls for the same manga.
  */
-suspend fun Source.awaitChapterList(manga: SManga): List<SChapter> = getMangaUpdate(
-    manga = manga,
-    chapters = emptyList(),
-    fetchDetails = false,
-    fetchChapters = true,
-).chapters
+suspend fun Source.awaitChapterList(manga: SManga): List<SChapter> = try {
+    getMangaUpdate(
+        manga = manga,
+        chapters = emptyList(),
+        fetchDetails = false,
+        fetchChapters = true,
+    ).chapters
+} catch (e: kotlinx.coroutines.CancellationException) {
+    throw e
+} catch (e: Throwable) {
+    throw if (e is Exception) e else Exception(e.message ?: e.toString(), e)
+}
 
 /**
  * Fetches only a manga's details through the extensions-lib 1.6 [Source.getMangaUpdate] API.
@@ -162,12 +190,18 @@ suspend fun Source.awaitChapterList(manga: SManga): List<SChapter> = getMangaUpd
  * `throw UnsupportedOperationException()` — so the call must go through
  * `getMangaUpdate`. 1.4 sources fall through to the bridge in [CatalogueSource].
  */
-suspend fun Source.awaitMangaDetails(manga: SManga): SManga = getMangaUpdate(
-    manga = manga,
-    chapters = emptyList(),
-    fetchDetails = true,
-    fetchChapters = false,
-).manga
+suspend fun Source.awaitMangaDetails(manga: SManga): SManga = try {
+    getMangaUpdate(
+        manga = manga,
+        chapters = emptyList(),
+        fetchDetails = true,
+        fetchChapters = false,
+    ).manga
+} catch (e: kotlinx.coroutines.CancellationException) {
+    throw e
+} catch (e: Throwable) {
+    throw if (e is Exception) e else Exception(e.message ?: e.toString(), e)
+}
 
 /**
  * Fetches a manga's details **and** chapter list in a single [Source.getMangaUpdate] call.
@@ -190,9 +224,16 @@ suspend fun Source.awaitMangaDetails(manga: SManga): SManga = getMangaUpdate(
 suspend fun Source.awaitMangaUpdate(
     manga: SManga,
     chapters: List<SChapter> = emptyList(),
-): SMangaUpdate = getMangaUpdate(
-    manga = manga,
-    chapters = chapters,
-    fetchDetails = true,
-    fetchChapters = true,
-)
+): SMangaUpdate = try {
+    getMangaUpdate(
+        manga = manga,
+        chapters = chapters,
+        fetchDetails = true,
+        fetchChapters = true,
+    )
+} catch (e: kotlinx.coroutines.CancellationException) {
+    throw e
+} catch (e: Throwable) {
+    throw if (e is Exception) e else Exception(e.message ?: e.toString(), e)
+}
+
