@@ -3,14 +3,6 @@ plugins {
     id(Plugins.gradleVersions.name) version Plugins.gradleVersions.version
     id(Plugins.jetbrainsKotlin) version AndroidVersions.kotlin apply false
 }
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { setUrl("https://jitpack.io") }
-        maven { setUrl("https://plugins.gradle.org/m2/") }
-    }
-}
 
 subprojects {
     // apply(plugin = Plugins.kotlinter.name)
