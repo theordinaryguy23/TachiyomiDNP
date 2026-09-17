@@ -2,6 +2,7 @@ import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.Properties
 import org.gradle.api.tasks.Copy
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -17,6 +18,12 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("org.jetbrains.kotlin.plugin.compose") version AndroidVersions.kotlin // this version matches your Kotlin version
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 // Auto-copy dummy google-services.json if real one doesn't exist
@@ -64,7 +71,6 @@ android {
         versionCode = AndroidVersions.versionCode
         versionName = AndroidVersions.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        multiDexEnabled = true
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "BETA_COUNT", "\"${getBetaCount()}\"")
@@ -96,30 +102,48 @@ android {
         }
     }
 
+    val localProperties = Properties().apply {
+        val localPropsFile = rootProject.file("local.properties")
+        if (localPropsFile.exists()) {
+            localPropsFile.inputStream().use { stream ->
+                load(stream)
+            }
+        }
+    }
+
+    fun getSignProp(key: String): String? {
+        return System.getenv(key)
+            ?: (project.findProperty(key) as String?)
+            ?: localProperties.getProperty(key)
+    }
+
     signingConfigs {
         create("release") {
-            storeFile = file("release.keystore")
-            storePassword = "tachiyomi2026"
-            keyAlias = "tachiyomiJ2K"
-            keyPassword = "tachiyomi2026"
+            val ksFile = getSignProp("KEYSTORE_FILE")?.let { file(it) } ?: file("release.keystore")
+            val ksPassword = getSignProp("KEYSTORE_PASSWORD")
+            val kAlias = getSignProp("KEY_ALIAS")
+            val kPassword = getSignProp("KEY_PASSWORD")
+
+            if (ksFile.exists() && !ksPassword.isNullOrEmpty() && !kAlias.isNullOrEmpty() && !kPassword.isNullOrEmpty()) {
+                storeFile = ksFile
+                storePassword = ksPassword
+                keyAlias = kAlias
+                keyPassword = kPassword
+            }
         }
     }
 
     buildTypes {
         getByName("debug") {
             versionNameSuffix = "-d${getCommitCount()}"
-            if (file("release.keystore").exists()) {
+            if (signingConfigs.getByName("release").storeFile != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
         }
         getByName("release") {
-            // applicationIdSuffix = ".j2k"
-            if (file("release.keystore").exists()) {
+            if (signingConfigs.getByName("release").storeFile != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            // isShrinkResources = true
-            // isMinifyEnabled = true
-            // proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
         create("beta") {
             initWith(getByName("release"))
@@ -166,22 +190,17 @@ android {
         }
     }
 
-    applicationVariants.all {
-        val variant = this
-        variant.outputs.all {
-            val output = this
-            if (output is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
-                val sep = "-"
-                // Use clean versionName (without suffix) for consistent APK naming
-                val cleanVersion = AndroidVersions.versionName
-                val buildType = variant.buildType.name
-                val abi = output.getFilter("ABI") ?: "universal"
-                // Standard naming: TachiyomiDNP-{version}-{buildType}-{abi}.apk
-                output.outputFileName =
-                    "TachiyomiDNP$sep$cleanVersion$sep$buildType$sep$abi.apk"
-            }
+androidComponents {
+    onVariants { variant ->
+        val cleanVersion = AndroidVersions.versionName
+        val buildType = variant.buildType ?: "release"
+        variant.outputs.forEach { output ->
+            val abiFilter = output.filters.find { it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI }
+            val abi = abiFilter?.identifier ?: "universal"
+            output.outputFileName.set("TachiyomiDNP-$cleanVersion-$buildType-$abi.apk")
         }
     }
+}
 
     lint {
         disable.addAll(listOf("MissingTranslation", "ExtraTranslation"))
@@ -190,12 +209,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 
@@ -241,8 +260,6 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-
-    implementation("androidx.multidex:multidex:2.0.1")
 
     // Firebase - explicit versions to avoid BOM version conflicts
     configurations.all {
@@ -348,7 +365,7 @@ dependencies {
     val fastAdapterVersion = "5.7.0"
     implementation("com.mikepenz:fastadapter:$fastAdapterVersion")
     implementation("com.mikepenz:fastadapter-extensions-binding:$fastAdapterVersion")
-    implementation("com.github.arkon.FlexibleAdapter:flexible-adapter:c8013533")
+    implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.mthli:Slice:v1.2")
     implementation("io.noties.markwon:core:4.6.2")

@@ -20,7 +20,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.multidex.MultiDex
 import coil.Coil
 import eu.kanade.tachiyomi.appwidget.TachiyomiWidgetManager
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
@@ -126,11 +125,6 @@ open class App :
         if (!AuthenticatorUtil.isAuthenticating && preferences.lockAfter().get() >= 0) {
             SecureActivityDelegate.locked = true
         }
-    }
-
-    override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(base)
-        MultiDex.install(this)
     }
 
     override fun onLowMemory() {
