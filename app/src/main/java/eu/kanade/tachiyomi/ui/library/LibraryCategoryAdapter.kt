@@ -15,6 +15,8 @@ import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.system.withDefContext
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
@@ -147,6 +149,7 @@ class LibraryCategoryAdapter(
 
     suspend fun performFilterAsync() {
         val s = getFilter(String::class.java)
+        setFilter(null)
         if (s.isNullOrBlank()) {
             if (mangas.firstOrNull()?.filter?.isNotBlank() == true) {
                 mangas.forEach { it.filter = "" }
@@ -154,6 +157,7 @@ class LibraryCategoryAdapter(
             updateDataSet(mangas)
         } else {
             val filteredManga = withDefContext { mangas.filter { it.filter(s) } }
+            currentCoroutineContext().ensureActive()
             if (filteredManga.isEmpty() && controller?.presenter?.showAllCategories == false) {
                 val catId = mangas.firstOrNull()?.let { it.header?.catId ?: it.manga.category }
                 val blankItem = catId?.let { controller.presenter.blankItem(it) }
@@ -161,6 +165,7 @@ class LibraryCategoryAdapter(
             } else {
                 updateDataSet(filteredManga)
             }
+            setFilter(s)
         }
         isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
         setItemsPerCategoryMap()

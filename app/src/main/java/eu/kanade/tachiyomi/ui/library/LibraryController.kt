@@ -100,6 +100,7 @@ import eu.kanade.tachiyomi.util.system.getResourceDrawable
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
+import kotlinx.coroutines.Job
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -198,6 +199,7 @@ open class LibraryController(
 
     private var observeLater: Boolean = false
     var searchItem = SearchGlobalItem()
+    private var performFilterJob: Job? = null
 
     var snack: Snackbar? = null
     var displaySheet: TabbedLibraryDisplaySheet? = null
@@ -1520,13 +1522,16 @@ open class LibraryController(
             searchItem.string = this.query
             if (adapter.scrollableHeaders.isEmpty() && !isSubClass) {
                 adapter.addScrollableHeader(searchItem)
+            } else if (!isSubClass) {
+                adapter.updateItem(searchItem)
             }
         } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
             adapter.removeAllScrollableHeaders()
         }
         adapter.setFilter(query)
+        performFilterJob?.cancel()
         if (presenter.allLibraryItems.isEmpty()) return true
-        viewScope.launchUI {
+        performFilterJob = viewScope.launchUI {
             adapter.performFilterAsync()
         }
         return true

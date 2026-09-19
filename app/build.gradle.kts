@@ -202,6 +202,10 @@ androidComponents {
     }
 }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     lint {
         disable.addAll(listOf("MissingTranslation", "ExtraTranslation"))
         abortOnError = false
