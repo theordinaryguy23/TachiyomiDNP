@@ -26,7 +26,24 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build Windows desktop application
-        run: .\gradlew.bat :desktop:packageDistributionForCurrentOS --no-daemon --stacktrace
+        shell: pwsh
+        run: |
+          $maxAttempts = 3
+          for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+            Write-Host "Windows desktop packaging attempt $attempt of $maxAttempts"
+            & .\gradlew.bat :desktop:packageDistributionForCurrentOS --no-daemon --stacktrace
+
+            if ($LASTEXITCODE -eq 0) {
+              exit 0
+            }
+
+            if ($attempt -lt $maxAttempts) {
+              Write-Warning "Packaging failed with exit code $LASTEXITCODE. Retrying after 20 seconds..."
+              Start-Sleep -Seconds 20
+            }
+          }
+
+          exit $LASTEXITCODE
 
       - name: Upload Windows EXE
         uses: actions/upload-artifact@v4
