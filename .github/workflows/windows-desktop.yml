@@ -1,0 +1,43 @@
+name: Windows Desktop
+
+on:
+  push:
+    branches: [ main, develop, beta, 'feature/**' ]
+    tags: [ v* ]
+  pull_request:
+    branches: [ main, beta ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build Windows desktop application
+        run: .\gradlew.bat :desktop:packageDistributionForCurrentOS --no-daemon --stacktrace
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: tachiyomidnp-windows-exe
+          path: desktop/build/compose/binaries/main/exe/*.exe
+          if-no-files-found: error
+
+      - name: Upload Windows MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: tachiyomidnp-windows-msi
+          path: desktop/build/compose/binaries/main/msi/*.msi
+          if-no-files-found: error
