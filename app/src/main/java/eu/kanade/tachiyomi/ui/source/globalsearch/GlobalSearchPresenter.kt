@@ -11,8 +11,9 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.awaitMangaDetails
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.shared.AndroidCatalogueSourceAdapter
+import eu.kanade.tachiyomi.shared.search.GlobalSearchService
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -22,8 +23,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -64,11 +63,15 @@ open class GlobalSearchPresenter(
 
     private val extensionManager: ExtensionManager by injectLazy()
 
+    private val sharedSearchService =
+        GlobalSearchService {
+            sources.map(::AndroidCatalogueSourceAdapter)
+        }
+
     private var extensionFilter: String? = null
 
     var items: List<GlobalSearchItem> = emptyList()
 
-    private val semaphore = Semaphore(5)
 
     override fun onCreate() {
         super.onCreate()
@@ -171,52 +174,45 @@ open class GlobalSearchPresenter(
         fetchSourcesJob?.cancel()
         fetchSourcesJob =
             presenterScope.launch {
-                sources.map { source ->
-                    launch mainLaunch@{
-                        semaphore.withPermit {
-                            if (this@GlobalSearchPresenter.items.find { it.source == source }?.results != null) {
-                                return@mainLaunch
+                val results = sharedSearchService.search(query)
+                results.forEach { searchResult ->
+                    val source = sources.find { it.id == searchResult.sourceId } ?: return@forEach
+                    val mangas =
+                        searchResult.manga.map { sharedManga ->
+                            val localManga = Manga.create(sharedManga.url, sharedManga.title, source.id).apply {
+                                thumbnail_url = sharedManga.thumbnailUrl
+                                author = sharedManga.author
+                                artist = sharedManga.artist
+                                description = sharedManga.description
+                                status = sharedManga.status
                             }
-                            val mangasPage =
-                                try {
-                                    val filters = try { source.getFilterList() } catch (e: Throwable) { FilterList() }
-                                    source.getSearchManga(1, query, filters)
-                                } catch (error: Throwable) {
-                                    if (error is kotlinx.coroutines.CancellationException) throw error
-                                    MangasPage(emptyList(), false)
-                                }
-                            val mangas = (mangasPage?.mangas ?: emptyList())
-                                .take(10)
-                                .map { networkToLocalManga(it, source.id) }
-                            fetchImage(mangas, source)
-                            if (mangas.isNotEmpty() && !loadTime.containsKey(source.id)) {
-                                loadTime[source.id] = Date().time
-                            }
-                            val result =
-                                createCatalogueSearchItem(
-                                    source,
-                                    mangas.map { GlobalSearchMangaItem(it) },
-                                )
-                            items =
-                                items
-                                    .map { item -> if (item.source == result.source) result else item }
-                                    .sortedWith(
-                                        compareBy(
-                                            // Bubble up sources that actually have results
-                                            { it.results.isNullOrEmpty() },
-                                            // Same as initial sort, i.e. pinned first then alphabetically
-                                            { it.source.id.toString() !in pinnedSourceIds },
-                                            { loadTime[it.source.id] ?: 0L },
-                                            { "${it.source.name.lowercase(Locale.getDefault())} (${it.source.lang})" },
-                                        ),
-                                    )
-                            withUIContext { view?.setItems(items) }
+                            networkToLocalManga(localManga, source.id)
                         }
+
+                    fetchImage(mangas, source)
+                    if (mangas.isNotEmpty() && !loadTime.containsKey(source.id)) {
+                        loadTime[source.id] = Date().time
                     }
+
+                    val result =
+                        createCatalogueSearchItem(
+                            source,
+                            mangas.map { GlobalSearchMangaItem(it) },
+                        )
+                    items =
+                        items
+                            .map { item -> if (item.source == result.source) result else item }
+                            .sortedWith(
+                                compareBy(
+                                    { it.results.isNullOrEmpty() },
+                                    { it.source.id.toString() !in pinnedSourceIds },
+                                    { loadTime[it.source.id] ?: 0L },
+                                    line
+                                ),
+                            )
+                    withUIContext { view?.setItems(items) }
                 }
             }
-    }
-
     /**
      * Initialize a list of manga.
      *
