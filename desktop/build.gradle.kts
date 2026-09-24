@@ -23,7 +23,7 @@ compose.desktop {
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
             )
             packageName = "TachiyomiDNP"
-            packageVersion = "1.0.0"
+            packageVersion = "1.9.3"
             description = "TachiyomiDNP Windows Desktop Edition"
         }
     }
