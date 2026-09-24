@@ -3,6 +3,7 @@ plugins {
     id(Plugins.gradleVersions.name) version Plugins.gradleVersions.version
     id(Plugins.jetbrainsKotlin) version AndroidVersions.kotlin apply false
     id("org.jetbrains.kotlin.plugin.compose") version AndroidVersions.kotlin apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version AndroidVersions.kotlin apply false
 }
 
 subprojects {
