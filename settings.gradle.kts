@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 rootProject.name = "TachiyomiDNP"
 include(":app")
 include(":desktop")
+include(":shared")
