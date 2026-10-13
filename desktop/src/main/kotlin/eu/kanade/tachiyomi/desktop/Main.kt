@@ -29,7 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import eu.kanade.tachiyomi.desktop.source.MangaChapter
 import eu.kanade.tachiyomi.desktop.source.MangaDexSource
+import eu.kanade.tachiyomi.desktop.source.MangaDetails
+import eu.kanade.tachiyomi.shared.model.Manga
 import eu.kanade.tachiyomi.shared.model.SearchResult
 import eu.kanade.tachiyomi.shared.search.GlobalSearchService
 import kotlinx.coroutines.CancellationException
@@ -51,8 +54,9 @@ fun main() = application {
 @Composable
 private fun DesktopShell() {
     var selectedSection by remember { mutableStateOf("Search") }
+    val mangaDexSource = remember { MangaDexSource() }
     val searchService = remember {
-        GlobalSearchService(sources = { listOf(MangaDexSource()) })
+        GlobalSearchService(sources = { listOf(mangaDexSource) })
     }
 
     Row(modifier = Modifier.fillMaxSize()) {
@@ -83,14 +87,14 @@ private fun DesktopShell() {
             contentAlignment = Alignment.TopStart,
         ) {
             when (selectedSection) {
-                "Search" -> DesktopSearchScreen(searchService)
+                "Search" -> DesktopSearchScreen(searchService, mangaDexSource)
                 else -> Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(selectedSection, style = MaterialTheme.typography.headlineMedium)
                     Text(
-                        "This section is planned for a later desktop phase. Search is available now.",
+                        "This section is planned for a later desktop phase. Search and manga details are available from Search.",
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -100,14 +104,60 @@ private fun DesktopShell() {
 }
 
 @Composable
-private fun DesktopSearchScreen(searchService: GlobalSearchService) {
+private fun DesktopSearchScreen(
+    searchService: GlobalSearchService,
+    mangaDexSource: MangaDexSource,
+) {
     var query by remember { mutableStateOf("") }
     var results by remember { mutableStateOf<List<SearchResult>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
+    var selectedManga by remember { mutableStateOf<Manga?>(null) }
     val scope = rememberCoroutineScope()
 
-    Column(
+    var details by remember { mutableStateOf<MangaDetails?>(null) }
+    var chapters by remember { mutableStateOf<List<MangaChapter>>(emptyList()) }
+    var detailLoading by remember { mutableStateOf(false) }
+    var detailError by remember { mutableStateOf<String?>(null) }
+
+    selectedManga?.let { manga ->
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Button(onClick = {
+                selectedManga = null
+                details = null
+                chapters = emptyList()
+                detailError = null
+            }) {
+                Text("← Back to search")
+            }
+            Text(manga.title, style = MaterialTheme.typography.headlineMedium)
+            Text(manga.url, style = MaterialTheme.typography.bodySmall)
+            if (detailLoading) CircularProgressIndicator()
+            detailError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            details?.let { item ->
+                item.status?.let { Text("Status: $it") }
+                if (item.authors.isNotEmpty()) Text("Author: ${item.authors.joinToString()}")
+                if (item.artists.isNotEmpty()) Text("Artist: ${item.artists.joinToString()}")
+                item.description?.let { Text(it) }
+                Text("Chapters", style = MaterialTheme.typography.titleLarge)
+                if (chapters.isEmpty() && !detailLoading) {
+                    Text("No English chapters were returned for this title.")
+                }
+                chapters.forEach { chapter ->
+                    val label = buildString {
+                        append("Chapter ")
+                        append(chapter.chapter ?: "—")
+                        if (chapter.volume != null) append("  •  Volume ${chapter.volume}")
+                        if (chapter.title.isNotBlank()) append("  •  ${chapter.title}")
+                    }
+                    Text(label)
+                }
+            }
+        }
+    } ?: Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -154,9 +204,7 @@ private fun DesktopSearchScreen(searchService: GlobalSearchService) {
             }
         }
 
-        if (loading) {
-            CircularProgressIndicator()
-        }
+        if (loading) CircularProgressIndicator()
         message?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         results.forEach { result ->
@@ -172,6 +220,28 @@ private fun DesktopSearchScreen(searchService: GlobalSearchService) {
                     Text(manga.title, style = MaterialTheme.typography.titleMedium)
                     Text(manga.url, style = MaterialTheme.typography.bodySmall)
                     manga.author?.let { Text("Author: $it", style = MaterialTheme.typography.bodySmall) }
+                    Button(onClick = {
+                        selectedManga = manga
+                        details = null
+                        chapters = emptyList()
+                        detailLoading = true
+                        detailError = null
+                        val mangaId = manga.url.substringAfterLast('/')
+                        scope.launch {
+                            try {
+                                details = mangaDexSource.details(mangaId)
+                                chapters = mangaDexSource.chapters(mangaId)
+                            } catch (error: CancellationException) {
+                                throw error
+                            } catch (error: Exception) {
+                                detailError = error.message ?: "Could not load manga details."
+                            } finally {
+                                detailLoading = false
+                            }
+                        }
+                    }) {
+                        Text("Details & chapters")
+                    }
                 }
             }
         }
