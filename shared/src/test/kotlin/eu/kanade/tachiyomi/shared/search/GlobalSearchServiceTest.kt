@@ -11,10 +11,10 @@ class GlobalSearchServiceTest {
     @Test
     fun blankQueryDoesNotCallSources() = runTest {
         var called = false
-        val service = GlobalSearchService {
+        val service = GlobalSearchService(sources = {
             called = true
             emptyList()
-        }
+        })
 
         assertTrue(service.search("   ").isEmpty())
         assertEquals(false, called)
@@ -39,7 +39,7 @@ class GlobalSearchServiceTest {
             }
         }
 
-        val results = GlobalSearchService { listOf(good, bad) }.search("naruto")
+        val results = GlobalSearchService(sources = { listOf(good, bad) }).search("naruto")
 
         assertEquals(2, results.size)
         assertEquals("naruto", results[0].manga.single().title)
