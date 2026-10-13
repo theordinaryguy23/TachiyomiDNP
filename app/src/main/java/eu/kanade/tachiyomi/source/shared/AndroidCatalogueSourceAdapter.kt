@@ -21,7 +21,9 @@ class AndroidCatalogueSourceAdapter(
     override suspend fun search(query: String): List<Manga> {
         val filters = try {
             source.getFilterList()
-        } catch (_: Throwable) {
+        } catch (error: kotlinx.coroutines.CancellationException) {
+            throw error
+        } catch (_: Exception) {
             FilterList()
         }
 
@@ -31,7 +33,7 @@ class AndroidCatalogueSourceAdapter(
             .take(10)
             .map { manga ->
                 Manga(
-                    id = 0L,
+                    sourceId = source.id,
                     title = manga.title,
                     url = manga.url,
                     thumbnailUrl = manga.thumbnail_url,
