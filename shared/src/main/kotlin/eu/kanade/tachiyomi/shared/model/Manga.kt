@@ -2,9 +2,15 @@ package eu.kanade.tachiyomi.shared.model
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Platform-neutral manga metadata returned by a source.
+ *
+ * This is a domain model, not a database row: persistent database IDs and Android-specific
+ * state belong to platform repositories. A manga's source + URL identify its source entry.
+ */
 @Serializable
 data class Manga(
-    val id: Long,
+    val sourceId: Long,
     val title: String,
     val url: String,
     val thumbnailUrl: String? = null,
