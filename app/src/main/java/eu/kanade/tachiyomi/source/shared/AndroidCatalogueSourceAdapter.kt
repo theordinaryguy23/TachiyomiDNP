@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.shared.model.Manga
 import eu.kanade.tachiyomi.shared.source.MangaSource
+import kotlinx.coroutines.CancellationException
 
 /**
  * Android adapter that exposes the existing CatalogueSource implementation to the
@@ -21,7 +22,9 @@ class AndroidCatalogueSourceAdapter(
     override suspend fun search(query: String): List<Manga> {
         val filters = try {
             source.getFilterList()
-        } catch (error: Exception) {
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
             FilterList()
         }
 
