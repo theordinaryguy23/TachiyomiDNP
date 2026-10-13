@@ -64,9 +64,9 @@ open class GlobalSearchPresenter(
     private val extensionManager: ExtensionManager by injectLazy()
 
     private val sharedSearchService =
-        GlobalSearchService {
+        GlobalSearchService(sources = {
             sources.map(::AndroidCatalogueSourceAdapter)
-        }
+        })
 
     private var extensionFilter: String? = null
 
@@ -207,12 +207,14 @@ open class GlobalSearchPresenter(
                                     { it.results.isNullOrEmpty() },
                                     { it.source.id.toString() !in pinnedSourceIds },
                                     { loadTime[it.source.id] ?: 0L },
-                                    line
+                                    { "${it.source.name.lowercase(Locale.getDefault())} (${it.source.lang})" },
                                 ),
                             )
                     withUIContext { view?.setItems(items) }
                 }
             }
+    }
+
     /**
      * Initialize a list of manga.
      *
