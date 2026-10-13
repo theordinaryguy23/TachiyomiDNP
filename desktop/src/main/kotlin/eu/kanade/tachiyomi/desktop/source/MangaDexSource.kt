@@ -35,7 +35,7 @@ class MangaDexSource : MangaSource {
         if (normalized.isEmpty()) return@withContext emptyList()
 
         val encodedQuery = URLEncoder.encode(normalized, UTF_8)
-        val url = "https://api.mangadex.org/manga?title=$encodedQuery&limit=10&contentRating[]=safe&contentRating[]=suggestive&includes[]=cover_art"
+        val url = "https://api.mangadex.org/manga?title=$encodedQuery&limit=10&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&includes%5B%5D=cover_art"
         val request = HttpRequest.newBuilder()
             .uri(URI.create(url))
             .timeout(Duration.ofSeconds(25))
