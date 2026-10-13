@@ -179,14 +179,18 @@ open class GlobalSearchPresenter(
                     val source = sources.find { it.id == searchResult.sourceId } ?: return@forEach
                     val mangas =
                         searchResult.manga.map { sharedManga ->
-                            val localManga = Manga.create(sharedManga.url, sharedManga.title, source.id).apply {
+                            val localManga = Manga.create(
+                                sharedManga.url,
+                                sharedManga.title,
+                                sharedManga.sourceId,
+                            ).apply {
                                 thumbnail_url = sharedManga.thumbnailUrl
                                 author = sharedManga.author
                                 artist = sharedManga.artist
                                 description = sharedManga.description
                                 status = sharedManga.status
                             }
-                            networkToLocalManga(localManga, source.id)
+                            networkToLocalManga(localManga, sharedManga.sourceId)
                         }
 
                     fetchImage(mangas, source)
