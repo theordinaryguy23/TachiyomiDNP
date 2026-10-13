@@ -27,7 +27,13 @@ class GlobalSearchServiceTest {
             override val name = "Good"
 
             override suspend fun search(query: String) =
-                listOf(Manga(1L, query, "/$query"))
+                listOf(
+                    Manga(
+                        sourceId = id,
+                        title = query,
+                        url = "/$query",
+                    ),
+                )
         }
 
         val bad = object : MangaSource {
@@ -43,6 +49,8 @@ class GlobalSearchServiceTest {
 
         assertEquals(2, results.size)
         assertEquals("naruto", results[0].manga.single().title)
+        assertEquals(1L, results[0].manga.single().sourceId)
+        assertEquals("/naruto", results[0].manga.single().url)
         assertEquals("boom", results[1].error)
     }
 }
