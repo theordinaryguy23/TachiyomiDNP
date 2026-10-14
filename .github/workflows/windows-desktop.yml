@@ -5,7 +5,7 @@ on:
     branches: [ main, develop, beta, 'feature/**', 'phase2f-*' ]
     tags: [ v* ]
   pull_request:
-    branches: [ main, beta ]
+    branches: [ main, beta, 'phase2e-desktop-reader-clean' ]
   workflow_dispatch:
 
 jobs:
