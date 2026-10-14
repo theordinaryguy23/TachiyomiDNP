@@ -45,6 +45,43 @@ jobs:
 
           exit $LASTEXITCODE
 
+      - name: Verify packaged Java runtime matches Java 21 bytecode
+        shell: pwsh
+        run: |
+          $runtimeRelease = Get-ChildItem "desktop/build/compose/binaries/main" -Filter "release" -Recurse |
+            Where-Object { $_.FullName -match '[\\/]runtime[\\/]release$' } |
+            Select-Object -First 1
+
+          if ($null -eq $runtimeRelease) {
+            throw "Could not find the bundled runtime release file. Refusing to publish an unverified installer."
+          }
+
+          $releaseText = Get-Content -LiteralPath $runtimeRelease.FullName -Raw
+          Write-Host "Bundled runtime metadata: $($runtimeRelease.FullName)"
+          Write-Host $releaseText
+
+          if ($releaseText -notmatch 'JAVA_VERSION="21(?:\.|")') {
+            throw "Bundled runtime is not Java 21. The desktop bytecode targets Java 21, so this installer would fail at startup."
+          }
+
+          $mainClass = "desktop/build/classes/kotlin/main/eu/kanade/tachiyomi/desktop/MainKt.class"
+          if (-not (Test-Path -LiteralPath $mainClass)) {
+            throw "Could not find compiled MainKt.class at $mainClass"
+          }
+
+          $bytes = [System.IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $mainClass))
+          if ($bytes.Length -lt 8 -or $bytes[0] -ne 0xCA -or $bytes[1] -ne 0xFE -or $bytes[2] -ne 0xBA -or $bytes[3] -ne 0xBE) {
+            throw "MainKt.class has an invalid Java class-file header."
+          }
+
+          $major = ([int]$bytes[6] * 256) + [int]$bytes[7]
+          Write-Host "MainKt.class bytecode major version: $major"
+          if ($major -ne 65) {
+            throw "Expected Java 21 bytecode (major version 65), got $major."
+          }
+
+          Write-Host "Runtime and bytecode compatibility check passed."
+
       - name: Upload Windows EXE
         uses: actions/upload-artifact@v4
         with:
