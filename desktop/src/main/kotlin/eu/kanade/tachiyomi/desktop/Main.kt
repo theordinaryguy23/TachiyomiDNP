@@ -37,17 +37,61 @@ import eu.kanade.tachiyomi.shared.model.SearchResult
 import eu.kanade.tachiyomi.shared.search.GlobalSearchService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 
-fun main() = application {
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "TachiyomiDNP — Windows Desktop",
-    ) {
-        MaterialTheme {
-            Surface(modifier = Modifier.fillMaxSize()) {
-                DesktopShell()
+fun main() {
+    installStartupDiagnostics()
+    writeStartupLog("Launching TachiyomiDNP Desktop; Java=${System.getProperty("java.version")}; OS=${System.getProperty("os.name")} ${System.getProperty("os.version")}")
+
+    try {
+        application {
+            Window(
+                onCloseRequest = ::exitApplication,
+                title = "TachiyomiDNP — Windows Desktop",
+            ) {
+                MaterialTheme {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        DesktopShell()
+                    }
+                }
             }
         }
+    } catch (failure: Throwable) {
+        writeStartupLog("Fatal error while starting the application", failure)
+        throw failure
+    }
+}
+
+private fun installStartupDiagnostics() {
+    val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
+    Thread.setDefaultUncaughtExceptionHandler { thread, failure ->
+        writeStartupLog("Uncaught exception on thread '${thread.name}'", failure)
+        previousHandler?.uncaughtException(thread, failure)
+    }
+}
+
+private fun writeStartupLog(message: String, failure: Throwable? = null) {
+    try {
+        val root = System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }
+            ?: System.getProperty("user.home")
+        val logPath = Path.of(root, "TachiyomiDNP", "logs", "startup.log")
+        Files.createDirectories(logPath.parent)
+        val stackTrace = failure?.let {
+            StringWriter().also { writer -> it.printStackTrace(PrintWriter(writer)) }.toString()
+        }.orEmpty()
+        Files.writeString(
+            logPath,
+            "${java.time.Instant.now()}  $message${if (stackTrace.isBlank()) "" else "\n$stackTrace"}\n",
+            StandardOpenOption.CREATE,
+            StandardOpenOption.WRITE,
+            StandardOpenOption.APPEND,
+        )
+    } catch (_: Exception) {
+        // Diagnostics must never prevent the application from launching.
     }
 }
 
