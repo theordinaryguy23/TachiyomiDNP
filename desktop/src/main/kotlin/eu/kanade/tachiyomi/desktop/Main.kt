@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import eu.kanade.tachiyomi.desktop.reader.DesktopReaderProgressStore
 import eu.kanade.tachiyomi.desktop.source.MangaChapter
 import eu.kanade.tachiyomi.desktop.source.MangaDexReaderSource
 import eu.kanade.tachiyomi.desktop.source.MangaDexSource
@@ -61,6 +62,7 @@ private fun DesktopShell() {
     var selectedSection by remember { mutableStateOf("Search") }
     val mangaDexSource = remember { MangaDexSource() }
     val readerSource = remember { MangaDexReaderSource() }
+    val progressStore = remember { DesktopReaderProgressStore() }
     val searchService = remember {
         GlobalSearchService(sources = { listOf(mangaDexSource) })
     }
@@ -93,7 +95,7 @@ private fun DesktopShell() {
             contentAlignment = Alignment.TopStart,
         ) {
             when (selectedSection) {
-                "Search" -> DesktopSearchScreen(searchService, mangaDexSource, readerSource)
+                "Search" -> DesktopSearchScreen(searchService, mangaDexSource, readerSource, progressStore)
                 else -> Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -114,6 +116,7 @@ private fun DesktopSearchScreen(
     searchService: GlobalSearchService,
     mangaDexSource: MangaDexSource,
     readerSource: MangaDexReaderSource,
+    progressStore: DesktopReaderProgressStore,
 ) {
     var query by remember { mutableStateOf("") }
     var results by remember { mutableStateOf<List<SearchResult>>(emptyList()) }
@@ -133,6 +136,7 @@ private fun DesktopSearchScreen(
         ReaderScreen(
             chapter = chapterToRead,
             readerSource = readerSource,
+            progressStore = progressStore,
             onBack = { selectedChapter = null },
         )
         return
@@ -279,10 +283,11 @@ private fun DesktopSearchScreen(
 private fun ReaderScreen(
     chapter: MangaChapter,
     readerSource: MangaDexReaderSource,
+    progressStore: DesktopReaderProgressStore,
     onBack: () -> Unit,
 ) {
     var pages by remember(chapter.id) { mutableStateOf<List<String>>(emptyList()) }
-    var pageIndex by remember(chapter.id) { mutableStateOf(0) }
+    var pageIndex by remember(chapter.id) { mutableStateOf(progressStore.loadPageIndex(chapter.id)) }
     var loadingPages by remember(chapter.id) { mutableStateOf(true) }
     var loadingImage by remember(chapter.id) { mutableStateOf(false) }
     var error by remember(chapter.id) { mutableStateOf<String?>(null) }
@@ -301,6 +306,18 @@ private fun ReaderScreen(
             error = failure.message ?: "Could not load chapter pages."
         } finally {
             loadingPages = false
+        }
+    }
+
+    LaunchedEffect(chapter.id, pages.size) {
+        if (pages.isNotEmpty()) {
+            pageIndex = pageIndex.coerceIn(0, pages.lastIndex)
+        }
+    }
+
+    LaunchedEffect(chapter.id, pages.size, pageIndex) {
+        if (pages.isNotEmpty()) {
+            progressStore.savePageIndex(chapter.id, pageIndex)
         }
     }
 
@@ -357,7 +374,7 @@ private fun ReaderScreen(
             }
             error != null -> Text(error!!, color = MaterialTheme.colorScheme.error)
             else -> {
-                Text("Page ${pageIndex + 1} of ${pages.size} · Data Saver quality")
+                Text("Page ${pageIndex + 1} of ${pages.size} · Data Saver quality · Progress saved automatically")
                 imageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 if (loadingImage) {
                     Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
