@@ -7,16 +7,14 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.awt.image.BufferedImage
-import java.io.ByteArrayInputStream
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
-import javax.imageio.ImageIO
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import org.jetbrains.skia.Image as SkiaImage
 
 /**
  * JVM-native MangaDex chapter reader support.
@@ -61,9 +59,11 @@ class MangaDexReaderSource {
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException("MangaDex image server returned HTTP ${response.statusCode()}.")
         }
-        val decoded: BufferedImage = ImageIO.read(ByteArrayInputStream(response.body()))
-            ?: error("The chapter page could not be decoded as an image.")
-        decoded.toComposeImageBitmap()
+        try {
+            SkiaImage.makeFromEncoded(response.body()).toComposeImageBitmap()
+        } catch (failure: Exception) {
+            throw IllegalStateException("The chapter page could not be decoded as an image.", failure)
+        }
     }
 
     private fun getJson(url: String) = run {
