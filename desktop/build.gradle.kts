@@ -20,6 +20,10 @@ compose.desktop {
     application {
         mainClass = "eu.kanade.tachiyomi.desktop.MainKt"
 
+        // Kotlin bytecode is compiled for Java 21. Explicitly use the same JDK
+        // for jpackage/jlink so the bundled runtime can execute that bytecode.
+        javaHome = System.getenv("JAVA_HOME")
+
         nativeDistributions {
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe,

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.desktop
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,10 +28,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import eu.kanade.tachiyomi.desktop.source.MangaChapter
+import eu.kanade.tachiyomi.desktop.source.MangaDexReaderSource
 import eu.kanade.tachiyomi.desktop.source.MangaDexSource
 import eu.kanade.tachiyomi.desktop.source.MangaDetails
 import eu.kanade.tachiyomi.shared.model.Manga
@@ -55,6 +60,7 @@ fun main() = application {
 private fun DesktopShell() {
     var selectedSection by remember { mutableStateOf("Search") }
     val mangaDexSource = remember { MangaDexSource() }
+    val readerSource = remember { MangaDexReaderSource() }
     val searchService = remember {
         GlobalSearchService(sources = { listOf(mangaDexSource) })
     }
@@ -87,14 +93,14 @@ private fun DesktopShell() {
             contentAlignment = Alignment.TopStart,
         ) {
             when (selectedSection) {
-                "Search" -> DesktopSearchScreen(searchService, mangaDexSource)
+                "Search" -> DesktopSearchScreen(searchService, mangaDexSource, readerSource)
                 else -> Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(selectedSection, style = MaterialTheme.typography.headlineMedium)
                     Text(
-                        "This section is planned for a later desktop phase. Search and manga details are available from Search.",
+                        "This section is planned for a later desktop phase. Search, manga details, and chapter reading are available from Search.",
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
@@ -107,18 +113,30 @@ private fun DesktopShell() {
 private fun DesktopSearchScreen(
     searchService: GlobalSearchService,
     mangaDexSource: MangaDexSource,
+    readerSource: MangaDexReaderSource,
 ) {
     var query by remember { mutableStateOf("") }
     var results by remember { mutableStateOf<List<SearchResult>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
     var selectedManga by remember { mutableStateOf<Manga?>(null) }
+    var selectedChapter by remember { mutableStateOf<MangaChapter?>(null) }
     val scope = rememberCoroutineScope()
 
     var details by remember { mutableStateOf<MangaDetails?>(null) }
     var chapters by remember { mutableStateOf<List<MangaChapter>>(emptyList()) }
     var detailLoading by remember { mutableStateOf(false) }
     var detailError by remember { mutableStateOf<String?>(null) }
+
+    val chapterToRead = selectedChapter
+    if (chapterToRead != null) {
+        ReaderScreen(
+            chapter = chapterToRead,
+            readerSource = readerSource,
+            onBack = { selectedChapter = null },
+        )
+        return
+    }
 
     selectedManga?.let { manga ->
         Column(
@@ -153,7 +171,16 @@ private fun DesktopSearchScreen(
                         if (chapter.volume != null) append("  •  Volume ${chapter.volume}")
                         if (chapter.title.isNotBlank()) append("  •  ${chapter.title}")
                     }
-                    Text(label)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(label, modifier = Modifier.weight(1f))
+                        Button(onClick = { selectedChapter = chapter }) {
+                            Text("Read")
+                        }
+                    }
                 }
             }
         }
@@ -241,6 +268,109 @@ private fun DesktopSearchScreen(
                         }
                     }) {
                         Text("Details & chapters")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReaderScreen(
+    chapter: MangaChapter,
+    readerSource: MangaDexReaderSource,
+    onBack: () -> Unit,
+) {
+    var pages by remember(chapter.id) { mutableStateOf<List<String>>(emptyList()) }
+    var pageIndex by remember(chapter.id) { mutableStateOf(0) }
+    var loadingPages by remember(chapter.id) { mutableStateOf(true) }
+    var loadingImage by remember(chapter.id) { mutableStateOf(false) }
+    var error by remember(chapter.id) { mutableStateOf<String?>(null) }
+    var imageError by remember(chapter.id) { mutableStateOf<String?>(null) }
+    var image by remember(chapter.id) { mutableStateOf<ImageBitmap?>(null) }
+
+    LaunchedEffect(chapter.id) {
+        loadingPages = true
+        error = null
+        try {
+            pages = readerSource.pages(chapter.id, dataSaver = true)
+            if (pages.isEmpty()) error = "MangaDex returned no pages for this chapter."
+        } catch (failure: CancellationException) {
+            throw failure
+        } catch (failure: Exception) {
+            error = failure.message ?: "Could not load chapter pages."
+        } finally {
+            loadingPages = false
+        }
+    }
+
+    LaunchedEffect(pages, pageIndex) {
+        val url = pages.getOrNull(pageIndex)
+        if (url == null) {
+            image = null
+            return@LaunchedEffect
+        }
+        loadingImage = true
+        imageError = null
+        image = null
+        try {
+            image = readerSource.loadImage(url)
+        } catch (failure: CancellationException) {
+            throw failure
+        } catch (failure: Exception) {
+            imageError = failure.message ?: "Could not load this page."
+        } finally {
+            loadingImage = false
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Button(onClick = onBack) { Text("← Chapters") }
+            Text(
+                text = buildString {
+                    append("Chapter ")
+                    append(chapter.chapter ?: "—")
+                    if (chapter.title.isNotBlank()) append(" · ${chapter.title}")
+                },
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Button(enabled = pageIndex > 0 && !loadingPages, onClick = { pageIndex-- }) {
+                Text("Previous")
+            }
+            Button(enabled = pageIndex < pages.lastIndex && !loadingPages, onClick = { pageIndex++ }) {
+                Text("Next")
+            }
+        }
+
+        when {
+            loadingPages -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+            error != null -> Text(error!!, color = MaterialTheme.colorScheme.error)
+            else -> {
+                Text("Page ${pageIndex + 1} of ${pages.size} · Data Saver quality")
+                imageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                if (loadingImage) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    image?.let { bitmap ->
+                        Image(
+                            bitmap = bitmap,
+                            contentDescription = "Page ${pageIndex + 1}",
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            contentScale = ContentScale.Fit,
+                        )
                     }
                 }
             }
