@@ -48,12 +48,20 @@ jobs:
       - name: Verify packaged Java runtime matches Java 21 bytecode
         shell: pwsh
         run: |
-          $runtimeRelease = Get-ChildItem "desktop/build/compose/binaries/main" -Filter "release" -Recurse |
-            Where-Object { $_.FullName -match '[\\/]runtime[\\/]release$' } |
+          # Compose Desktop may place the distributable runtime outside the installer output folder.
+          # Search the whole desktop build tree and identify release metadata by its parent folder.
+          $runtimeRelease = Get-ChildItem "desktop/build" -Filter "release" -File -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.Directory.Name -eq "runtime" } |
             Select-Object -First 1
 
           if ($null -eq $runtimeRelease) {
-            throw "Could not find the bundled runtime release file. Refusing to publish an unverified installer."
+            Write-Host "Release metadata files found under desktop/build:"
+            Get-ChildItem "desktop/build" -Filter "release" -File -Recurse -ErrorAction SilentlyContinue |
+              ForEach-Object { Write-Host $_.FullName }
+            Write-Host "Compose build directories:"
+            Get-ChildItem "desktop/build/compose" -Directory -Recurse -ErrorAction SilentlyContinue |
+              Select-Object -ExpandProperty FullName
+            throw "Could not locate bundled runtime/release under desktop/build. Refusing to publish an unverified installer."
           }
 
           $releaseText = Get-Content -LiteralPath $runtimeRelease.FullName -Raw
