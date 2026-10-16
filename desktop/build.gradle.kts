@@ -30,6 +30,9 @@ compose.desktop {
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
             )
+            // HttpClient is loaded by the MangaDex desktop source at runtime.
+            // jpackage's dependency analysis can miss this module, so include it explicitly.
+            modules("java.net.http")
             packageName = "TachiyomiDNP"
             packageVersion = "1.9.3"
             description = "TachiyomiDNP Windows Desktop Edition"
