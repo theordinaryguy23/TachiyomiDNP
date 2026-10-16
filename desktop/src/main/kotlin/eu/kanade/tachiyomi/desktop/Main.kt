@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import eu.kanade.tachiyomi.desktop.reader.DesktopChapterDownloadStore
 import eu.kanade.tachiyomi.desktop.reader.DesktopReaderProgressStore
 import eu.kanade.tachiyomi.desktop.source.MangaChapter
 import eu.kanade.tachiyomi.desktop.source.MangaDexReaderSource
@@ -63,6 +64,8 @@ private fun DesktopShell() {
     val mangaDexSource = remember { MangaDexSource() }
     val readerSource = remember { MangaDexReaderSource() }
     val progressStore = remember { DesktopReaderProgressStore() }
+    val downloadStore = remember { DesktopChapterDownloadStore() }
+    var requestedChapter by remember { mutableStateOf<MangaChapter?>(null) }
     val searchService = remember {
         GlobalSearchService(sources = { listOf(mangaDexSource) })
     }
@@ -95,7 +98,22 @@ private fun DesktopShell() {
             contentAlignment = Alignment.TopStart,
         ) {
             when (selectedSection) {
-                "Search" -> DesktopSearchScreen(searchService, mangaDexSource, readerSource, progressStore)
+                "Search" -> DesktopSearchScreen(
+                    searchService = searchService,
+                    mangaDexSource = mangaDexSource,
+                    readerSource = readerSource,
+                    progressStore = progressStore,
+                    downloadStore = downloadStore,
+                    requestedChapter = requestedChapter,
+                    onRequestedChapterConsumed = { requestedChapter = null },
+                )
+                "Downloads" -> DownloadsScreen(
+                    downloadStore = downloadStore,
+                    onRead = { downloaded ->
+                        requestedChapter = downloaded.asMangaChapter()
+                        selectedSection = "Search"
+                    },
+                )
                 else -> Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -117,6 +135,9 @@ private fun DesktopSearchScreen(
     mangaDexSource: MangaDexSource,
     readerSource: MangaDexReaderSource,
     progressStore: DesktopReaderProgressStore,
+    downloadStore: DesktopChapterDownloadStore,
+    requestedChapter: MangaChapter?,
+    onRequestedChapterConsumed: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
     var results by remember { mutableStateOf<List<SearchResult>>(emptyList()) }
@@ -124,7 +145,16 @@ private fun DesktopSearchScreen(
     var message by remember { mutableStateOf<String?>(null) }
     var selectedManga by remember { mutableStateOf<Manga?>(null) }
     var selectedChapter by remember { mutableStateOf<MangaChapter?>(null) }
+    var downloadingChapterId by remember { mutableStateOf<String?>(null) }
+    var downloadStatus by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(requestedChapter) {
+        if (requestedChapter != null) {
+            selectedChapter = requestedChapter
+            onRequestedChapterConsumed()
+        }
+    }
 
     var details by remember { mutableStateOf<MangaDetails?>(null) }
     var chapters by remember { mutableStateOf<List<MangaChapter>>(emptyList()) }
@@ -137,6 +167,7 @@ private fun DesktopSearchScreen(
             chapter = chapterToRead,
             readerSource = readerSource,
             progressStore = progressStore,
+            downloadStore = downloadStore,
             onBack = { selectedChapter = null },
         )
         return
@@ -168,6 +199,7 @@ private fun DesktopSearchScreen(
                 if (chapters.isEmpty() && !detailLoading) {
                     Text("No English chapters were returned for this title.")
                 }
+                downloadStatus?.let { Text(it, color = if (it.startsWith("Download failed")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary) }
                 chapters.forEach { chapter ->
                     val label = buildString {
                         append("Chapter ")
@@ -183,6 +215,34 @@ private fun DesktopSearchScreen(
                         Text(label, modifier = Modifier.weight(1f))
                         Button(onClick = { selectedChapter = chapter }) {
                             Text("Read")
+                        }
+                        Button(
+                            enabled = downloadingChapterId == null && !downloadStore.isDownloaded(chapter.id),
+                            onClick = {
+                                scope.launch {
+                                    downloadingChapterId = chapter.id
+                                    downloadStatus = "Preparing chapter download…"
+                                    try {
+                                        val pageUrls = readerSource.pages(chapter.id, dataSaver = true)
+                                        if (pageUrls.isEmpty()) error("MangaDex returned no pages.")
+                                        val pageBytes = ArrayList<ByteArray>(pageUrls.size)
+                                        pageUrls.forEachIndexed { index, url ->
+                                            downloadStatus = "Downloading page ${index + 1} of ${pageUrls.size}…"
+                                            pageBytes += readerSource.downloadPageBytes(url)
+                                        }
+                                        downloadStore.saveChapter(chapter, pageBytes)
+                                        downloadStatus = "Download complete: ${pageUrls.size} pages saved for offline reading."
+                                    } catch (failure: CancellationException) {
+                                        throw failure
+                                    } catch (failure: Exception) {
+                                        downloadStatus = "Download failed: ${failure.message ?: "unknown error"}"
+                                    } finally {
+                                        downloadingChapterId = null
+                                    }
+                                }
+                            },
+                        ) {
+                            Text(if (downloadingChapterId == chapter.id) "Downloading…" else if (downloadStore.isDownloaded(chapter.id)) "Downloaded" else "Download")
                         }
                     }
                 }
@@ -279,14 +339,61 @@ private fun DesktopSearchScreen(
     }
 }
 
+
+@Composable
+private fun DownloadsScreen(
+    downloadStore: DesktopChapterDownloadStore,
+    onRead: (eu.kanade.tachiyomi.desktop.reader.DownloadedChapter) -> Unit,
+) {
+    var refreshKey by remember { mutableStateOf(0) }
+    val downloads = remember(refreshKey) { downloadStore.listDownloads() }
+
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("Downloads", style = MaterialTheme.typography.headlineMedium)
+        Text("Chapters saved on this PC. Downloaded pages can be read without an internet connection.")
+        if (downloads.isEmpty()) {
+            Text("No downloaded chapters yet. Open Search → Details & chapters → Download.")
+        }
+        downloads.forEach { downloaded ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        buildString {
+                            append("Chapter ")
+                            append(downloaded.chapter ?: "—")
+                            if (downloaded.title.isNotBlank()) append(" · ${downloaded.title}")
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text("${downloaded.pageCount} pages · Available offline", style = MaterialTheme.typography.bodySmall)
+                }
+                Button(onClick = { onRead(downloaded) }) { Text("Read") }
+                Button(onClick = {
+                    downloadStore.delete(downloaded.id)
+                    refreshKey++
+                }) { Text("Delete") }
+            }
+        }
+    }
+}
+
 @Composable
 private fun ReaderScreen(
     chapter: MangaChapter,
     readerSource: MangaDexReaderSource,
     progressStore: DesktopReaderProgressStore,
+    downloadStore: DesktopChapterDownloadStore,
     onBack: () -> Unit,
 ) {
     var pages by remember(chapter.id) { mutableStateOf<List<String>>(emptyList()) }
+    var offline by remember(chapter.id) { mutableStateOf(false) }
     var pageIndex by remember(chapter.id) { mutableStateOf(progressStore.loadPageIndex(chapter.id)) }
     var loadingPages by remember(chapter.id) { mutableStateOf(true) }
     var loadingImage by remember(chapter.id) { mutableStateOf(false) }
@@ -298,7 +405,14 @@ private fun ReaderScreen(
         loadingPages = true
         error = null
         try {
-            pages = readerSource.pages(chapter.id, dataSaver = true)
+            val downloaded = downloadStore.find(chapter.id)
+            if (downloaded != null) {
+                offline = true
+                pages = List(downloaded.pageCount) { "" }
+            } else {
+                offline = false
+                pages = readerSource.pages(chapter.id, dataSaver = true)
+            }
             if (pages.isEmpty()) error = "MangaDex returned no pages for this chapter."
         } catch (failure: CancellationException) {
             throw failure
@@ -331,7 +445,11 @@ private fun ReaderScreen(
         imageError = null
         image = null
         try {
-            image = readerSource.loadImage(url)
+            image = if (offline) {
+                readerSource.decodeImage(downloadStore.readPageBytes(chapter.id, pageIndex))
+            } else {
+                readerSource.loadImage(url)
+            }
         } catch (failure: CancellationException) {
             throw failure
         } catch (failure: Exception) {
@@ -374,7 +492,7 @@ private fun ReaderScreen(
             }
             error != null -> Text(error!!, color = MaterialTheme.colorScheme.error)
             else -> {
-                Text("Page ${pageIndex + 1} of ${pages.size} · Data Saver quality · Progress saved automatically")
+                Text("Page ${pageIndex + 1} of ${pages.size} · ${if (offline) "Offline download" else "Data Saver quality"} · Progress saved automatically")
                 imageError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 if (loadingImage) {
                     Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
