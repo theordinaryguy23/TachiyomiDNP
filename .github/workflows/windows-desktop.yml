@@ -2,7 +2,7 @@ name: Windows Desktop
 
 on:
   push:
-    branches: [ main, develop, beta, 'feature/**', 'phase2f-*' ]
+    branches: [ main, develop, beta, 'feature/**', 'phase2f-*', 'phase2g-*' ]
     tags: [ v* ]
   pull_request:
     branches: [ main, beta, 'phase2e-desktop-reader-clean', 'phase2f-reader-progress' ]
@@ -73,6 +73,12 @@ jobs:
 
           if ($releaseText -notmatch 'JAVA_VERSION="21(?:\.|")') {
             throw "Bundled runtime is not Java 21. The desktop bytecode targets Java 21, so this installer would fail at startup."
+          }
+
+          # The MangaDex desktop source uses java.net.http.HttpClient. Validate the
+          # actual linked runtime modules, not just the Java version.
+          if ($releaseText -notmatch 'MODULES="[^"]*\bjava\.net\.http\b') {
+            throw "Bundled runtime is missing java.net.http, required by MangaDex HttpClient."
           }
 
           $mainClass = "desktop/build/classes/kotlin/main/eu/kanade/tachiyomi/desktop/MainKt.class"

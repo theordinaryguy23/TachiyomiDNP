@@ -46,7 +46,18 @@ class MangaDexReaderSource {
             }
         }
 
-    suspend fun loadImage(url: String): ImageBitmap = withContext(Dispatchers.IO) {
+    suspend fun loadImage(url: String): ImageBitmap =
+        decodeImage(downloadPageBytes(url))
+
+    suspend fun decodeImage(bytes: ByteArray): ImageBitmap = withContext(Dispatchers.IO) {
+        try {
+            SkiaImage.makeFromEncoded(bytes).toComposeImageBitmap()
+        } catch (failure: Exception) {
+            throw IllegalStateException("The chapter page could not be decoded as an image.", failure)
+        }
+    }
+
+    suspend fun downloadPageBytes(url: String): ByteArray = withContext(Dispatchers.IO) {
         require(url.startsWith("https://")) { "Only HTTPS image URLs are supported." }
         val request = HttpRequest.newBuilder()
             .uri(URI.create(url))
@@ -59,11 +70,8 @@ class MangaDexReaderSource {
         if (response.statusCode() !in 200..299) {
             throw IllegalStateException("MangaDex image server returned HTTP ${response.statusCode()}.")
         }
-        try {
-            SkiaImage.makeFromEncoded(response.body()).toComposeImageBitmap()
-        } catch (failure: Exception) {
-            throw IllegalStateException("The chapter page could not be decoded as an image.", failure)
-        }
+        if (response.body().isEmpty()) throw IllegalStateException("MangaDex returned an empty chapter page.")
+        response.body()
     }
 
     private fun getJson(url: String) = run {
