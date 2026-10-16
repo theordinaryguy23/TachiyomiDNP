@@ -116,8 +116,8 @@ class DesktopChapterDownloadStore(
             DownloadedChapter(
                 id = id,
                 title = properties.getProperty("title", "Untitled chapter"),
-                chapter = properties.getProperty("chapter")?.ifBlank { null },
-                volume = properties.getProperty("volume")?.ifBlank { null },
+                chapter = properties.getProperty("chapter")?.takeIf { it.isNotBlank() },
+                volume = properties.getProperty("volume")?.takeIf { it.isNotBlank() },
                 pageCount = pageCount,
             )
         } catch (_: IOException) {
