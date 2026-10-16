@@ -105,24 +105,26 @@ class DesktopChapterDownloadStore(
         if (Files.exists(destination)) deleteRecursively(destination)
     }
 
-    private fun readMetadata(directory: Path): DownloadedChapter? = try {
-        val file = directory.resolve(METADATA_FILE)
-        if (!Files.isRegularFile(file)) return null
-        val properties = Properties().apply { Files.newInputStream(file).use(::load) }
-        val id = properties.getProperty("id") ?: return null
-        val pageCount = properties.getProperty("pageCount")?.toIntOrNull() ?: return null
-        if (!isValidChapterId(id) || pageCount <= 0 || directory.fileName.toString() != id) return null
-        DownloadedChapter(
-            id = id,
-            title = properties.getProperty("title", "Untitled chapter"),
-            chapter = properties.getProperty("chapter")?.ifBlank { null },
-            volume = properties.getProperty("volume")?.ifBlank { null },
-            pageCount = pageCount,
-        )
-    } catch (_: IOException) {
-        null
-    } catch (_: SecurityException) {
-        null
+    private fun readMetadata(directory: Path): DownloadedChapter? {
+        return try {
+            val file = directory.resolve(METADATA_FILE)
+            if (!Files.isRegularFile(file)) return null
+            val properties = Properties().apply { Files.newInputStream(file).use(::load) }
+            val id = properties.getProperty("id") ?: return null
+            val pageCount = properties.getProperty("pageCount")?.toIntOrNull() ?: return null
+            if (!isValidChapterId(id) || pageCount <= 0 || directory.fileName.toString() != id) return null
+            DownloadedChapter(
+                id = id,
+                title = properties.getProperty("title", "Untitled chapter"),
+                chapter = properties.getProperty("chapter")?.ifBlank { null },
+                volume = properties.getProperty("volume")?.ifBlank { null },
+                pageCount = pageCount,
+            )
+        } catch (_: IOException) {
+            null
+        } catch (_: SecurityException) {
+            null
+        }
     }
 
     private fun pagePath(chapterId: String, pageIndex: Int) =
