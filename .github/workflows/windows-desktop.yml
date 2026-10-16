@@ -2,10 +2,10 @@ name: Windows Desktop
 
 on:
   push:
-    branches: [ main, develop, beta, 'feature/**' ]
+    branches: [ main, develop, beta, 'feature/**', 'phase2f-*' ]
     tags: [ v* ]
   pull_request:
-    branches: [ main, beta ]
+    branches: [ main, beta, 'phase2e-desktop-reader-clean', 'phase2f-reader-progress' ]
   workflow_dispatch:
 
 jobs:
@@ -24,6 +24,9 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
+
+      - name: Run desktop unit tests
+        run: .\gradlew.bat :desktop:test --no-daemon --stacktrace
 
       - name: Build Windows desktop application
         shell: pwsh
