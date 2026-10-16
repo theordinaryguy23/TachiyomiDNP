@@ -2,10 +2,10 @@ name: Windows Desktop
 
 on:
   push:
-    branches: [ main, develop, beta, 'feature/**', 'phase2f-*' ]
+    branches: [ main, develop, beta, 'feature/**', 'phase2f-*', 'phase2g-*' ]
     tags: [ v* ]
   pull_request:
-    branches: [ main, beta, 'phase2e-desktop-reader-clean' ]
+    branches: [ main, beta, 'phase2e-desktop-reader-clean', 'phase2f-reader-progress' ]
   workflow_dispatch:
 
 jobs:
