@@ -39,8 +39,8 @@ class DesktopChapterDownloadStore(
                     .map { readMetadata(it) }
                     .filter { it != null }
                     .map { it!! }
-                    .sortedWith(compareBy<DownloadedChapter> { it.title.lowercase() }.thenBy { it.chapter ?: "" })
                     .toList()
+                    .sortedWith(compareBy<DownloadedChapter> { it.title.lowercase() }.thenBy { it.chapter ?: "" })
             }
         } catch (_: IOException) {
             emptyList()
