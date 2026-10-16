@@ -75,6 +75,12 @@ jobs:
             throw "Bundled runtime is not Java 21. The desktop bytecode targets Java 21, so this installer would fail at startup."
           }
 
+          # The MangaDex desktop source uses java.net.http.HttpClient. Validate the
+          # actual linked runtime modules, not just the Java version.
+          if ($releaseText -notmatch 'MODULES="[^"]*\bjava\.net\.http\b') {
+            throw "Bundled runtime is missing java.net.http, required by MangaDex HttpClient."
+          }
+
           $mainClass = "desktop/build/classes/kotlin/main/eu/kanade/tachiyomi/desktop/MainKt.class"
           if (-not (Test-Path -LiteralPath $mainClass)) {
             throw "Could not find compiled MainKt.class at $mainClass"
